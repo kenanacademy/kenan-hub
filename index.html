@@ -1,0 +1,508 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Kenan Connect - หน้าหลัก</title>
+<script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
+<style>
+  :root { --green:#06C755; --ink:#1b1b1b; --muted:#777; --line:#e6e6e6; --bg:#f7f7f7; --navy:#0b4a7a; }
+  * { box-sizing:border-box; }
+  body { font-family:-apple-system, Helvetica, Arial, sans-serif; margin:0; background:var(--bg); color:var(--ink); }
+  a { color:inherit; text-decoration:none; }
+
+  /* Top bar */
+  .topbar { position:sticky; top:0; z-index:10; background:#fff; border-bottom:1px solid var(--line);
+            display:flex; align-items:center; gap:12px; padding:12px 16px; }
+  .topbar .brand { display:flex; flex-direction:column; line-height:1.15; }
+  .topbar .brand .title { font-size:16px; font-weight:bold; color:var(--green); }
+  .topbar .brand .sub { font-size:11px; color:var(--muted); }
+  .topbar .spacer { flex:1; }
+  .iconbtn { position:relative; width:38px; height:38px; border:none; background:transparent; border-radius:10px;
+             cursor:pointer; display:flex; align-items:center; justify-content:center; color:var(--ink); }
+  .iconbtn:hover { background:#f0f0f0; }
+  .iconbtn svg { width:22px; height:22px; }
+  .bell-dot { position:absolute; top:6px; right:6px; min-width:16px; height:16px; padding:0 4px; border-radius:9px;
+              background:#e74c3c; border:2px solid #fff; color:#fff; font-size:10px; font-weight:bold; line-height:12px;
+              display:none; align-items:center; justify-content:center; box-sizing:content-box; }
+
+  /* Notification dropdown */
+  .notif-wrap { position:relative; }
+  .notif-panel { position:absolute; top:46px; right:0; width:320px; max-width:86vw; background:#fff; border:1px solid var(--line);
+                 border-radius:14px; box-shadow:0 10px 30px rgba(0,0,0,.14); overflow:hidden; display:none; z-index:20; }
+  .notif-panel.open { display:block; }
+  .notif-head { display:flex; align-items:center; justify-content:space-between; padding:12px 14px; border-bottom:1px solid var(--line); }
+  .notif-head b { font-size:14px; }
+  .notif-head .hclear { font-size:11px; color:var(--navy); cursor:pointer; background:none; border:none; padding:0; }
+  .notif-list { max-height:60vh; overflow-y:auto; }
+  .notif-item { display:flex; gap:10px; padding:12px 14px; border-bottom:1px solid #f2f2f2; cursor:pointer; text-align:left; }
+  .notif-item:last-child { border-bottom:none; }
+  .notif-item:hover { background:#f7fbf8; }
+  .notif-item .nic { width:30px; height:30px; border-radius:8px; flex:0 0 auto; display:flex; align-items:center; justify-content:center;
+                     background:#e9f7ef; color:var(--green); }
+  .notif-item.warn .nic { background:#fff3cd; color:#a97a10; }
+  .notif-item .nic svg { width:16px; height:16px; }
+  .notif-item .ntitle { display:block; font-size:13px; font-weight:bold; line-height:1.3; }
+  .notif-item .nsub { display:block; font-size:11px; color:var(--muted); margin-top:2px; }
+  .notif-empty { padding:22px 14px; text-align:center; color:var(--muted); font-size:13px; }
+  .avatar { display:flex; align-items:center; gap:8px; }
+  .avatar .pic { width:34px; height:34px; border-radius:50%; background:#dfe7ef; color:var(--navy);
+                 display:flex; align-items:center; justify-content:center; font-size:13px; font-weight:bold;
+                 background-size:cover; background-position:center; overflow:hidden; }
+  .avatar .who { font-size:12px; color:var(--muted); max-width:120px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  @media (max-width:520px){ .avatar .who { display:none; } }
+
+  .wrap { max-width:720px; margin:0 auto; padding:16px; }
+
+  /* Status strip */
+  .strip { display:flex; gap:10px; flex-wrap:wrap; }
+  .chip { flex:1 1 160px; max-width:320px; background:#fff; border:1px solid var(--line); border-radius:12px; padding:12px 14px;
+          min-width:150px; display:flex; align-items:center; gap:10px; }
+  .chip .ic { width:34px; height:34px; border-radius:9px; display:flex; align-items:center; justify-content:center; flex:0 0 auto; }
+  .chip .ic svg { width:19px; height:19px; }
+  .chip.parcel .ic { background:#fff3e0; color:#e67e22; }
+  .chip.approve .ic { background:#e9f7ef; color:var(--green); }
+  .chip .label { font-size:12px; color:var(--muted); }
+  .chip .value { font-size:16px; font-weight:bold; }
+  .chip .value .unit { font-size:12px; font-weight:normal; color:var(--muted); margin-left:2px; }
+
+  .section-title { font-size:13px; color:var(--muted); margin:22px 2px 10px; }
+
+  /* Tile grid */
+  .grid { display:grid; grid-template-columns:repeat(3, 1fr); gap:12px; }
+  @media (max-width:560px){ .grid { grid-template-columns:repeat(2, 1fr); } }
+  .tile { position:relative; background:#fff; border:1px solid var(--line); border-radius:14px; padding:16px 14px;
+          display:flex; flex-direction:column; gap:10px; min-height:112px; cursor:pointer; transition:transform .06s, box-shadow .12s; }
+  .tile:hover { box-shadow:0 4px 14px rgba(0,0,0,.07); transform:translateY(-1px); }
+  .tile .ticon { width:42px; height:42px; border-radius:11px; background:#e9f7ef; color:var(--green);
+                 display:flex; align-items:center; justify-content:center; }
+  .tile .ticon svg { width:23px; height:23px; }
+  .tile .tname { font-size:14px; font-weight:bold; line-height:1.25; }
+  .tile .ten { font-size:11px; color:var(--muted); }
+  .tile.soon { cursor:default; opacity:.72; }
+  .tile.soon:hover { box-shadow:none; transform:none; }
+  .soon-tag { position:absolute; top:10px; right:10px; font-size:10px; color:var(--muted);
+              background:#f0f0f0; border-radius:999px; padding:3px 8px; }
+
+  /* Admin entry */
+  .admin-entry { display:none; margin-top:14px; }
+  .admin-entry a { display:flex; align-items:center; gap:12px; background:#fff; border:1px solid var(--line);
+                   border-left:4px solid var(--navy); border-radius:12px; padding:14px 16px; }
+  .admin-entry .ic { width:38px; height:38px; border-radius:10px; background:#eef6ff; color:var(--navy);
+                     display:flex; align-items:center; justify-content:center; flex:0 0 auto; }
+  .admin-entry .ic svg { width:20px; height:20px; }
+  .admin-entry .txt b { font-size:14px; }
+  .admin-entry .txt div { font-size:11px; color:var(--muted); }
+  .admin-entry .chev { margin-left:auto; color:var(--muted); }
+
+  /* Auth / status boxes (same language as existing modules) */
+  #status { margin:14px 0; padding:12px; border-radius:8px; font-size:14px; display:none; white-space:pre-line; }
+  .ok { background:#d4edda; color:#155724; }
+  .err { background:#f8d7da; color:#721c24; }
+  #checkingBox { margin:16px; padding:14px; border-radius:8px; font-size:14px; background:#eee; color:#555; }
+  #loginBox { display:none; margin:16px; padding:16px; border-radius:10px; background:#fff; border:1px solid var(--line); }
+  #loginBox b { font-size:15px; }
+  #loginBox p { font-size:13px; color:var(--muted); }
+  #loginBox button { width:100%; padding:12px; font-size:15px; border:none; border-radius:8px; margin-top:10px;
+                     color:#fff; font-weight:bold; cursor:pointer; background:var(--green); }
+  #manualEntryBox { margin-top:12px; padding:12px; border-radius:8px; font-size:13px; background:#f0f0f0; color:#333; }
+  #manualEntryBox input { width:100%; padding:10px; font-size:14px; border-radius:8px; border:1px solid #ccc; box-sizing:border-box; }
+  #manualEntryBox button { width:100%; background:#666; margin-top:8px; }
+  #manualEntryMsg { margin-top:6px; }
+  .tiny { font-size:11px; color:var(--muted); }
+  #idFoot { margin:20px 16px; font-size:11px; color:#aaa; word-break:break-all; text-align:center; }
+</style>
+</head>
+<body>
+
+  <!-- ===================== Top bar ===================== -->
+  <div class="topbar">
+    <div class="brand">
+      <span class="title">Kenan Connect</span>
+      <span class="sub">หน้าหลัก / Home</span>
+    </div>
+    <div class="spacer"></div>
+    <div class="notif-wrap">
+      <button class="iconbtn" id="bellBtn" title="การแจ้งเตือน / Notifications" onclick="toggleNotif(event)" aria-label="Notifications">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M18 8a6 6 0 1 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.7 21a2 2 0 0 1-3.4 0"/></svg>
+        <span class="bell-dot" id="bellDot"></span>
+      </button>
+      <div class="notif-panel" id="notifPanel">
+        <div class="notif-head">
+          <b>การแจ้งเตือน / Notifications</b>
+        </div>
+        <div class="notif-list" id="notifList"></div>
+      </div>
+    </div>
+    <div class="avatar">
+      <span class="who" id="avatarWho"></span>
+      <span class="pic" id="avatarPic">–</span>
+    </div>
+  </div>
+
+  <div id="checkingBox">กำลังตรวจสอบสถานะการเข้าสู่ระบบ...</div>
+
+  <!-- Login fallback (browser login / manual UID), mirrors existing modules -->
+  <div id="loginBox">
+    <b>เข้าสู่ระบบด้วย LINE</b>
+    <p>เข้าสู่ระบบเพื่อดูหน้าหลักของ Kenan Connect</p>
+    <button type="button" id="manualLoginBtn" onclick="doManualLogin()">เข้าสู่ระบบ LINE (กดครั้งเดียว)</button>
+    <div id="manualEntryBox">
+      <b>เข้าใช้งานแบบไม่พึ่ง LIFF (ถ้ากดล็อกอิน LINE ข้างบนไม่สำเร็จ)</b>
+      <p class="tiny" style="margin:6px 0;">แชทกับ Kenan Connect OA แล้วพิมพ์ "ขอสิทธิ์" เพื่อรับรหัสผู้ใช้ LINE ของคุณ จากนั้นวางรหัสในช่องด้านล่าง</p>
+      <input type="text" id="manualUidInput" placeholder="เช่น Uxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx">
+      <button type="button" onclick="useManualUid()">ใช้รหัสนี้</button>
+      <div id="manualEntryMsg" class="tiny"></div>
+    </div>
+  </div>
+
+  <!-- ===================== Dashboard ===================== -->
+  <div class="wrap" id="dashArea" style="display:none;">
+    <div id="status"></div>
+
+    <!-- Status strip -->
+    <div class="strip">
+      <div class="chip parcel">
+        <span class="ic">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M21 8 12 3 3 8v8l9 5 9-5V8z"/><path d="m3 8 9 5 9-5"/><path d="M12 13v8"/></svg>
+        </span>
+        <div>
+          <div class="label">พัสดุใหม่ / New parcel</div>
+          <div class="value" id="parcelValue">–</div>
+        </div>
+      </div>
+      <div class="chip approve" id="approveChip" style="display:none;">
+        <span class="ic">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+        </span>
+        <div>
+          <div class="label">รออนุมัติ / Pending approvals</div>
+          <div class="value" id="approveValue">–</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Tile grid -->
+    <div class="section-title">บริการ / Services</div>
+    <div class="grid" id="tileGrid"></div>
+
+    <!-- Admin-only entry -->
+    <div class="admin-entry" id="adminEntry">
+      <a id="adminLink" href="#">
+        <span class="ic">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12 2 4 6v6c0 5 3.5 8 8 10 4.5-2 8-5 8-10V6z"/><path d="M9 12l2 2 4-4"/></svg>
+        </span>
+        <span class="txt"><b>Admin hub</b><div>จัดการข้อมูลและอนุมัติคำขอ / Manage data and approvals</div></span>
+        <span class="chev">
+          <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg>
+        </span>
+      </a>
+    </div>
+  </div>
+
+  <div id="idFoot"></div>
+
+  <script>
+    /* ============================================================
+       CONFIG
+       ------------------------------------------------------------
+       SCRIPT_URL : single shared GAS Web App backend. Value below is
+                    identical to the one already live in kenan-register /
+                    kenan-admin-hub / kenan-parcel (verified). Change only
+                    if the backend is ever redeployed to a new /exec URL.
+       LIFF_ID    : Hub needs its OWN LIFF app under LINE Login channel
+                    2010937586 (each module has a distinct LIFF ID).
+                    >>> TODO: create it in LINE Developers Console and paste here. <<<
+       ============================================================ */
+    const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzMzOnY7z76qPTY0HXLKGOsJpJStszSmJ57_Rgo7WyRGQ0Q-K8vdQj531B-_yUYRwUa/exec';
+    // Reuse the shared channel LIFF ID (channel 2010937586). kenan-parcel and kenan-call-tree already
+    // reuse this exact ID for direct GitHub Pages access. Create a dedicated Hub LIFF app in LINE
+    // Developers Console only if you later need in-LINE deep-linking to the Hub URL specifically.
+    const LIFF_ID = '2010937586-a4GJnU8o';
+
+    // Backend readiness flags. The live GAS backend (Kenan_QuickWin_Backend) does NOT yet expose a
+    // per-user parcel-count or a notifications/ActivityLog endpoint. Flip these to true once those
+    // actions exist (Phase 1 item 6). Until then the parcel chip shows a neutral "not linked" state
+    // and the bell shows only real, currently-available alerts (pending approvals, for admins).
+    const PARCEL_SUMMARY_READY = false;     // set true when a getMyParcelSummary action exists
+    const NOTIFICATIONS_ENDPOINT_READY = true; // getNotifications provided by Activity.gs (item 6)
+
+    // GitHub Pages base for org 'kenanacademy'. Each tile links to its module repo page.
+    const PAGES_BASE = 'https://kenanacademy.github.io';
+
+    // Tiles per spec Phase 1, item 1. Call Tree is intentionally NOT a tile
+    // (it is Broadcaster-only inside Admin Hub); ประกาศองค์กร replaces it.
+    // 'live:false' = module page not deployed yet (built in later Phase 1 items) -> shown as "เร็วๆ นี้".
+    // Repo names for not-yet-built modules follow the kenan-* convention and are marked TODO for Pipat to confirm.
+    const MODULES = [
+      { key:'car',       th:'จองรถ',          en:'Car booking',     repo:'kenan-car-booking',    live:true,  icon:'car' },        // map UI stubbed until Maps API key
+      { key:'room',      th:'จองห้องประชุม',  en:'Room booking',    repo:'kenan-room-booking',   live:true,  icon:'room' },
+      { key:'equipment', th:'ยืมอุปกรณ์',      en:'Equipment loan',  repo:'kenan-equipment-loan', live:true,  icon:'box' },
+      { key:'parcel',    th:'พัสดุ',           en:'Parcel',          repo:'kenan-parcel',         live:true,  icon:'parcel' },
+      { key:'announce',  th:'ประกาศองค์กร',    en:'Announcements',   repo:'kenan-announcements',  live:true,  icon:'mega' },
+      { key:'directory', th:'ทำเนียบพนักงาน',  en:'Employee directory', repo:'kenan-directory',   live:true,  icon:'people' },
+      { key:'history',   th:'ประวัติของฉัน',   en:'My history',      repo:'kenan-history',        live:true,  icon:'clock' }
+    ];
+
+    const ICONS = {
+      car:'<path d="M5 13l1.5-4.5A2 2 0 0 1 8.4 7h7.2a2 2 0 0 1 1.9 1.5L19 13"/><path d="M5 13h14v5H5z"/><circle cx="7.5" cy="18" r="1.5"/><circle cx="16.5" cy="18" r="1.5"/>',
+      room:'<path d="M3 21h18"/><path d="M5 21V5a1 1 0 0 1 1-1h9a1 1 0 0 1 1 1v16"/><path d="M12 12h.01"/>',
+      box:'<path d="M21 8 12 3 3 8v8l9 5 9-5V8z"/><path d="m3 8 9 5 9-5"/><path d="M12 13v8"/>',
+      parcel:'<rect x="4" y="7" width="16" height="12" rx="1"/><path d="M4 11h16"/><path d="M12 7v12"/>',
+      mega:'<path d="M3 11v2a1 1 0 0 0 1 1h2l4 4V6L6 10H4a1 1 0 0 0-1 1z"/><path d="M14 8a4 4 0 0 1 0 8"/>',
+      clock:'<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>',
+      people:'<path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>'
+    };
+
+    let currentUid = '';
+
+    /* ---------- helpers (verbatim from existing modules) ---------- */
+    function escapeHtml(s){ return String(s==null?'':s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+
+    function setId(msg){ const el=document.getElementById('idFoot'); if(el) el.textContent = msg; }
+
+    function showStatus(ok, message){
+      const el=document.getElementById('status'); if(!el) return;
+      el.style.display='block'; el.className = ok?'ok':'err'; el.textContent = message;
+    }
+
+    // GAS web app บางครั้งตอบเป็นหน้า HTML ชั่วคราวถ้ายิงหลาย request พร้อมกัน (concurrency) - ลองใหม่อัตโนมัติ
+    async function callApiGet(params, retries){
+      if (retries === undefined) retries = 2;
+      const url = new URL(SCRIPT_URL);
+      url.searchParams.set('format','json');
+      Object.keys(params).forEach(k => url.searchParams.set(k, params[k]));
+      const res = await fetch(url.toString());
+      const text = await res.text();
+      try {
+        return JSON.parse(text);
+      } catch (e) {
+        if (retries > 0) {
+          await new Promise(r => setTimeout(r, 400));
+          return callApiGet(params, retries - 1);
+        }
+        throw new Error('เซิร์ฟเวอร์ตอบไม่ถูกต้อง (ลองใหม่แล้วไม่สำเร็จ)');
+      }
+    }
+
+    async function callApiPost(payload){
+      const res = await fetch(SCRIPT_URL, {
+        method:'POST',
+        headers:{ 'Content-Type':'text/plain;charset=utf-8' },
+        body: JSON.stringify(payload)
+      });
+      return res.json();
+    }
+
+    /* ---------- rendering ---------- */
+    function moduleUrl(repo){ return PAGES_BASE + '/' + repo + '/'; }
+
+    /* ---------- notifications (bell) ---------- */
+    // notifications = [{ title, sub, href, warn(bool) }]
+    let notifications = [];
+
+    const NOTIF_ICON = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>';
+
+    function toggleNotif(ev){
+      if (ev) ev.stopPropagation();
+      const panel = document.getElementById('notifPanel');
+      panel.classList.toggle('open');
+    }
+    function closeNotif(){ document.getElementById('notifPanel').classList.remove('open'); }
+    // close when clicking outside the bell/panel
+    document.addEventListener('click', function(e){
+      const wrap = e.target.closest && e.target.closest('.notif-wrap');
+      if (!wrap) closeNotif();
+    });
+
+    function setBellCount(n){
+      const dot = document.getElementById('bellDot');
+      if (!dot) return;
+      if (n > 0) { dot.textContent = n > 99 ? '99+' : String(n); dot.style.display = 'flex'; }
+      else { dot.style.display = 'none'; }
+    }
+
+    function renderNotifications(){
+      const list = document.getElementById('notifList');
+      list.innerHTML = '';
+      if (!notifications.length){
+        list.innerHTML = '<div class="notif-empty">ยังไม่มีการแจ้งเตือน<br>No notifications</div>';
+        setBellCount(0);
+        return;
+      }
+      notifications.forEach(n => {
+        const item = document.createElement(n.href ? 'a' : 'div');
+        item.className = 'notif-item' + (n.warn ? ' warn' : '');
+        if (n.href) item.href = n.href;
+        item.innerHTML =
+          '<span class="nic">' + NOTIF_ICON + '</span>' +
+          '<span><span class="ntitle">' + escapeHtml(n.title) + '</span>' +
+          (n.sub ? '<span class="nsub">' + escapeHtml(n.sub) + '</span>' : '') + '</span>';
+        list.appendChild(item);
+      });
+      setBellCount(notifications.length);
+    }
+
+    function renderTiles(){
+      const grid = document.getElementById('tileGrid');
+      grid.innerHTML = '';
+      MODULES.forEach(m => {
+        const tile = document.createElement(m.live ? 'a' : 'div');
+        tile.className = 'tile' + (m.live ? '' : ' soon');
+        if (m.live) tile.href = moduleUrl(m.repo);
+        tile.innerHTML =
+          (m.live ? '' : '<span class="soon-tag">เร็วๆ นี้</span>') +
+          '<span class="ticon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">' + ICONS[m.icon] + '</svg></span>' +
+          '<div><div class="tname">' + escapeHtml(m.th) + '</div><div class="ten">' + escapeHtml(m.en) + '</div></div>';
+        grid.appendChild(tile);
+      });
+    }
+
+    function setAvatar(displayName, pictureUrl){
+      const pic = document.getElementById('avatarPic');
+      const who = document.getElementById('avatarWho');
+      if (who) who.textContent = displayName || '';
+      if (!pic) return;
+      if (pictureUrl) { pic.style.backgroundImage = 'url("' + pictureUrl + '")'; pic.textContent = ''; }
+      else { pic.textContent = (displayName || '?').trim().charAt(0).toUpperCase() || '?'; }
+    }
+
+    /* ---------- dashboard data (all GETs sequential, never Promise.all) ---------- */
+    async function loadDashboard(uid){
+      currentUid = uid;
+      document.getElementById('checkingBox').style.display = 'none';
+      document.getElementById('loginBox').style.display = 'none';
+      document.getElementById('dashArea').style.display = 'block';
+      renderTiles();
+      setId('รหัสผู้ใช้ LINE ของคุณ: ' + uid);
+
+      notifications = [];
+      let isAdmin = false;
+
+      // 1) admin state (also gates the Admin hub entry)
+      try {
+        const auth = await callApiGet({ action:'getAuthState', uid });
+        isAdmin = !!auth.authorized;
+      } catch (e) { /* leave isAdmin=false, dashboard still usable */ }
+
+      if (isAdmin) {
+        document.getElementById('adminEntry').style.display = 'block';
+        document.getElementById('adminLink').href = moduleUrl('kenan-admin-hub');
+        document.getElementById('approveChip').style.display = 'flex';
+      }
+
+      // 2) new-parcel chip. Backend has no per-user parcel-count endpoint yet, and the Parcels sheet
+      //    is keyed by RecipientName/Email (not LineUserId), so we do NOT fake a "0". Gated by flag.
+      if (PARCEL_SUMMARY_READY) {
+        try {
+          const p = await callApiGet({ action:'getMyParcelSummary', uid });
+          const parcelCount = Number(p && (p.count != null ? p.count : (p.newCount != null ? p.newCount : 0))) || 0;
+          document.getElementById('parcelValue').innerHTML = parcelCount + '<span class="unit">รายการ</span>';
+          if (parcelCount > 0) {
+            notifications.push({ title:'มีพัสดุใหม่ ' + parcelCount + ' รายการ', sub:'พัสดุ / Parcel', href:moduleUrl('kenan-parcel'), warn:false });
+          }
+        } catch (e) {
+          document.getElementById('parcelValue').textContent = '—';
+        }
+      } else {
+        document.getElementById('parcelValue').innerHTML = '<span class="unit">รอเชื่อมต่อ</span>';
+      }
+
+      // 3) pending approvals (admin only) - reuse EXISTING admin-hub actions, sequential.
+      //    These are the only real per-user alerts the backend exposes today -> feed the bell.
+      if (isAdmin) {
+        try {
+          const reg = await callApiGet({ action:'getPendingRegistrations', uid });
+          const adm = await callApiGet({ action:'getPendingAdminRequests', uid });
+          const regN = (reg && reg.registrations ? reg.registrations.length : 0);
+          const admN = (adm && adm.requests ? adm.requests.length : 0);
+          document.getElementById('approveValue').innerHTML = (regN + admN) + '<span class="unit">รายการ</span>';
+          const adminHref = moduleUrl('kenan-admin-hub');
+          if (regN > 0) notifications.push({ title:'คำขอลงทะเบียน ' + regN + ' รายการรออนุมัติ', sub:'Admin hub · registrations', href:adminHref, warn:true });
+          if (admN > 0) notifications.push({ title:'คำขอสิทธิ์ Admin ' + admN + ' รายการรออนุมัติ', sub:'Admin hub · admin access', href:adminHref, warn:true });
+        } catch (e) {
+          document.getElementById('approveValue').textContent = '—';
+        }
+      }
+
+      // 4) future ActivityLog-backed notifications (flag off until Phase 1 item 6 wires the endpoint)
+      if (NOTIFICATIONS_ENDPOINT_READY) {
+        try {
+          const n = await callApiGet({ action:'getNotifications', uid });
+          (n && n.notifications ? n.notifications : []).forEach(x => {
+            notifications.push({ title:x.message || x.title || '', sub:x.module || '', href:x.href || '', warn:false });
+          });
+        } catch (e) { /* ignore */ }
+      }
+
+      renderNotifications();
+    }
+
+    /* ---------- LINE auth flow (mirrors existing modules) ---------- */
+    function showLogin(showBtn){
+      document.getElementById('checkingBox').style.display = 'none';
+      document.getElementById('dashArea').style.display = 'none';
+      document.getElementById('loginBox').style.display = 'block';
+      document.getElementById('manualLoginBtn').style.display = showBtn ? 'block' : 'none';
+    }
+
+    function doManualLogin(){
+      try { liff.login(); } catch (e) { setId('login ล้มเหลว: ' + (e && e.message ? e.message : e)); }
+    }
+
+    function useManualUid(){
+      const input = document.getElementById('manualUidInput');
+      const msgEl = document.getElementById('manualEntryMsg');
+      const uid = input ? input.value.trim() : '';
+      if (!uid) { if (msgEl) msgEl.textContent = 'กรุณาวางรหัสผู้ใช้ LINE ก่อน'; return; }
+      setAvatar(null, null);
+      loadDashboard(uid).then(() => { if (msgEl) msgEl.textContent = 'เข้าสู่ระบบด้วยรหัสที่กรอกแล้ว'; });
+    }
+
+    async function tryLoadProfile(){
+      try {
+        const profile = await liff.getProfile();
+        setAvatar(profile.displayName, profile.pictureUrl);
+        await loadDashboard(profile.userId);
+      } catch (e) {
+        setId('getProfile ล้มเหลว: ' + (e && e.message ? e.message : JSON.stringify(e)));
+        showLogin(true);
+      }
+    }
+
+    (async function init(){
+      let settled = false;
+      const timeout = setTimeout(() => {
+        if (!settled) { setId('หมดเวลารอ LIFF - ใช้ช่องกรอกรหัสด้วยตนเองแทนได้เลย'); showLogin(true); }
+      }, 6000);
+
+      if (typeof liff === 'undefined') {
+        setId('LIFF SDK โหลดไม่สำเร็จ - ใช้ช่องกรอกรหัสด้วยตนเองแทนได้เลย');
+        showLogin(true);
+        return;
+      }
+
+      try {
+        await liff.init({ liffId: LIFF_ID });
+        settled = true;
+        clearTimeout(timeout);
+
+        let loggedIn = false;
+        try { loggedIn = liff.isLoggedIn(); } catch (e0) {}
+
+        if (!loggedIn) { showLogin(true); return; }
+        await tryLoadProfile();
+      } catch (e) {
+        settled = true;
+        clearTimeout(timeout);
+        setId('LIFF init ล้มเหลว: ' + (e && e.message ? e.message : JSON.stringify(e)) + ' - ใช้ช่องกรอกรหัสด้วยตนเองแทนได้เลย');
+        showLogin(true);
+      }
+    })();
+  </script>
+</body>
+</html>
