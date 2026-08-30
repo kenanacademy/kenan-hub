@@ -488,8 +488,20 @@ const S = {
   isAdmin:false, isOfficer:false, isSuper:false, regStatus:'unknown',
   liffReady:false, notifCount:0,
   draft:{ photo:null, thumb:null, scan:null, recipient:null, tracking:'' },
-  regDraft:null, employees:[], stack:[]
+  regDraft:null, employees:[], stack:[],
+  cache:{}          // เก็บผลที่ไม่ค่อยเปลี่ยน (รายชื่อ · อุปกรณ์) ไว้ในหน่วยความจำรอบนี้
 };
+
+/** อ่านผ่านแคช: ข้อมูลที่ไม่ค่อยเปลี่ยนไม่ต้องยิงถาม Apps Script ซ้ำทุกครั้ง
+    Apps Script ทำงานทีละคำขอ ยิ่งยิงถี่ยิ่งต่อคิวกันเองจนช้า */
+async function cached(key, ttlMs, fn){
+  const c = S.cache[key];
+  if(c && Date.now() - c.at < ttlMs) return c.v;
+  const v = await fn();
+  S.cache[key] = { at:Date.now(), v };
+  return v;
+}
+const clearCache = k => { if(k) delete S.cache[k]; else S.cache = {}; };
 
 /* ── 3. COPY DECK — ข้อความจริงทุกบรรทัด ไทย/อังกฤษ ───────────── */
 const T = {
@@ -1062,15 +1074,33 @@ const IC = {
 
 /* ── 6. ROUTER — เปลี่ยนหน้าทันที ไม่โหลดใหม่ ─────────────────── */
 const ROUTES = {};
+/* ผูกการเปลี่ยนหน้าเข้ากับประวัติเบราว์เซอร์
+   ไม่ทำแบบนี้ ปุ่มย้อนกลับของมือถือจะเด้งออกจากแอปทันทีตั้งแต่หน้าแรก */
 function go(name, params = {}, replace = false){
-  if(!replace) S.stack.push({ name, params });
+  if(replace){
+    if(S.stack.length) S.stack[S.stack.length - 1] = { name, params };
+    else S.stack.push({ name, params });
+    try{ history.replaceState({ i:S.stack.length }, '', '#' + name); }catch(e){}
+  }else{
+    S.stack.push({ name, params });
+    try{ history.pushState({ i:S.stack.length }, '', '#' + name); }catch(e){}
+  }
   render(name, params);
 }
 function back(){
-  S.stack.pop();
-  const prev = S.stack[S.stack.length - 1] || { name:'home', params:{} };
-  render(prev.name, prev.params);
+  if(S.stack.length > 1){ try{ history.back(); return; }catch(e){} }
+  S.stack = []; go('home', {}, true);
 }
+window.addEventListener('popstate', () => {
+  if(S.stack.length > 1){
+    S.stack.pop();
+    const prev = S.stack[S.stack.length - 1];
+    render(prev.name, prev.params);
+  }else{
+    // อยู่หน้าแรกแล้วกดย้อนกลับ = ตั้งใจจะออกจริง ปล่อยให้ออกได้ตามปกติ
+    render('home', {});
+  }
+});
 $('#backBtn').onclick = back;
 
 function chrome(name){
@@ -1150,6 +1180,8 @@ ROUTES.home = async () => {
     { ic:IC.tool,  th:t('mIssue'),  en:t('mIssueEn'),  go:'issues' },
     { ic:IC.chat,  th:t('mFaq'),    en:t('mFaqEn'),    soon:true }
   ];
+  // ผู้ดูแลต้องกลับเข้าเมนูตัวเองได้จากในแอป ไม่ใช่ต้องออกไปกด Rich Menu ทุกครั้ง
+  if(S.isOfficer) mods.push({ ic:IC.user, th:t('adminTitle'), en:'Admin', go:'admin' });
   $('#main').innerHTML = `<div class="view">
     <div class="greet"><h2>${esc(t('greet')(name))}</h2><p>${esc(t('greetSub'))}</p></div>
     <div class="section-title">${esc(t('services'))}<span class="en">${esc(t('servicesEn'))}</span></div>
@@ -1169,7 +1201,8 @@ ROUTES.home = async () => {
   });
   $('#allNews').onclick = () => go('news');
   try{
-    const r = await apiRetry('getAnnouncements', {}, 'GET');
+    const r = S.bootNews ? { items:S.bootNews } : await apiRetry('getAnnouncements', {}, 'GET');
+    S.bootNews = null;
     const list = r?.items || [];
     $('#newsBox').innerHTML = list.length
       ? `<div class="rows">${list.slice(0,3).map(a => `
@@ -1298,7 +1331,8 @@ ROUTES['parcel-in'] = async () => {
 
   // โหลดรายชื่อพนักงานล่วงหน้าตอนที่ผู้ใช้กำลังถ่ายรูป — พอเลื่อนลงมาจะพร้อมแล้ว
   if(!S.employees.length){
-    try{ const r = await apiRetry('getEmployees', {}, 'GET'); S.employees = r?.items || []; }catch(e){}
+    try{ const r = await cached('emp', 6e5, () => apiRetry('getEmployees', {}, 'GET'));
+         S.employees = r?.items || []; }catch(e){}
   }
 
   let chosen = null, isUnknown = false;
@@ -1539,14 +1573,18 @@ ROUTES.profile = async () => {
       <div style="height:12px"></div>
       <button class="btn soft" id="pSave">${esc(t('prSave'))}</button>
     </div>
+    ${S.isOfficer ? `<div style="margin-top:12px">
+      <button class="btn soft" id="toAdm">${esc(t('adminTitle'))}</button></div>` : ''}
     <div style="margin-top:12px"><button class="btn ghost" id="pol">${esc(t('prPrivacy'))}</button></div>
   </div>`;
+  if($('#toAdm')) $('#toAdm').onclick = () => go('admin');
   $('#pSave').onclick = async () => {
     const b = $('#pSave'); b.disabled = true;
     try{
       await apiRetry('updateMyProfile',
         { phone:$('#pPhone').value.trim(), show_phone:$('#pShow').checked ? 'true' : 'false' }, 'POST');
       S.me = S.me || {}; S.me.phone = $('#pPhone').value.trim(); S.me.show_phone = $('#pShow').checked;
+      clearCache('dir'); clearCache('emp');
       toast(t('prSaved'), 'ok');
     }catch(e){ toast(t('netErr'), 'bad'); }
     b.disabled = false;
@@ -1774,7 +1812,8 @@ ROUTES.directory = async () => {
              border-radius:12px;font-size:16px;margin-bottom:12px">
     <div id="dl">${skeleton(4)}</div></div>`;
   let people = [];
-  try{ const r = await apiRetry('getDirectory', {}, 'GET'); people = r?.items || []; }catch(e){}
+  try{ const r = await cached('dir', 3e5, () => apiRetry('getDirectory', {}, 'GET'));
+       people = r?.items || []; }catch(e){}
   if(!people.length){ $('#dl').innerHTML = emptyState(IC.info, t('dirEmpty'), t('dirEmptyBody')); return; }
 
   const norm = s => String(s || '').toLowerCase().replace(/\s|\./g, '');
@@ -2661,7 +2700,7 @@ ROUTES['admin-res'] = async () => {
           note:$('#rnt').value.trim(),
           photo:img.v?.full || '', thumb:img.v?.thumb || ''
         }, extra || {}), 'POST');
-        closeSheet(); toast(t('admResSaved'),'ok'); go('admin-res', {}, true);
+        closeSheet(); clearCache(); toast(t('admResSaved'),'ok'); go('admin-res', {}, true);
       }catch(e){ toast(t('netErr'),'bad'); }
     };
     $('#rsv2').onclick = save(null);
@@ -3083,7 +3122,8 @@ async function boot(){
 
   let auth;
   try{
-    auth = await apiRetry('getAuthState', {}, 'GET');
+    auth = await apiRetry('bootstrap', {}, 'GET');
+    if(auth?.announcements) S.bootNews = auth.announcements;
   }catch(e){
     if(e.message === 'NO_CONFIG'){ render('home'); return; }
     S.stack = []; render('offline', {}); return;   // ต่อเซิร์ฟเวอร์ไม่ได้ → อย่าพาไปกรอกฟอร์ม
