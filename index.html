@@ -439,7 +439,8 @@ const START_AT = (function(){
   try{
     const g = new URLSearchParams(location.search).get('go');
     return ['home','parcel-in','my-parcels','unidentified','calltree','profile',
-            'news','reservation','admin'].includes(g) ? g : null;
+            'news','reservation','admin','directory','activity','issues',
+            'alert-board'].includes(g) ? g : null;
   }catch(e){ return null; }
 })();
 /* ?rec=PCL-xxx → เปิดพัสดุชิ้นนั้นให้เลย (ลิงก์ที่ส่งไปในข้อความ LINE) */
@@ -491,6 +492,35 @@ const T = {
     admQuotaOk:'ยังเหลือพอ ระบบแจ้งเตือนทาง LINE ได้ตามปกติ',
     admQuotaWarn:'ใกล้หมดแล้ว เมื่อครบระบบจะสลับไปแจ้งทางอีเมลแทนโดยอัตโนมัติ',
     admOpenSheet:'เปิดฐานข้อมูลใน Google Sheet',
+    dirTitle:'ทำเนียบบุคลากร', dirTitleEn:'Staff Directory',
+    dirEmpty:'ยังไม่มีใครลงทะเบียน', dirEmptyBody:'เมื่อเพื่อนร่วมงานลงทะเบียนแล้ว จะขึ้นที่นี่',
+    dirNoPhone:'ไม่ได้เปิดเผยเบอร์',
+    actTitle:'ประวัติของฉัน', actOpen:'ยังไม่จบ', actDone:'จบแล้ว',
+    actEmpty:'ยังไม่มีรายการ', actEmptyBody:'พัสดุ ของที่ยืม เรื่องที่แจ้ง จะรวมอยู่ที่นี่',
+    tParcel:'พัสดุ', tBorrow:'ยืมอุปกรณ์', tCar:'จองรถ', tIssue:'แจ้งเหตุ',
+    mDir:'ทำเนียบบุคลากร', mDirEn:'Directory',
+    mAct:'ประวัติของฉัน', mActEn:'My Activity',
+    mIssue:'แจ้งเหตุ', mIssueEn:'Report an Issue',
+    emgSafe:'ฉันปลอดภัย', emgSafeSub:'ออกจากอาคารแล้ว หรืออยู่ที่จุดรวมพล',
+    emgHelp:'ต้องการความช่วยเหลือ', emgHelpSub:'ติดอยู่ · บาดเจ็บ · ออกไม่ได้',
+    emgSent:'บันทึกสถานะแล้ว', emgYouSaid:s=>`คุณแจ้งว่า: ${s}`,
+    emgWhere:'อยู่ตรงไหน (ถ้าบอกได้)', emgWherePh:'เช่น ชั้น 3 ห้องเก็บของ',
+    emgSend:'ส่งขอความช่วยเหลือ',
+    emgBoard:'กระดานสถานะ', emgDeclare:'ประกาศเหตุฉุกเฉิน',
+    emgNone:'ยังไม่ตอบ', emgSafeN:'ปลอดภัย', emgHelpN:'ขอความช่วยเหลือ', emgTotal:'ทั้งหมด',
+    emgClose:'ปิดประกาศนี้', emgClosed:'ปิดประกาศแล้ว',
+    emgTitle:'หัวข้อประกาศ', emgTitlePh:'เช่น เหตุเพลิงไหม้ชั้น 3 อพยพทันที',
+    emgBody:'รายละเอียด · จุดรวมพล', emgBodyPh:'เช่น ลงบันไดหนีไฟ จุดรวมพลลานจอดรถหน้าอาคาร',
+    emgScope:'ส่งถึงใคร', emgAll:'ทุกที่ตั้ง',
+    emgConfirm:'ยืนยันประกาศฉุกเฉิน',
+    emgConfirmBody:'ข้อความจะส่งถึงทุกคนทันทีทั้งทาง LINE และอีเมล ใช้เฉพาะกรณีจริงเท่านั้น',
+    emgSentTo:n=>`ส่งถึง ${n} คนแล้ว`,
+    assignTo:'ระบุผู้รับให้พัสดุนี้', assigned:'ระบุผู้รับและแจ้งเตือนแล้ว',
+    issueSoon:'หมวดแจ้งเหตุกำลังพัฒนา ตอนนี้แจ้ง IT หรือ Admin ตามช่องทางเดิมไปก่อนครับ',
+    prPhone:'เบอร์ติดต่อ', prShowPhone:'เปิดเผยเบอร์ในทำเนียบบุคลากร',
+    prShowPhoneSub:'ถ้าปิดไว้ เพื่อนร่วมงานจะเห็นแค่อีเมล',
+    prSave:'บันทึก', prSaved:'บันทึกแล้ว',
+
     recGone:'ไม่พบพัสดุชิ้นนี้แล้ว อาจถูกกดรับไปแล้ว',
     admPostNews:'ลงประกาศ / ข่าวสาร',
     admRoles:'ตั้งสิทธิ์ผู้ใช้',
@@ -621,6 +651,35 @@ const T = {
     admQuotaOk:'Plenty left — LINE notifications working normally',
     admQuotaWarn:'Running low — the system will switch to email automatically when it runs out',
     admOpenSheet:'Open the database in Google Sheets',
+    dirTitle:'Staff Directory', dirTitleEn:'ทำเนียบบุคลากร',
+    dirEmpty:'Nobody registered yet', dirEmptyBody:'Colleagues will appear here once they register.',
+    dirNoPhone:'Phone not shared',
+    actTitle:'My Activity', actOpen:'Open', actDone:'Closed',
+    actEmpty:'Nothing yet', actEmptyBody:'Parcels, loans and reports will all appear here.',
+    tParcel:'Parcel', tBorrow:'Equipment', tCar:'Vehicle', tIssue:'Issue',
+    mDir:'Directory', mDirEn:'ทำเนียบบุคลากร',
+    mAct:'My Activity', mActEn:'ประวัติของฉัน',
+    mIssue:'Report an Issue', mIssueEn:'แจ้งเหตุ',
+    emgSafe:'I am safe', emgSafeSub:'Out of the building or at the assembly point',
+    emgHelp:'I need help', emgHelpSub:'Trapped · injured · cannot get out',
+    emgSent:'Status recorded', emgYouSaid:s=>`You reported: ${s}`,
+    emgWhere:'Where are you? (if you can say)', emgWherePh:'e.g. 3rd floor store room',
+    emgSend:'Send request for help',
+    emgBoard:'Status board', emgDeclare:'Declare an emergency',
+    emgNone:'No response', emgSafeN:'Safe', emgHelpN:'Need help', emgTotal:'Total',
+    emgClose:'Close this alert', emgClosed:'Alert closed',
+    emgTitle:'Alert title', emgTitlePh:'e.g. Fire on 3rd floor — evacuate now',
+    emgBody:'Details · assembly point', emgBodyPh:'e.g. Use the fire stairs. Assemble in the front car park.',
+    emgScope:'Send to', emgAll:'All offices',
+    emgConfirm:'Confirm emergency alert',
+    emgConfirmBody:'This reaches everyone immediately by LINE and email. Use for real incidents only.',
+    emgSentTo:n=>`Sent to ${n} people`,
+    assignTo:'Assign a recipient', assigned:'Recipient set and notified',
+    issueSoon:'This section is being built. For now please contact IT or Admin as usual.',
+    prPhone:'Phone', prShowPhone:'Show my phone in the staff directory',
+    prShowPhoneSub:'If off, colleagues see only your email',
+    prSave:'Save', prSaved:'Saved',
+
     recGone:'That parcel is no longer listed — it may already be picked up',
     admPostNews:'Post news',
     admRoles:'Manage roles',
@@ -932,18 +991,21 @@ $('#bellBtn').onclick = () => go('notifications');
 ROUTES.home = async () => {
   const name = S.me?.nickname || S.me?.name_th || S.profile?.displayName || '';
   const mods = [
-    { k:'parcel', ic:IC.box,   th:t('mParcel'), en:t('mParcelEn'), go:'my-parcels', badge:S.notifCount ? `${S.notifCount} ใหม่` : '' },
-    { k:'call',   ic:IC.sos,   th:t('mCall'),   en:t('mCallEn'),   go:'calltree', sos:true },
-    { k:'car',    ic:IC.car,   th:t('mCar'),    en:t('mCarEn'),    soon:true },
-    { k:'loan',   ic:IC.laptop,th:t('mLoan'),   en:t('mLoanEn'),   soon:true },
-    { k:'help',   ic:IC.tool,  th:t('mHelp'),   en:t('mHelpEn'),   soon:true },
-    { k:'faq',    ic:IC.chat,  th:t('mFaq'),    en:t('mFaqEn'),    soon:true }
+    { ic:IC.box,   th:t('mParcel'), en:t('mParcelEn'), go:'my-parcels',
+      badge:S.notifCount ? `${S.notifCount} ใหม่` : '' },
+    { ic:IC.sos,   th:t('mCall'),   en:t('mCallEn'),   go:'calltree', sos:true },
+    { ic:IC.user,  th:t('mDir'),    en:t('mDirEn'),    go:'directory' },
+    { ic:IC.clock, th:t('mAct'),    en:t('mActEn'),    go:'activity' },
+    { ic:IC.bellBig, th:t('news'),  en:t('newsEn'),    go:'news' },
+    { ic:IC.car,   th:t('mResv'),   en:'Reservation',  go:'reservation', soon:true },
+    { ic:IC.tool,  th:t('mIssue'),  en:t('mIssueEn'),  go:'issues', soon:true },
+    { ic:IC.chat,  th:t('mFaq'),    en:t('mFaqEn'),    soon:true }
   ];
   $('#main').innerHTML = `<div class="view">
     <div class="greet"><h2>${esc(t('greet')(name))}</h2><p>${esc(t('greetSub'))}</p></div>
     <div class="section-title">${esc(t('services'))}<span class="en">${esc(t('servicesEn'))}</span></div>
     <div class="tiles">${mods.map(m => `
-      <button class="tile ${m.soon ? 'soon' : ''} ${m.sos ? 'sos' : ''}" data-go="${m.soon ? '' : m.go}">
+      <button class="tile ${m.soon ? 'soon' : ''} ${m.sos ? 'sos' : ''}" data-go="${m.go || ''}">
         ${m.badge ? `<span class="badge">${esc(m.badge)}</span>` : ''}
         ${m.soon ? `<span class="badge">${esc(t('soon'))}</span>` : ''}
         <div class="ic">${m.ic}</div>
@@ -1186,7 +1248,21 @@ ROUTES.unidentified = async () => {
       ${p.photo_id || p.thumb_id ? `<img class="sheet-photo" id="unPhoto" alt="">
         <p class="sheet-photo-hint">${esc(t('pcViewPhoto'))}</p>` : ''}
       <button class="btn primary" id="mine">${esc(t('unMine'))}</button>
+      ${S.isOfficer ? `<button class="btn soft" id="assign">${esc(t('assignTo'))}</button>` : ''}
       <button class="btn ghost" id="cx">${esc(t('cancel'))}</button>`);
+    if($('#assign')) $('#assign').onclick = async () => {
+      closeSheet();
+      if(!S.employees.length){
+        try{ const r = await apiRetry('getEmployees', {}, 'GET'); S.employees = r?.items || []; }catch(e){}
+      }
+      const pick = await pickPerson();
+      if(!pick || pick.unknown) return;
+      try{
+        await apiRetry('assignParcel',
+          { record_id:b.dataset.id, recipient_id:pick.kenan_user_id }, 'POST');
+        toast(t('assigned'), 'ok'); go('unidentified', {}, true);
+      }catch(e){ toast(t('netErr'), 'bad'); }
+    };
     if($('#unPhoto')){
       loadPhoto(p.photo_id || p.thumb_id, $('#unPhoto'));
       $('#unPhoto').onclick = () => { closeSheet(); openPhoto(p.photo_id || p.thumb_id, ''); };
@@ -1202,7 +1278,55 @@ ROUTES.unidentified = async () => {
 
 ROUTES.calltree = async () => {
   setTitle(t('ctTitle'));
-  $('#main').innerHTML = `<div class="view"><div id="list">${skeleton(4)}</div></div>`;
+  $('#main').innerHTML = `<div class="view"><div id="alertBox"></div><div id="list">${skeleton(4)}</div></div>`;
+
+  // มีเหตุอยู่ → ปุ่มยืนยันสถานะต้องมาก่อนทุกอย่าง ตัวใหญ่ ไม่มีอะไรให้เลือกผิด
+  let A = null;
+  try{ A = await apiRetry('getActiveAlert', {}, 'GET'); }catch(e){}
+  if(A?.active){
+    const done = !!A.myStatus;
+    $('#alertBox').innerHTML = `
+      <div class="alertbox" style="background:var(--bad);color:#fff;border-radius:18px;padding:17px;margin-bottom:14px">
+        <div style="font-size:11px;font-weight:800;opacity:.9;letter-spacing:.06em">${esc(fmtDate(A.alert.at))}</div>
+        <h3 style="margin:5px 0 6px;font-size:18px;font-weight:800;line-height:1.35">${esc(A.alert.title)}</h3>
+        <p style="margin:0;font-size:13px;opacity:.93;white-space:pre-wrap">${esc(A.alert.body || '')}</p>
+      </div>
+      ${done ? `<div class="note ok">✅<div><b>${esc(t('emgYouSaid')(
+            A.myStatus === 'help' ? t('emgHelp') : t('emgSafe')))}</b></div></div>` : `
+        <button class="btn g" id="bSafe" style="padding:24px;font-size:19px;border-radius:18px;background:var(--ok);color:#fff">
+          ${esc(t('emgSafe'))}<br><small style="font-size:12px;font-weight:600;opacity:.85">${esc(t('emgSafeSub'))}</small></button>
+        <div style="height:11px"></div>
+        <button class="btn r" id="bHelp" style="padding:24px;font-size:19px;border-radius:18px;background:var(--bad);color:#fff">
+          ${esc(t('emgHelp'))}<br><small style="font-size:12px;font-weight:600;opacity:.85">${esc(t('emgHelpSub'))}</small></button>`}
+      ${A.canSeeBoard ? `<div style="height:11px"></div>
+        <button class="btn soft" id="bBoard">${esc(t('emgBoard'))}</button>` : ''}
+      <div style="height:16px"></div>`;
+    if($('#bSafe')) $('#bSafe').onclick = async () => {
+      try{ await apiRetry('respondAlert', { alert_id:A.alert.alert_id, status:'safe' }, 'POST');
+           toast(t('emgSent'), 'ok'); go('calltree', {}, true); }
+      catch(e){ toast(t('netErr'), 'bad'); }
+    };
+    if($('#bHelp')) $('#bHelp').onclick = () => {
+      sheet(`<h3>${esc(t('emgHelp'))}</h3>
+        <div class="field"><label>${esc(t('emgWhere'))}</label>
+          <input id="hLoc" placeholder="${esc(t('emgWherePh'))}"></div>
+        <button class="btn danger" id="hGo" style="background:var(--bad);color:#fff">${esc(t('emgSend'))}</button>
+        <button class="btn ghost" id="hX">${esc(t('cancel'))}</button>`);
+      $('#hX').onclick = closeSheet;
+      $('#hGo').onclick = async () => {
+        const loc = $('#hLoc').value.trim(); closeSheet();
+        try{ await apiRetry('respondAlert',
+              { alert_id:A.alert.alert_id, status:'help', location:loc }, 'POST');
+             toast(t('emgSent'), 'ok'); go('calltree', {}, true); }
+        catch(e){ toast(t('netErr'), 'bad'); }
+      };
+    };
+    if($('#bBoard')) $('#bBoard').onclick = () => go('alert-board');
+  }else if(A?.canDeclare){
+    $('#alertBox').innerHTML =
+      `<button class="btn ghost" id="dec" style="margin-bottom:14px">${esc(t('emgDeclare'))}</button>`;
+    $('#dec').onclick = declareSheet;
+  }
   let items = [];
   try{ const r = await apiRetry('getContacts', {}, 'GET'); items = r?.items || []; }catch(e){}
   if(!items.length){
@@ -1255,8 +1379,29 @@ ROUTES.profile = async () => {
         <button data-l="en" class="${S.lang === 'en' ? 'on' : ''}">EN</button>
       </div>
     </div>
+    <div class="card" style="margin-top:12px">
+      <div class="field"><label>${esc(t('prPhone'))}</label>
+        <input id="pPhone" inputmode="tel" value="${esc(m.phone || '')}" placeholder="08x-xxx-xxxx"></div>
+      <label class="check" style="margin:0">
+        <input type="checkbox" id="pShow" ${m.show_phone === true || String(m.show_phone) === 'TRUE' ? 'checked' : ''}>
+        <span><b>${esc(t('prShowPhone'))}</b><br>
+          <span style="color:var(--ink-3);font-size:12px">${esc(t('prShowPhoneSub'))}</span></span>
+      </label>
+      <div style="height:12px"></div>
+      <button class="btn soft" id="pSave">${esc(t('prSave'))}</button>
+    </div>
     <div style="margin-top:12px"><button class="btn ghost" id="pol">${esc(t('prPrivacy'))}</button></div>
   </div>`;
+  $('#pSave').onclick = async () => {
+    const b = $('#pSave'); b.disabled = true;
+    try{
+      await apiRetry('updateMyProfile',
+        { phone:$('#pPhone').value.trim(), show_phone:$('#pShow').checked ? 'true' : 'false' }, 'POST');
+      S.me = S.me || {}; S.me.phone = $('#pPhone').value.trim(); S.me.show_phone = $('#pShow').checked;
+      toast(t('prSaved'), 'ok');
+    }catch(e){ toast(t('netErr'), 'bad'); }
+    b.disabled = false;
+  };
   document.querySelectorAll('.langsw button').forEach(b => b.onclick = () => {
     S.lang = b.dataset.l; go('profile', {}, true);
   });
@@ -1468,6 +1613,162 @@ ROUTES['admin-roles'] = async () => {
     });
   }
 };
+
+
+/* ── ทำเนียบบุคลากร ─────────────────────────────────────────── */
+ROUTES.directory = async () => {
+  setTitle(t('dirTitle'));
+  $('#main').innerHTML = `<div class="view">
+    <input id="dq" placeholder="${esc(t('pkSearch'))}"
+      style="width:100%;padding:13px 14px;border:1.5px solid var(--line);
+             border-radius:12px;font-size:16px;margin-bottom:12px">
+    <div id="dl">${skeleton(4)}</div></div>`;
+  let people = [];
+  try{ const r = await apiRetry('getDirectory', {}, 'GET'); people = r?.items || []; }catch(e){}
+  if(!people.length){ $('#dl').innerHTML = emptyState(IC.info, t('dirEmpty'), t('dirEmptyBody')); return; }
+
+  const norm = s => String(s || '').toLowerCase().replace(/\s|\./g, '');
+  const paint = kw => {
+    const k = norm(kw);
+    const hits = !k ? people : people.filter(p =>
+      norm(p.name_th).includes(k) || norm(p.name_en).includes(k) ||
+      norm(p.nickname).includes(k) || norm(p.department).includes(k));
+    if(!hits.length){ $('#dl').innerHTML = `<div class="pk-empty">${esc(t('pkNone'))}</div>`; return; }
+    // จัดกลุ่มตามแผนก — หาคนง่ายกว่าเรียงชื่อยาวๆ 40 คนรวด
+    const groups = {};
+    hits.forEach(p => { (groups[p.department || '—'] ||= []).push(p); });
+    $('#dl').innerHTML = Object.keys(groups).map(d => `
+      <div class="section-title">${esc(d)}</div>
+      <div class="rows">${groups[d].map(p => `
+        <div class="row">
+          <span class="av">${esc(String(p.nickname || p.name_th || '?').trim().charAt(0))}</span>
+          <div class="body">
+            <div class="t">${esc(p.name_th || p.name_en)}${p.nickname ? ' · ' + esc(p.nickname) : ''}</div>
+            <div class="s">${esc(p.phone || p.email || '')}</div>
+          </div>
+          ${p.phone ? `<a class="mini call" href="tel:${esc(p.phone)}">📞</a>` : ''}
+          ${p.email ? `<a class="mini line" href="mailto:${esc(p.email)}">✉</a>` : ''}
+        </div>`).join('')}</div>`).join('');
+  };
+  paint('');
+  $('#dq').oninput = e => paint(e.target.value);
+};
+
+/* ── ประวัติของฉัน ──────────────────────────────────────────── */
+ROUTES.activity = async () => {
+  setTitle(t('actTitle'));
+  $('#main').innerHTML = `<div class="view"><div id="al">${skeleton(3)}</div></div>`;
+  let items = [];
+  try{ const r = await apiRetry('getMyActivity', {}, 'GET'); items = r?.items || []; }catch(e){}
+  if(!items.length){ $('#al').innerHTML = emptyState(IC.box, t('actEmpty'), t('actEmptyBody')); return; }
+  const label = ty => ({ parcel:t('tParcel'), borrow:t('tBorrow'), car:t('tCar'), ticket:t('tIssue') }[ty] || ty);
+  const row = r => `
+    <div class="row">
+      <div class="thumb" style="background:#EEF3FF;color:var(--primary)">${IC.box}</div>
+      <div class="body">
+        <div class="t">${esc(r.title || label(r.type))}</div>
+        <div class="s">${esc(label(r.type))} · ${esc(fmtDate(r.created_at))}</div>
+      </div>
+      <span class="pill ${r.is_open ? 'wait' : 'done'}">${esc(r.is_open ? t('actOpen') : t('actDone'))}</span>
+    </div>`;
+  const open = items.filter(r => r.is_open), done = items.filter(r => !r.is_open);
+  $('#al').innerHTML =
+    (open.length ? `<div class="section-title">${esc(t('actOpen'))}</div>
+      <div class="rows">${open.map(row).join('')}</div>` : '') +
+    (done.length ? `<div class="section-title">${esc(t('actDone'))}</div>
+      <div class="rows">${done.slice(0,30).map(row).join('')}</div>` : '');
+};
+
+/* ── แจ้งเหตุ (โครงรอไว้) ───────────────────────────────────── */
+ROUTES.issues = async () => {
+  setTitle(t('mIssue'));
+  $('#main').innerHTML = `<div class="view">
+    <div class="note info">${IC.info}<div>${esc(t('issueSoon'))}</div></div>
+    <div style="margin-top:14px"><button class="btn ghost" id="bk">${esc(t('backHome'))}</button></div>
+  </div>`;
+  $('#bk').onclick = () => { S.stack = []; go('home'); };
+};
+
+/* ── กระดานสถานะฉุกเฉิน ─────────────────────────────────────
+   ตัวเลขที่สำคัญที่สุดคือ "ยังไม่ตอบ" ไม่ใช่ "ปลอดภัย"
+   เพราะคนปลอดภัยไม่ต้องทำอะไรต่อ แต่คนที่เงียบต้องตามทุกคน */
+ROUTES['alert-board'] = async () => {
+  setTitle(t('emgBoard'));
+  $('#main').innerHTML = `<div class="view"><div id="bd">${skeleton(3)}</div></div>`;
+  let b = null;
+  try{ b = await apiRetry('getAlertBoard', {}, 'GET'); }catch(e){}
+  if(!b?.ok){ $('#bd').innerHTML = emptyState(IC.info, t('adminNo'), t('adminNoBody')); return; }
+  if(!b.active){ $('#bd').innerHTML = emptyState(IC.bellBig, t('emgClosed'), ''); return; }
+
+  const answered = b.safe.length + b.help.length;
+  const list = (rows, cls) => rows.length ? `<div class="rows" ${cls ? 'style="border-color:var(--bad-line,#FECACA)"' : ''}>${
+    rows.map(r => `<div class="row">
+      <span class="av ${cls ? 'no' : ''}">${esc(String(r.nickname || r.name || '?').trim().charAt(0))}</span>
+      <div class="body">
+        <div class="t">${esc(r.name)}${r.nickname ? ' · ' + esc(r.nickname) : ''}</div>
+        <div class="s">${esc([r.dept, r.location, r.note].filter(Boolean).join(' · ') || '—')}</div>
+      </div>
+      ${r.phone ? `<a class="mini call" href="tel:${esc(r.phone)}">📞</a>` : ''}
+    </div>`).join('')}</div>` : '';
+
+  $('#bd').innerHTML = `
+    <div class="card" style="border-color:var(--bad,#DC2626)">
+      <div style="font-size:11px;font-weight:800;color:var(--bad,#DC2626)">${esc(fmtDate(b.alert.at))}</div>
+      <h3 style="margin:5px 0 0;font-size:17px">${esc(b.alert.title)}</h3>
+    </div>
+    <div class="tiles" style="margin-top:12px">
+      <div class="tile" style="min-height:76px;background:var(--warn-bg);border-color:var(--warn-line)">
+        <div class="nm" style="font-size:25px;color:var(--warn)">${b.none.length}</div>
+        <div class="en">${esc(t('emgNone'))}</div></div>
+      <div class="tile" style="min-height:76px;background:var(--bad-bg);border-color:var(--bad-line)">
+        <div class="nm" style="font-size:25px;color:var(--bad)">${b.help.length}</div>
+        <div class="en">${esc(t('emgHelpN'))}</div></div>
+      <div class="tile" style="min-height:76px;background:var(--ok-bg);border-color:var(--ok-line)">
+        <div class="nm" style="font-size:25px;color:var(--ok)">${b.safe.length}</div>
+        <div class="en">${esc(t('emgSafeN'))}</div></div>
+      <div class="tile" style="min-height:76px">
+        <div class="nm" style="font-size:25px">${answered}/${b.total}</div>
+        <div class="en">${esc(t('emgTotal'))}</div></div>
+    </div>
+    ${b.help.length ? `<div class="section-title" style="color:var(--bad)">${esc(t('emgHelpN'))}</div>${list(b.help, true)}` : ''}
+    ${b.none.length ? `<div class="section-title" style="color:var(--warn)">${esc(t('emgNone'))}</div>${list(b.none)}` : ''}
+    ${b.safe.length ? `<div class="section-title">${esc(t('emgSafeN'))}</div>${list(b.safe)}` : ''}
+    ${b.canClose ? `<div style="margin-top:16px"><button class="btn ghost" id="cls">${esc(t('emgClose'))}</button></div>` : ''}`;
+
+  if($('#cls')) $('#cls').onclick = async () => {
+    try{ await apiRetry('closeAlert', { alert_id:b.alert.alert_id }, 'POST');
+         toast(t('emgClosed'), 'ok'); go('alert-board', {}, true); }
+    catch(e){ toast(t('netErr'), 'bad'); }
+  };
+};
+
+/* ── ประกาศเหตุฉุกเฉิน (admin) ──────────────────────────────── */
+function declareSheet(){
+  sheet(`<h3>${esc(t('emgDeclare'))}</h3>
+    <div class="note warn" style="margin:10px 0 14px">⚠️<div>${esc(t('emgConfirmBody'))}</div></div>
+    <div class="field"><label>${esc(t('emgTitle'))}<span class="req">*</span></label>
+      <input id="aT" placeholder="${esc(t('emgTitlePh'))}"></div>
+    <div class="field"><label>${esc(t('emgBody'))}</label>
+      <textarea id="aB" rows="3" placeholder="${esc(t('emgBodyPh'))}"></textarea></div>
+    <div class="field"><label>${esc(t('emgScope'))}</label>
+      <select id="aO"><option value="ALL">${esc(t('emgAll'))}</option>
+        <option value="BKK">Bangkok</option><option value="DEEPSOUTH">Deep South</option></select></div>
+    <button class="btn danger" id="aGo">${esc(t('emgConfirm'))}</button>
+    <button class="btn ghost" id="aX">${esc(t('cancel'))}</button>`);
+  $('#aX').onclick = closeSheet;
+  $('#aGo').onclick = async () => {
+    const title = $('#aT').value.trim();
+    if(!title){ toast(t('admNeedTitle'), 'bad'); return; }
+    const b = $('#aGo'); b.disabled = true; b.textContent = t('loading');
+    try{
+      const r = await apiRetry('createAlert',
+        { title, body:$('#aB').value.trim(), office:$('#aO').value }, 'POST');
+      closeSheet();
+      toast(r?.ok ? t('emgSentTo')(r.reached || 0) : t('netErr'), r?.ok ? 'ok' : 'bad');
+      go('alert-board');
+    }catch(e){ toast(t('netErr'), 'bad'); b.disabled = false; b.textContent = t('emgConfirm'); }
+  };
+}
 
 /** หน้าเดียวกับ consent แต่เปิดจากโปรไฟล์ — อ่านอย่างเดียว มีปุ่มย้อนกลับ */
 ROUTES.privacy = async () => { await ROUTES.consent({ readonly:true }); };
