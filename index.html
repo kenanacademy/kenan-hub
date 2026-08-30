@@ -442,11 +442,15 @@ const START_AT = (function(){
             'news','reservation','admin'].includes(g) ? g : null;
   }catch(e){ return null; }
 })();
+/* ?rec=PCL-xxx → เปิดพัสดุชิ้นนั้นให้เลย (ลิงก์ที่ส่งไปในข้อความ LINE) */
+const START_REC = (function(){
+  try{ return new URLSearchParams(location.search).get('rec') || null; }catch(e){ return null; }
+})();
 
 /* ── 2. STATE (ในหน่วยความจำ ไม่ใช้ localStorage) ─────────────── */
 const S = {
   lang:'th', uid:null, profile:null, me:null,
-  isAdmin:false, isOfficer:false, regStatus:'unknown',
+  isAdmin:false, isOfficer:false, isSuper:false, regStatus:'unknown',
   liffReady:false, notifCount:0,
   draft:{ photo:null, thumb:null, scan:null, recipient:null, tracking:'' },
   regDraft:null, employees:[], stack:[]
@@ -487,6 +491,22 @@ const T = {
     admQuotaOk:'ยังเหลือพอ ระบบแจ้งเตือนทาง LINE ได้ตามปกติ',
     admQuotaWarn:'ใกล้หมดแล้ว เมื่อครบระบบจะสลับไปแจ้งทางอีเมลแทนโดยอัตโนมัติ',
     admOpenSheet:'เปิดฐานข้อมูลใน Google Sheet',
+    recGone:'ไม่พบพัสดุชิ้นนี้แล้ว อาจถูกกดรับไปแล้ว',
+    admPostNews:'ลงประกาศ / ข่าวสาร',
+    admRoles:'ตั้งสิทธิ์ผู้ใช้',
+    admImport:'ดึงประกาศจากอีเมล',
+    admImportHint:'HR ส่งประกาศทางอีเมลอยู่แล้ว — แค่ forward มาที่บัญชีระบบแล้วติด label "kc-news" จากนั้นกดปุ่มนี้ ระบบจะเก็บเข้า Kenan Connect ให้เอง (ทำอัตโนมัติทุกเช้าด้วย)',
+    admImported:n=>`นำเข้าประกาศ ${n} รายการแล้ว`,
+    admWriteOwn:'หรือพิมพ์เอง',
+    admTitleTh:'หัวข้อ (ไทย)', admTitleEn:'หัวข้อ (อังกฤษ)', admBodyTh:'รายละเอียด',
+    admTitlePh:'เช่น ซ้อมอพยพหนีไฟประจำปี',
+    admBodyPh:'วางเนื้อหาจากอีเมลได้เลย',
+    admPost:'เผยแพร่ประกาศ', admPosted:'เผยแพร่แล้ว', admNeedTitle:'กรุณาใส่หัวข้อ',
+    roleStaff:'พนักงาน', roleStaffSub:'ใช้งานทั่วไป · รับแจ้งเตือน · กดรับพัสดุ',
+    roleOfficer:'ผู้ดูแลพัสดุ', roleOfficerSub:'บันทึกพัสดุเข้า · จัดการกองไม่ทราบผู้รับ',
+    roleAdmin:'ผู้ดูแลระบบ', roleAdminSub:'สิทธิ์ผู้ดูแลพัสดุ + ลงประกาศ + ดูภาพรวม',
+    roleSuper:'Super Admin', roleSaved:'บันทึกสิทธิ์แล้ว',
+
 
     regTitle:'ลงทะเบียนใช้งาน', regLead:'ใช้ครั้งเดียว แล้วเข้าใช้ผ่าน LINE ได้เลย',
     fName:'ชื่อ-นามสกุล (ไทย)', fNameEn:'Full name (Thai)',
@@ -601,6 +621,22 @@ const T = {
     admQuotaOk:'Plenty left — LINE notifications working normally',
     admQuotaWarn:'Running low — the system will switch to email automatically when it runs out',
     admOpenSheet:'Open the database in Google Sheets',
+    recGone:'That parcel is no longer listed — it may already be picked up',
+    admPostNews:'Post news',
+    admRoles:'Manage roles',
+    admImport:'Import from email',
+    admImportHint:'HR already announces by email — just forward it to the system account with the "kc-news" label, then tap this. It also runs automatically every morning.',
+    admImported:n=>`Imported ${n} announcement(s)`,
+    admWriteOwn:'Or write it here',
+    admTitleTh:'Title (Thai)', admTitleEn:'Title (English)', admBodyTh:'Details',
+    admTitlePh:'e.g. Annual fire drill',
+    admBodyPh:'Paste the email content here',
+    admPost:'Publish', admPosted:'Published', admNeedTitle:'Please enter a title',
+    roleStaff:'Staff', roleStaffSub:'General use · notifications · claim parcels',
+    roleOfficer:'Parcel officer', roleOfficerSub:'Log parcels · manage the unidentified pile',
+    roleAdmin:'Admin', roleAdminSub:'Officer rights + post news + see the overview',
+    roleSuper:'Super Admin', roleSaved:'Roles saved',
+
 
     regTitle:'Register', regLead:'One time only, then sign in with LINE',
     fName:'Full name (Thai)', fNameEn:'ชื่อ-นามสกุล (ไทย)',
@@ -838,8 +874,10 @@ function chrome(name){
   $('#title').hidden   = isHome;
   $('#nav').hidden     = isFull;
   $('#bellBtn').hidden = isFull;
-  // FAB โผล่เฉพาะหน้าที่ไม่ใช่หน้าบันทึกเอง — บันทึกพัสดุได้จากทุกที่ใน 1 แตะ
-  $('#fab').hidden = isFull || name === 'parcel-in' || !S.isOfficer;
+  // ปุ่มลอยโผล่เฉพาะหน้าที่เกี่ยวกับพัสดุและเมนูผู้ดูแลเท่านั้น
+  // หน้าอื่น (โดยเฉพาะหน้าฉุกเฉิน) ห้ามมีอะไรมาบัง
+  $('#fab').hidden = !S.isOfficer ||
+                     !['my-parcels','unidentified','admin'].includes(name);
   document.querySelectorAll('.nav button').forEach(b =>
     b.classList.toggle('on', b.dataset.go === name || (name === 'parcel-in' && b.dataset.go === 'my-parcels')));
 }
@@ -932,7 +970,7 @@ ROUTES.home = async () => {
   }catch(e){ $('#newsBox').innerHTML = ''; }
 };
 
-ROUTES['my-parcels'] = async () => {
+ROUTES['my-parcels'] = async (params = {}) => {
   setTitle(t('pcTitle'));
   $('#main').innerHTML = `<div class="view">
     ${S.isOfficer ? `<button class="btn soft" id="toUn" style="margin-bottom:14px">${esc(t('unTitle'))}</button>` : ''}
@@ -963,6 +1001,16 @@ ROUTES['my-parcels'] = async () => {
   const byId = {}; items.forEach(p => byId[p.record_id] = p);
   document.querySelectorAll('#list .row[data-act]').forEach(b =>
     b.onclick = () => claimSheet(b.dataset.id, byId[b.dataset.id]));
+
+  // มาจากลิงก์ในข้อความแจ้งเตือน หรือกดจากหน้าการแจ้งเตือน → เปิดพัสดุชิ้นนั้นเลย
+  const focus = params.rec;
+  if(focus && byId[focus]){
+    const row = document.querySelector(`#list .row[data-id="${CSS.escape(focus)}"]`);
+    if(row) row.scrollIntoView({ block:'center' });
+    setTimeout(() => claimSheet(focus, byId[focus]), 260);
+  }else if(focus){
+    toast(t('recGone'));
+  }
   document.querySelectorAll('#list img[data-ph]').forEach(im => {
     loadPhoto(im.dataset.ph, im);
     // แตะที่รูปเล็ก = เปิดดูจ่าหน้าเต็มจอทันที ไม่ต้องผ่านหน้ายืนยัน
@@ -1275,6 +1323,16 @@ ROUTES.admin = async () => {
   $('#toCam').onclick = () => go('parcel-in');
   $('#toUn').onclick  = () => go('unidentified');
 
+  if(S.isAdmin){
+    $('#toUn').insertAdjacentHTML('afterend',
+      `<div style="height:9px"></div>
+       <button class="btn ghost" id="toNews">${esc(t('admPostNews'))}</button>` +
+      (S.isSuper ? `<div style="height:9px"></div>
+       <button class="btn ghost" id="toRoles">${esc(t('admRoles'))}</button>` : ''));
+    $('#toNews').onclick = () => go('admin-news');
+    if($('#toRoles')) $('#toRoles').onclick = () => go('admin-roles');
+  }
+
   let s = null;
   try{ s = await apiRetry('getAdminSummary', {}, 'GET'); }catch(e){}
   if(!s?.ok){ $('#sum').innerHTML = ''; return; }
@@ -1299,6 +1357,118 @@ ROUTES.admin = async () => {
          style="display:flex;text-decoration:none">${esc(t('admOpenSheet'))}</a></div>`;
 };
 
+/* ── ลงประกาศ (admin) ─────────────────────────────────────────
+   HR ประกาศทางอีเมลอยู่แล้ว ปุ่ม "ดึงจากอีเมล" จึงสำคัญกว่าฟอร์ม
+   เพราะไม่ต้องพิมพ์ซ้ำ — แค่ forward เข้ามาแล้วกดปุ่มเดียว */
+ROUTES['admin-news'] = async () => {
+  setTitle(t('admPostNews'));
+  $('#main').innerHTML = `<div class="view">
+    <div class="note info">${IC.info}<div>${esc(t('admImportHint'))}</div></div>
+    <button class="btn soft" id="imp" style="margin:12px 0 4px">${esc(t('admImport'))}</button>
+
+    <div class="section-title">${esc(t('admWriteOwn'))}</div>
+    <div class="card">
+      <div class="field"><label>${esc(t('admTitleTh'))}<span class="req">*</span></label>
+        <input id="nTh" placeholder="${esc(t('admTitlePh'))}"></div>
+      <div class="field"><label>${esc(t('admBodyTh'))}</label>
+        <textarea id="bTh" rows="6" placeholder="${esc(t('admBodyPh'))}"></textarea></div>
+      <div class="field" style="margin-bottom:0"><label>${esc(t('admTitleEn'))}</label>
+        <input id="nEn" placeholder="(optional)"></div>
+    </div>
+    <div class="sticky-cta"><button class="btn primary" id="post">${esc(t('admPost'))}</button></div>
+  </div>`;
+
+  $('#imp').onclick = async () => {
+    const b = $('#imp'); b.disabled = true; b.textContent = t('loading');
+    try{
+      const r = await apiRetry('importNews', {}, 'POST');
+      toast(r?.ok ? t('admImported')(r.added || 0) : t('netErr'), r?.ok ? 'ok' : 'bad');
+    }catch(e){ toast(t('netErr'), 'bad'); }
+    b.disabled = false; b.textContent = t('admImport');
+  };
+  $('#post').onclick = async () => {
+    const title = $('#nTh').value.trim();
+    if(!title){ toast(t('admNeedTitle'), 'bad'); return; }
+    const b = $('#post'); b.disabled = true;
+    try{
+      await apiRetry('addAnnouncement', {
+        title_th:title, title_en:$('#nEn').value.trim(), body_th:$('#bTh').value.trim()
+      }, 'POST');
+      toast(t('admPosted'), 'ok');
+      S.stack = []; go('news');
+    }catch(e){ toast(t('netErr'), 'bad'); b.disabled = false; }
+  };
+};
+
+/* ── ตั้งสิทธิ์ผู้ใช้ (เฉพาะ super admin) ────────────────────────
+   super admin กำหนดจาก ADMIN_EMAILS ใน Script Properties เท่านั้น
+   แก้ในชีทไม่ได้ — กันคนตั้งสิทธิ์ให้ตัวเอง */
+ROUTES['admin-roles'] = async () => {
+  setTitle(t('admRoles'));
+  $('#main').innerHTML = `<div class="view">
+    <input id="rq" class="inp" placeholder="${esc(t('pkSearch'))}"
+      style="width:100%;padding:13px 14px;border:1.5px solid var(--line);
+             border-radius:12px;font-size:16px;margin-bottom:12px">
+    <div id="ulist">${skeleton(4)}</div></div>`;
+
+  let users = [];
+  try{ const r = await apiRetry('getUsersForAdmin', {}, 'GET'); users = r?.items || []; }catch(e){}
+
+  const badge = u => {
+    const r = String(u.roles || 'staff');
+    if(u.is_super)            return `<span class="pill new">${esc(t('roleSuper'))}</span>`;
+    if(r.includes('admin'))   return `<span class="pill new">${esc(t('roleAdmin'))}</span>`;
+    if(r.includes('officer')) return `<span class="pill wait">${esc(t('roleOfficer'))}</span>`;
+    return `<span class="pill" style="background:var(--neutral);color:var(--ink-3)">${esc(t('roleStaff'))}</span>`;
+  };
+  const paint = kw => {
+    const k = String(kw || '').toLowerCase();
+    const hits = users.filter(u => !k ||
+      String(u.name_th).toLowerCase().includes(k) ||
+      String(u.nickname).toLowerCase().includes(k) ||
+      String(u.email).toLowerCase().includes(k));
+    $('#ulist').innerHTML = `<div class="rows">${hits.map(u => `
+      <button class="row" data-id="${esc(u.kenan_user_id)}" ${u.is_super ? 'disabled style="opacity:.6"' : ''}>
+        <span class="av">${esc(String(u.nickname || u.name_th || '?').trim().charAt(0))}</span>
+        <div class="body">
+          <div class="t">${esc(u.name_th)}${u.nickname ? ' · ' + esc(u.nickname) : ''}</div>
+          <div class="s">${esc(u.email)}</div>
+        </div>${badge(u)}
+      </button>`).join('')}</div>`;
+    document.querySelectorAll('#ulist .row:not([disabled])').forEach(b =>
+      b.onclick = () => roleSheet(users.find(x => x.kenan_user_id === b.dataset.id)));
+  };
+  paint('');
+  $('#rq').oninput = e => paint(e.target.value);
+
+  function roleSheet(u){
+    const cur = String(u.roles || 'staff');
+    const lvl = cur.includes('admin') ? 'admin' : cur.includes('officer') ? 'officer' : 'staff';
+    const opt = (v, th, sub) => `
+      <button class="row" data-r="${v}" style="border-radius:12px;border:1.5px solid ${
+        v === lvl ? 'var(--primary)' : 'var(--line)'};margin-bottom:8px;background:${
+        v === lvl ? 'var(--bk-bg,#EEF3FF)' : '#fff'}">
+        <div class="body"><div class="t">${esc(th)}</div><div class="s">${esc(sub)}</div></div>
+        ${v === lvl ? '<span style="color:var(--primary);font-weight:800">✓</span>' : ''}
+      </button>`;
+    sheet(`<h3>${esc(u.name_th)}</h3><p class="sub">${esc(u.email)}</p>
+      ${opt('staff',   t('roleStaff'),   t('roleStaffSub'))}
+      ${opt('officer', t('roleOfficer'), t('roleOfficerSub'))}
+      ${opt('admin',   t('roleAdmin'),   t('roleAdminSub'))}
+      <button class="btn ghost" id="cx" style="margin-top:6px">${esc(t('cancel'))}</button>`);
+    $('#cx').onclick = closeSheet;
+    document.querySelectorAll('#sheetBody .row[data-r]').forEach(b => b.onclick = async () => {
+      const roles = b.dataset.r === 'admin'   ? 'staff,officer,admin'
+                  : b.dataset.r === 'officer' ? 'staff,officer' : 'staff';
+      closeSheet();
+      try{
+        await apiRetry('setUserRoles', { target_id:u.kenan_user_id, roles }, 'POST');
+        u.roles = roles; toast(t('roleSaved'), 'ok'); paint($('#rq').value);
+      }catch(e){ toast(t('netErr'), 'bad'); }
+    });
+  }
+};
+
 /** หน้าเดียวกับ consent แต่เปิดจากโปรไฟล์ — อ่านอย่างเดียว มีปุ่มย้อนกลับ */
 ROUTES.privacy = async () => { await ROUTES.consent({ readonly:true }); };
 
@@ -1318,10 +1488,17 @@ ROUTES.notifications = async () => {
   try{ const r = await apiRetry('getNotifications', {}, 'GET'); items = r?.items || []; }catch(e){}
   $('#list').innerHTML = items.length
     ? `<div class="rows">${items.map(n => `
-        <div class="row"><div class="body">
-          <div class="t">${esc(n.title || n.message)}</div>
-          <div class="s">${esc(fmtDate(n.at))}</div></div></div>`).join('')}</div>`
+        <button class="row" ${n.record_id ? `data-rec="${esc(n.record_id)}"` : ''}>
+          <div class="body">
+            <div class="t">${esc(n.title || n.message)}</div>
+            <div class="s">${esc(fmtDate(n.at))}</div>
+          </div>
+          ${n.record_id ? `<span class="go">${IC.chev}</span>` : ''}
+        </button>`).join('')}</div>`
     : emptyState(IC.bellBig, t('notifEmpty'), '');
+  // กดแล้วต้องเด้งไปที่พัสดุชิ้นนั้นจริงๆ ไม่ใช่แค่รายการเฉยๆ
+  document.querySelectorAll('#list .row[data-rec]').forEach(b =>
+    b.onclick = () => go('my-parcels', { rec:b.dataset.rec }));
   S.notifCount = 0; $('#bellDot').hidden = true;
 };
 
@@ -1438,6 +1615,7 @@ ROUTES.otp = async () => {
       const auth = await apiRetry('getAuthState', {}, 'GET');
       S.me = auth?.user || null;
       S.isAdmin = !!auth?.isAdmin;
+      S.isSuper = !!auth?.isSuper;
       S.isOfficer = !!(auth?.isAdmin || auth?.isOfficer);
       S.regStatus = auth?.registrationStatus || 'approved';
       S.regDraft = null;
@@ -1713,6 +1891,7 @@ async function boot(){
 
   S.me        = auth?.user || null;
   S.isAdmin   = !!auth?.isAdmin;
+  S.isSuper   = !!auth?.isSuper;
   S.isOfficer = !!(auth?.isAdmin || auth?.isOfficer);
   S.regStatus = auth?.registrationStatus || (S.me ? 'approved' : 'none');
   S.notifCount= auth?.notificationCount || 0;
@@ -1722,9 +1901,9 @@ async function boot(){
   if(!S.me?.consent_at)               go('consent');
   else if(S.regStatus !== 'approved') go('register');
   else if(START_AT && START_AT !== 'home'){
-    // มาจากปุ่ม Rich Menu → เปิดหน้านั้นเลย แต่ยังกดย้อนกลับมาหน้าแรกได้
+    // มาจากปุ่ม Rich Menu หรือลิงก์ในข้อความแจ้งเตือน → เปิดหน้านั้นเลย แต่ยังย้อนกลับได้
     S.stack = [{ name:'home', params:{} }];
-    go(START_AT);
+    go(START_AT, START_REC ? { rec:START_REC } : {});
   }
   else                                go('home');
 }
