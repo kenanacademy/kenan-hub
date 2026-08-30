@@ -276,6 +276,50 @@ main{flex:1 1 auto;padding:16px 16px calc(var(--nav-h) + var(--safe-b) + 24px)}
 #sheet h3{margin:0 0 4px;font-size:17px;font-weight:700}
 #sheet .sub{margin:0 0 16px;font-size:13px;color:var(--ink-3)}
 
+/* ── ดูรูปเต็มจอ + ซูม (ต้องอ่านจ่าหน้าซองให้ออก) ─────────────── */
+#lb{position:fixed;inset:0;z-index:90;background:#0B0F17;display:none;flex-direction:column}
+#lb.on{display:flex}
+#lb .top{display:flex;align-items:center;justify-content:space-between;
+  padding:calc(env(safe-area-inset-top,0px) + 10px) 14px 10px;color:#fff;flex:0 0 auto}
+#lb .top b{font-size:14px;font-weight:700}
+#lb .x{width:38px;height:38px;border-radius:50%;background:rgba(255,255,255,.15);
+  display:grid;place-items:center;color:#fff;font-size:20px;line-height:1}
+#lbStage{flex:1;overflow:hidden;position:relative;touch-action:none;display:grid;place-items:center}
+#lbImg{max-width:100%;max-height:100%;transform-origin:center center;
+  transition:transform .16s ease-out;will-change:transform;user-select:none;-webkit-user-drag:none}
+#lb .zoom{display:flex;gap:10px;justify-content:center;align-items:center;
+  padding:12px 14px calc(env(safe-area-inset-bottom,0px) + 16px);flex:0 0 auto}
+#lb .zb{min-width:56px;height:46px;padding:0 16px;border-radius:23px;background:rgba(255,255,255,.16);
+  color:#fff;font-size:19px;font-weight:800;display:grid;place-items:center}
+#lb .zb.wide{font-size:13.5px;font-weight:700}
+#lb .hint{color:rgba(255,255,255,.55);font-size:11.5px;text-align:center;padding-bottom:4px}
+
+/* รูปใหญ่ใน sheet ยืนยันรับของ */
+.sheet-photo{width:100%;border-radius:12px;background:var(--neutral);display:block;
+  aspect-ratio:4/3;object-fit:cover;margin-bottom:6px}
+.sheet-photo-hint{font-size:11.5px;color:var(--primary);font-weight:700;text-align:center;margin:0 0 14px}
+
+/* ── ตัวเลือกผู้รับแบบค้นหา (40+ คน เลื่อนหาไม่ไหว) ────────────── */
+.picker-btn{width:100%;padding:13px 14px;border:1.5px solid var(--line);border-radius:var(--r);
+  background:var(--surface);text-align:left;display:flex;align-items:center;gap:10px}
+.picker-btn .nm{flex:1;min-width:0;font-size:15px}
+.picker-btn .nm.ph{color:var(--ink-3)}
+.picker-btn .nm small{display:block;font-size:11.5px;color:var(--ink-3);font-weight:500}
+.picker-btn .ch{color:var(--ink-3);font-size:12px}
+#pkSearch{width:100%;padding:13px 14px;border:1.5px solid var(--primary);border-radius:var(--r);
+  font-size:16px;margin-bottom:10px;background:var(--surface)}
+#pkList{max-height:46dvh;overflow:auto;margin:0 -4px}
+.pk-row{width:100%;display:flex;align-items:center;gap:11px;padding:11px 10px;
+  border-radius:10px;text-align:left}
+.pk-row:active{background:var(--bg)}
+.pk-row .av{width:34px;height:34px;border-radius:50%;background:#EEF3FF;color:var(--primary);
+  font-size:13px;font-weight:800;display:grid;place-items:center;flex:0 0 auto}
+.pk-row .b{flex:1;min-width:0}
+.pk-row .t{font-size:14.5px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.pk-row .s{font-size:11.5px;color:var(--ink-3)}
+.pk-row.unknown .av{background:var(--warn-bg);color:var(--warn)}
+.pk-empty{text-align:center;padding:26px 10px;color:var(--ink-3);font-size:13px}
+
 /* ── Consent / PDPA ────────────────────────────────────────── */
 .legal{
   background:var(--surface);border:1px solid var(--line);border-radius:var(--r);
@@ -363,6 +407,17 @@ main{flex:1 1 auto;padding:16px 16px calc(var(--nav-h) + var(--safe-b) + 24px)}
 <div id="sheet"><div class="grip"></div><div id="sheetBody"></div></div>
 <div id="toast"></div>
 
+<div id="lb">
+  <div class="top"><b id="lbTitle"></b><button class="x" id="lbX" aria-label="ปิด">✕</button></div>
+  <div id="lbStage"><img id="lbImg" alt=""></div>
+  <div class="hint" id="lbHint"></div>
+  <div class="zoom">
+    <button class="zb" id="lbOut">−</button>
+    <button class="zb wide" id="lbFit">100%</button>
+    <button class="zb" id="lbIn">＋</button>
+  </div>
+</div>
+
 <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
 <script>
 /* ═══════════════════════════════════════════════════════════════
@@ -377,6 +432,15 @@ const CFG = {
   LIFF_TIMEOUT_MS : 3500,
   CONSENT_VERSION : '2026-09-01'
 };
+
+/* เก็บ ?go=... ไว้ตั้งแต่ต้น เพราะเดี๋ยวจะล้าง query string ทิ้งหลัง LIFF ล็อกอิน
+   ใช้ให้ปุ่ม Rich Menu พาไปหน้าที่ต้องการได้โดยตรง เช่น ?go=parcel-in */
+const START_AT = (function(){
+  try{
+    const g = new URLSearchParams(location.search).get('go');
+    return ['home','parcel-in','my-parcels','unidentified','calltree','profile'].includes(g) ? g : null;
+  }catch(e){ return null; }
+})();
 
 /* ── 2. STATE (ในหน่วยความจำ ไม่ใช้ localStorage) ─────────────── */
 const S = {
@@ -455,7 +519,13 @@ const T = {
     inScanOk:'อ่านได้แล้ว ตรวจสอบให้ถูกก่อนบันทึก',
     inScanFail:'อ่านไม่ออก เลือกชื่อเองได้เลย',
     inRecipient:'ผู้รับ', inRecipientEn:'Recipient',
-    inPick:'— เลือกผู้รับ —', inUnknown:'ไม่ทราบผู้รับ (เข้ากองรอระบุ)',
+    inPick:'แตะเพื่อเลือกผู้รับ', inUnknown:'ไม่ทราบผู้รับ',
+    pkSearch:'พิมพ์ชื่อ ชื่อเล่น หรือชื่ออังกฤษ',
+    pkUnknownSub:'ส่งเข้ากองรอระบุตัวผู้รับ',
+    pkNone:'ไม่พบชื่อนี้ ลองพิมพ์สั้นลง หรือใช้ชื่อเล่น',
+    noPhoto:'รายการนี้ไม่มีรูป',
+    zoomHint:'แตะสองครั้ง หรือใช้สองนิ้วเพื่อซูม',
+    pcViewPhoto:'แตะรูปเพื่อดูจ่าหน้าแบบเต็มจอ',
     inTracking:'เลขพัสดุ (ถ้ามี)', inTrackingEn:'Tracking no.',
     inSave:'บันทึกและแจ้งผู้รับ',
     inSaveUnknown:'บันทึกเข้ากองไม่ทราบผู้รับ',
@@ -549,7 +619,13 @@ const T = {
     inScanOk:'Read successfully — please check before saving',
     inScanFail:'Could not read it — pick the name manually',
     inRecipient:'Recipient', inRecipientEn:'ผู้รับ',
-    inPick:'— Select recipient —', inUnknown:'Unknown recipient (send to pile)',
+    inPick:'Tap to choose recipient', inUnknown:'Unknown recipient',
+    pkSearch:'Type a name, nickname, or English name',
+    pkUnknownSub:'Send to the unidentified pile',
+    pkNone:'No match — try fewer letters, or a nickname',
+    noPhoto:'No photo for this item',
+    zoomHint:'Double-tap or pinch to zoom',
+    pcViewPhoto:'Tap the photo to see the label full screen',
     inTracking:'Tracking no. (optional)', inTrackingEn:'เลขพัสดุ',
     inSave:'Save and notify recipient',
     inSaveUnknown:'Save to unidentified pile',
@@ -853,16 +929,35 @@ ROUTES['my-parcels'] = async () => {
       <div class="rows">${waiting.map(p => rowHtml(p, true)).join('')}</div>` : ''}
     ${done.length ? `<div class="section-title">${esc(t('pcHistory'))}</div>
       <div class="rows">${done.map(p => rowHtml(p, false)).join('')}</div>` : ''}`;
-  document.querySelectorAll('#list .row[data-act]').forEach(b => b.onclick = () => claimSheet(b.dataset.id));
-  document.querySelectorAll('#list img[data-ph]').forEach(im => loadPhoto(im.dataset.ph, im));
+  const byId = {}; items.forEach(p => byId[p.record_id] = p);
+  document.querySelectorAll('#list .row[data-act]').forEach(b =>
+    b.onclick = () => claimSheet(b.dataset.id, byId[b.dataset.id]));
+  document.querySelectorAll('#list img[data-ph]').forEach(im => {
+    loadPhoto(im.dataset.ph, im);
+    // แตะที่รูปเล็ก = เปิดดูจ่าหน้าเต็มจอทันที ไม่ต้องผ่านหน้ายืนยัน
+    im.onclick = ev => {
+      ev.stopPropagation();
+      const p = byId[im.closest('.row').dataset.id] || {};
+      openPhoto(p.photo_id || im.dataset.ph, p.title || '');
+    };
+  });
 };
 
-function claimSheet(id){
+function claimSheet(id, parcel){
+  const p = parcel || {};
   sheet(`<h3>${esc(t('pcClaim'))}?</h3>
     <p class="sub">${esc(S.lang === 'th' ? 'ระบบจะบันทึกเวลาที่คุณกดรับไว้เป็นหลักฐาน' : 'The time you confirm is recorded as evidence.')}</p>
+    ${p.photo_id || p.thumb_id ? `
+      <img class="sheet-photo" id="shPhoto" alt="">
+      <p class="sheet-photo-hint">${esc(t('pcViewPhoto'))}</p>` : ''}
     <button class="btn primary" id="okClaim">${esc(t('pcClaim'))}</button>
     <button class="btn ghost" id="notMine">${esc(t('pcNotMine'))}</button>
     <button class="btn ghost" id="cx">${esc(t('cancel'))}</button>`);
+  if($('#shPhoto')){
+    // โหลดรูปใหญ่มาแสดงเลย ไม่ใช่รูปย่อ — จะได้พออ่านจ่าหน้าได้โดยไม่ต้องเปิดเต็มจอ
+    loadPhoto(p.photo_id || p.thumb_id, $('#shPhoto'));
+    $('#shPhoto').onclick = () => { closeSheet(); openPhoto(p.photo_id || p.thumb_id, p.title || ''); };
+  }
   $('#cx').onclick = closeSheet;
   $('#okClaim').onclick = async () => {
     closeSheet();
@@ -888,8 +983,9 @@ ROUTES['parcel-in'] = async () => {
       <button class="btn soft" id="scanBtn">${esc(t('inScan'))}</button>
       <div class="field" style="margin-top:16px">
         <label>${esc(t('inRecipient'))}<span class="en">${esc(t('inRecipientEn'))}</span></label>
-        <select id="rcp"><option value="">${esc(t('inPick'))}</option>
-          <option value="__unknown__">${esc(t('inUnknown'))}</option></select>
+        <button class="picker-btn" id="rcp">
+          <span class="nm ph" id="rcpNm">${esc(t('inPick'))}</span><span class="ch">▾</span>
+        </button>
       </div>
       <div class="field">
         <label>${esc(t('inTracking'))}</label>
@@ -910,21 +1006,27 @@ ROUTES['parcel-in'] = async () => {
     $('#afterShot').hidden = false;
   };
 
-  // โหลดรายชื่อพนักงานล่วงหน้า — ตอนกดจะไม่ต้องรอ
+  // โหลดรายชื่อพนักงานล่วงหน้าตอนที่ผู้ใช้กำลังถ่ายรูป — พอเลื่อนลงมาจะพร้อมแล้ว
   if(!S.employees.length){
-    try{ const r = await apiRetry('getEmployees', {}, 'GET'); S.employees = r?.items || r?.employees || []; }catch(e){}
+    try{ const r = await apiRetry('getEmployees', {}, 'GET'); S.employees = r?.items || []; }catch(e){}
   }
-  const sel = $('#rcp');
-  S.employees.forEach(p => {
-    const o = document.createElement('option');
-    o.value = p.kenan_user_id || p.uid || p.email || p.name;
-    o.textContent = p.nickname ? `${p.name_th || p.name} (${p.nickname})` : (p.name_th || p.name);
-    o.dataset.json = JSON.stringify(p);
-    sel.appendChild(o);
-  });
-  sel.onchange = () => {
-    const btn = $('#saveBtn');
-    btn.textContent = sel.value === '__unknown__' ? t('inSaveUnknown') : t('inSave');
+
+  let chosen = null, isUnknown = false;
+  const nmEl = $('#rcpNm'), saveBtn = $('#saveBtn');
+  $('#rcp').onclick = async () => {
+    const pick = await pickPerson();
+    if(!pick) return;
+    if(pick.unknown){
+      isUnknown = true; chosen = null;
+      nmEl.className = 'nm'; nmEl.textContent = t('inUnknown');
+      saveBtn.textContent = t('inSaveUnknown');
+    }else{
+      isUnknown = false; chosen = pick;
+      nmEl.className = 'nm';
+      nmEl.innerHTML = `${esc(pick.name_th || pick.name_en)}` +
+        (pick.department ? `<small>${esc(pick.department)}</small>` : '');
+      saveBtn.textContent = t('inSave');
+    }
   };
 
   $('#scanBtn').onclick = async () => {
@@ -933,30 +1035,37 @@ ROUTES['parcel-in'] = async () => {
       const r = await apiRetry('scanParcelPhoto', { photo:S.draft.photo }, 'POST');
       if(r?.trackingNo) $('#trk').value = r.trackingNo;
       const guess = (r?.recipientName || '').trim();
-      let matched = false;
+      let matched = null;
       if(guess){
-        for(const o of sel.options){
-          if(o.textContent.includes(guess) || guess.includes(o.textContent.split(' (')[0])){
-            sel.value = o.value; matched = true; break;
-          }
-        }
+        const n = s => String(s || '').toLowerCase().replace(/\s|\./g, '');
+        const g = n(guess);
+        matched = S.employees.find(p => n(p.name_th) === g || n(p.nickname) === g)
+               || S.employees.find(p => g.includes(n(p.nickname)) && n(p.nickname).length > 1)
+               || S.employees.find(p => n(p.name_th).includes(g) && g.length > 2);
+      }
+      if(matched){
+        // AI เดาให้ แต่ยังต้องให้คนกดยืนยันเสมอ — แจ้งผิดคนเสียความเชื่อมั่นกว่าที่คิด
+        chosen = matched; isUnknown = false;
+        nmEl.className = 'nm';
+        nmEl.innerHTML = `${esc(matched.name_th || matched.name_en)}` +
+          (matched.department ? `<small>${esc(matched.department)}</small>` : '');
+        saveBtn.textContent = t('inSave');
       }
       toast(matched ? t('inScanOk') : t('inScanFail'), matched ? 'ok' : '');
     }catch(e){ toast(t('inScanFail')); }
     b.disabled = false; b.textContent = t('inScan');
   };
 
-  $('#saveBtn').onclick = async () => {
+  saveBtn.onclick = async () => {
     if(!S.draft.photo){ toast(t('inNeedPhoto'), 'bad'); return; }
-    const unknown = sel.value === '__unknown__' || !sel.value;
-    const btn = $('#saveBtn'); btn.disabled = true;
+    const unknown = isUnknown || !chosen;
+    const btn = saveBtn; btn.disabled = true;
     try{
-      const chosen = sel.selectedOptions[0]?.dataset.json ? JSON.parse(sel.selectedOptions[0].dataset.json) : null;
       await apiRetry('logParcel', {
         photo:S.draft.photo,
         thumb:S.draft.thumb,
-        recipient_id: unknown ? '' : (chosen?.kenan_user_id || sel.value),
-        recipient_name: unknown ? '' : (chosen?.name_th || chosen?.name || ''),
+        recipient_id: unknown ? '' : chosen.kenan_user_id,
+        recipient_name: unknown ? '' : (chosen.name_th || chosen.name_en || ''),
         tracking_no: $('#trk').value.trim()
       }, 'POST');
       S.draft = { photo:null, thumb:null, scan:null, recipient:null, tracking:'' };
@@ -982,12 +1091,27 @@ ROUTES.unidentified = async () => {
         <div class="s">${esc(t('pcArrived')(fmtDate(p.created_at)))}</div>
       </div><span class="go">${IC.chev}</span>
     </button>`).join('')}</div>`;
-  document.querySelectorAll('#list img[data-ph]').forEach(im => loadPhoto(im.dataset.ph, im));
+  const byId = {}; items.forEach(p => byId[p.record_id] = p);
+  document.querySelectorAll('#list img[data-ph]').forEach(im => {
+    loadPhoto(im.dataset.ph, im);
+    im.onclick = ev => {
+      ev.stopPropagation();
+      const p = byId[im.closest('.row').dataset.id] || {};
+      openPhoto(p.photo_id || im.dataset.ph, '');
+    };
+  });
   document.querySelectorAll('#list .row').forEach(b => b.onclick = () => {
+    const p = byId[b.dataset.id] || {};
     sheet(`<h3>${esc(t('unTitle'))}</h3>
       <p class="sub">${esc(S.lang === 'th' ? 'ระบุผู้รับของพัสดุชิ้นนี้' : 'Identify the recipient of this parcel')}</p>
+      ${p.photo_id || p.thumb_id ? `<img class="sheet-photo" id="unPhoto" alt="">
+        <p class="sheet-photo-hint">${esc(t('pcViewPhoto'))}</p>` : ''}
       <button class="btn primary" id="mine">${esc(t('unMine'))}</button>
       <button class="btn ghost" id="cx">${esc(t('cancel'))}</button>`);
+    if($('#unPhoto')){
+      loadPhoto(p.photo_id || p.thumb_id, $('#unPhoto'));
+      $('#unPhoto').onclick = () => { closeSheet(); openPhoto(p.photo_id || p.thumb_id, ''); };
+    }
     $('#cx').onclick = closeSheet;
     $('#mine').onclick = async () => {
       closeSheet();
@@ -1302,12 +1426,124 @@ function shrink2(file){
 /** ดึงรูปจากเซิร์ฟเวอร์ (ไฟล์ใน Drive เป็นส่วนตัว ไม่ได้เปิดลิงก์สาธารณะ) */
 const photoCache = {};
 async function loadPhoto(fileId, imgEl){
-  if(!fileId || !imgEl) return;
-  if(photoCache[fileId]){ imgEl.src = photoCache[fileId]; return; }
+  if(!fileId || !imgEl) return null;
+  if(photoCache[fileId]){ imgEl.src = photoCache[fileId]; return photoCache[fileId]; }
   try{
-    const r = await api('getPhoto', { file_id:fileId }, 'GET');
-    if(r?.data){ photoCache[fileId] = r.data; imgEl.src = r.data; }
+    const r = await apiRetry('getPhoto', { file_id:fileId }, 'GET');
+    if(r?.data){ photoCache[fileId] = r.data; if(imgEl) imgEl.src = r.data; return r.data; }
   }catch(e){}
+  return null;
+}
+
+/* ── ดูรูปเต็มจอ + ซูม ─────────────────────────────────────────
+   จ่าหน้าซองมักตัวเล็กและเบลอ ถ้าอ่านไม่ออกคนจะไม่กล้ากดรับ
+   จึงต้องซูมได้จริง ทั้งด้วยปุ่ม แตะสองครั้ง และนิ้วหุบ-กาง */
+let lbZ = 1, lbX = 0, lbY = 0;
+function lbApply(){
+  $('#lbImg').style.transform = `translate(${lbX}px,${lbY}px) scale(${lbZ})`;
+  $('#lbFit').textContent = Math.round(lbZ * 100) + '%';
+}
+function lbSet(z, keepPan){
+  lbZ = Math.min(6, Math.max(1, z));
+  if(lbZ === 1 || !keepPan){ lbX = 0; lbY = 0; }
+  lbApply();
+}
+async function openPhoto(fileId, title){
+  if(!fileId){ toast(t('noPhoto')); return; }
+  const img = $('#lbImg');
+  img.removeAttribute('src');
+  $('#lbTitle').textContent = title || '';
+  $('#lbHint').textContent = t('zoomHint');
+  lbSet(1);
+  $('#lb').classList.add('on');
+  const data = await loadPhoto(fileId, img);
+  if(!data){ toast(t('netErr'), 'bad'); $('#lb').classList.remove('on'); }
+}
+function closePhoto(){ $('#lb').classList.remove('on'); }
+$('#lbX').onclick   = closePhoto;
+$('#lbIn').onclick  = () => lbSet(lbZ * 1.6, true);
+$('#lbOut').onclick = () => lbSet(lbZ / 1.6, true);
+$('#lbFit').onclick = () => lbSet(lbZ > 1 ? 1 : 2.5);
+
+(function lbGestures(){
+  const stage = $('#lbStage');
+  let pts = new Map(), startDist = 0, startZ = 1, panning = false, sx = 0, sy = 0, lastTap = 0;
+
+  stage.addEventListener('pointerdown', e => {
+    stage.setPointerCapture(e.pointerId);
+    pts.set(e.pointerId, { x:e.clientX, y:e.clientY });
+    if(pts.size === 2){
+      const [a, b] = [...pts.values()];
+      startDist = Math.hypot(a.x - b.x, a.y - b.y); startZ = lbZ;
+    }else if(pts.size === 1){
+      panning = lbZ > 1; sx = e.clientX - lbX; sy = e.clientY - lbY;
+      const now = Date.now();
+      if(now - lastTap < 300) lbSet(lbZ > 1 ? 1 : 2.5);   // แตะสองครั้งเพื่อซูม
+      lastTap = now;
+    }
+  });
+  stage.addEventListener('pointermove', e => {
+    if(!pts.has(e.pointerId)) return;
+    pts.set(e.pointerId, { x:e.clientX, y:e.clientY });
+    if(pts.size === 2 && startDist){
+      const [a, b] = [...pts.values()];
+      lbSet(startZ * (Math.hypot(a.x - b.x, a.y - b.y) / startDist), true);
+    }else if(panning && pts.size === 1){
+      lbX = e.clientX - sx; lbY = e.clientY - sy; lbApply();
+    }
+  });
+  const up = e => { pts.delete(e.pointerId); if(pts.size < 2) startDist = 0; if(!pts.size) panning = false; };
+  stage.addEventListener('pointerup', up);
+  stage.addEventListener('pointercancel', up);
+})();
+
+/* ── ตัวเลือกผู้รับแบบค้นหา ─────────────────────────────────────
+   40+ คน เลื่อนหาใน dropdown ไม่ไหว → พิมพ์ 2-3 ตัวอักษรแล้วกรอง
+   ค้นได้ทั้งชื่อไทย ชื่ออังกฤษ และชื่อเล่น เพราะฉลากพัสดุมักเขียนชื่อเล่น */
+function pickPerson(){
+  return new Promise(resolve => {
+    sheet(`<h3>${esc(t('inRecipient'))}</h3>
+      <input id="pkSearch" placeholder="${esc(t('pkSearch'))}" autocomplete="off">
+      <div id="pkList"></div>
+      <button class="btn ghost" id="pkCancel" style="margin-top:10px">${esc(t('cancel'))}</button>`);
+
+    const norm = s => String(s || '').toLowerCase().replace(/\s|\./g, '');
+    const listEl = $('#pkList'), inp = $('#pkSearch');
+
+    const paint = (kw) => {
+      const k = norm(kw);
+      const hits = !k ? S.employees
+        : S.employees.filter(p => norm(p.name_th).includes(k) ||
+                                  norm(p.name_en).includes(k) ||
+                                  norm(p.nickname).includes(k));
+      listEl.innerHTML =
+        `<button class="pk-row unknown" data-u="1">
+           <span class="av">?</span>
+           <span class="b"><span class="t">${esc(t('inUnknown'))}</span>
+           <span class="s">${esc(t('pkUnknownSub'))}</span></span>
+         </button>` +
+        (hits.length ? hits.map(p => `
+          <button class="pk-row" data-id="${esc(p.kenan_user_id)}">
+            <span class="av">${esc(String(p.nickname || p.name_th || '?').trim().charAt(0))}</span>
+            <span class="b">
+              <span class="t">${esc(p.name_th || p.name_en)}${p.nickname ? ' · ' + esc(p.nickname) : ''}</span>
+              <span class="s">${esc(p.department || '')}</span>
+            </span>
+          </button>`).join('')
+        : `<div class="pk-empty">${esc(t('pkNone'))}</div>`);
+
+      listEl.querySelectorAll('.pk-row').forEach(b => b.onclick = () => {
+        closeSheet();
+        resolve(b.dataset.u ? { unknown:true }
+                            : S.employees.find(p => p.kenan_user_id === b.dataset.id));
+      });
+    };
+
+    paint('');
+    inp.oninput = () => paint(inp.value);
+    $('#pkCancel').onclick = () => { closeSheet(); resolve(null); };
+    setTimeout(() => inp.focus(), 260);
+  });
 }
 
 /* ── 9. BOOT — LIFF init ครั้งเดียวสำหรับทั้งแอป ───────────────── */
@@ -1370,6 +1606,11 @@ async function boot(){
   S.stack = [];
   if(!S.me?.consent_at)               go('consent');
   else if(S.regStatus !== 'approved') go('register');
+  else if(START_AT && START_AT !== 'home'){
+    // มาจากปุ่ม Rich Menu → เปิดหน้านั้นเลย แต่ยังกดย้อนกลับมาหน้าแรกได้
+    S.stack = [{ name:'home', params:{} }];
+    go(START_AT);
+  }
   else                                go('home');
 }
 boot();
