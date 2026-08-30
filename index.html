@@ -440,7 +440,8 @@ const START_AT = (function(){
     const g = new URLSearchParams(location.search).get('go');
     return ['home','parcel-in','my-parcels','unidentified','calltree','profile',
             'news','reservation','admin','directory','activity','issues',
-            'alert-board','issue-new','issue-queue'].includes(g) ? g : null;
+            'alert-board','issue-new','issue-queue',
+            'rooms','room-new','equipment'].includes(g) ? g : null;
   }catch(e){ return null; }
 })();
 /* ?rec=PCL-xxx → เปิดพัสดุชิ้นนั้นให้เลย (ลิงก์ที่ส่งไปในข้อความ LINE) */
@@ -520,6 +521,25 @@ const T = {
     prPhone:'เบอร์ติดต่อ', prShowPhone:'เปิดเผยเบอร์ในทำเนียบบุคลากร',
     prShowPhoneSub:'ถ้าปิดไว้ เพื่อนร่วมงานจะเห็นแค่อีเมล',
     prSave:'บันทึก', prSaved:'บันทึกแล้ว',
+    rmTitle:'จองห้องประชุม', rmBook:'จองห้อง', rmFree:'ว่าง', rmToday:'วันนี้',
+    rmNoBook:'ยังไม่มีใครจองห้องนี้', rmPick:'เลือกห้อง', rmWhen:'วันและเวลา',
+    rmSubject:'เรื่องที่ประชุม', rmSubjectPh:'เช่น ประชุมทีม WING ประจำสัปดาห์',
+    rmFrom:'เริ่ม', rmTo:'ถึง', rmGo:'ยืนยันการจอง', rmOk:'จองเรียบร้อย · ส่งไฟล์ปฏิทินไปที่อีเมลแล้ว',
+    rmClash:'ช่วงเวลานี้มีคนจองแล้ว', rmClashBy:(w,t)=>`${w} จองไว้ ${t}`,
+    rmBadTime:'เวลาสิ้นสุดต้องหลังเวลาเริ่ม', rmCancel:'ยกเลิกการจอง', rmCancelled:'ยกเลิกแล้ว',
+    rmMine:'การจองของฉัน', rmIcsHint:'จองเสร็จจะได้ไฟล์ปฏิทินทางอีเมล เปิดแล้วกดเพิ่มลง Outlook แล้วเชิญคนได้เลย',
+    eqTitle:'ยืม-คืนอุปกรณ์', eqAvail:'ว่าง', eqOut:'ถูกยืมอยู่', eqBy:w=>`อยู่กับ ${w}`,
+    eqBorrow:'ยืมของชิ้นนี้', eqReturn:'คืนของ', eqMine:'ของที่ฉันยืม',
+    eqPhotoBefore:'ถ่ายรูปสภาพของ ก่อนรับ', eqPhotoAfter:'ถ่ายรูปสภาพของ ตอนคืน',
+    eqPhotoShelf:'ถ่ายรูปตอนวางคืนที่เก็บ', eqShelfAt:s=>`ที่เก็บ: ${s}`,
+    eqPurpose:'ใช้ทำอะไร', eqPurposePh:'เช่น ถ่ายงานอบรมที่โรงแรม',
+    eqNeedPhoto:'ต้องถ่ายรูปสภาพของก่อน', eqNeedShelf:'ต้องถ่ายรูปตอนวางคืนที่เก็บด้วย',
+    eqBorrowed:'รับของแล้ว ระบบบันทึกเวลาและรูปไว้แล้ว', eqReturned:'คืนของเรียบร้อย',
+    eqBusy:'ของชิ้นนี้ถูกยืมไปแล้ว', eqEmpty:'ยังไม่มีอุปกรณ์ในระบบ',
+    eqEmptyBody:'ผู้ดูแลเพิ่มรายการได้ในแท็บ resources ของ Google Sheet',
+    eqSince:d=>`ยืมตั้งแต่ ${d}`, eqWhy:'ถ่ายรูปทุกครั้งเพื่อไม่ให้เถียงกันภายหลังว่าของเสียตอนไหน',
+    resvRoom:'ห้องประชุม', resvEq:'ยืมอุปกรณ์', resvCar:'จองรถ',
+
     dirCall:'โทร', dirMail:'ส่งอีเมล', dirCopy:'คัดลอกเบอร์', dirCopied:'คัดลอกแล้ว',
     isuNew:'แจ้งเรื่อง / สอบถาม', isuMine:'เรื่องที่ฉันแจ้ง', isuQueue:'คิวที่ต้องจัดการ',
     isuCat:'เรื่องอะไร', isuDetail:'รายละเอียด',
@@ -701,6 +721,25 @@ const T = {
     prPhone:'Phone', prShowPhone:'Show my phone in the staff directory',
     prShowPhoneSub:'If off, colleagues see only your email',
     prSave:'Save', prSaved:'Saved',
+    rmTitle:'Book a room', rmBook:'Book', rmFree:'Free', rmToday:'Today',
+    rmNoBook:'No bookings for this room', rmPick:'Choose a room', rmWhen:'Date and time',
+    rmSubject:'Meeting subject', rmSubjectPh:'e.g. WING team weekly',
+    rmFrom:'From', rmTo:'To', rmGo:'Confirm booking', rmOk:'Booked — calendar file sent to your email',
+    rmClash:'That time is already taken', rmClashBy:(w,t)=>`${w} booked it ${t}`,
+    rmBadTime:'End time must be after start time', rmCancel:'Cancel booking', rmCancelled:'Cancelled',
+    rmMine:'My bookings', rmIcsHint:'You will get a calendar file by email — open it to add to Outlook and invite people.',
+    eqTitle:'Equipment', eqAvail:'Available', eqOut:'On loan', eqBy:w=>`With ${w}`,
+    eqBorrow:'Borrow this', eqReturn:'Return', eqMine:'On loan to me',
+    eqPhotoBefore:'Photo of the item before you take it', eqPhotoAfter:'Photo of the item on return',
+    eqPhotoShelf:'Photo of it back on the shelf', eqShelfAt:s=>`Stored at: ${s}`,
+    eqPurpose:'What for', eqPurposePh:'e.g. filming the hotel training',
+    eqNeedPhoto:'A condition photo is required', eqNeedShelf:'A photo of it back on the shelf is required',
+    eqBorrowed:'Checked out — time and photo recorded', eqReturned:'Returned',
+    eqBusy:'Someone already has this item', eqEmpty:'No equipment listed yet',
+    eqEmptyBody:'An admin can add items in the resources tab of the Google Sheet.',
+    eqSince:d=>`Borrowed ${d}`, eqWhy:'Photos every time, so nobody has to argue later about when it broke',
+    resvRoom:'Meeting rooms', resvEq:'Equipment', resvCar:'Vehicles',
+
     dirCall:'Call', dirMail:'Email', dirCopy:'Copy number', dirCopied:'Copied',
     isuNew:'Report an issue', isuMine:'My reports', isuQueue:'Queue',
     isuCat:'What is it about', isuDetail:'Details',
@@ -952,6 +991,9 @@ const IC = {
   laptop:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="12" rx="2"/><path d="M2 20h20"/></svg>',
   sos:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M10.3 3.9L1.8 18a2 2 0 001.7 3h17a2 2 0 001.7-3L13.7 3.9a2 2 0 00-3.4 0z"/><path d="M12 9v4M12 17h.01"/></svg>',
   bellBig:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.7 21a2 2 0 01-3.4 0"/></svg>',
+  user:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>',
+  clock:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>',
+  cal:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M16 3v4M8 3v4M3 11h18"/><path d="M9 16l2 2 4-4"/></svg>',
   info:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>'
 };
 
@@ -1041,7 +1083,7 @@ ROUTES.home = async () => {
     { ic:IC.user,  th:t('mDir'),    en:t('mDirEn'),    go:'directory' },
     { ic:IC.clock, th:t('mAct'),    en:t('mActEn'),    go:'activity' },
     { ic:IC.bellBig, th:t('news'),  en:t('newsEn'),    go:'news' },
-    { ic:IC.car,   th:t('mResv'),   en:'Reservation',  go:'reservation', soon:true },
+    { ic:IC.cal,   th:t('mResv'),   en:'Reservation',  go:'reservation' },
     { ic:IC.tool,  th:t('mIssue'),  en:t('mIssueEn'),  go:'issues' },
     { ic:IC.chat,  th:t('mFaq'),    en:t('mFaqEn'),    soon:true }
   ];
@@ -1476,21 +1518,19 @@ ROUTES.news = async () => {
 ROUTES.reservation = async () => {
   setTitle(t('mResv'));
   const rows = [
-    { ic:IC.car,    th:t('mCar'),  en:t('mCarEn')  },
-    { ic:IC.laptop, th:t('mLoan'), en:t('mLoanEn') },
-    { ic:IC.box,    th:t('mRoom'), en:t('mRoomEn') }
+    { ic:IC.cal,    th:t('resvRoom'), en:'Meeting rooms', go:'rooms' },
+    { ic:IC.laptop, th:t('resvEq'),   en:'Equipment',     go:'equipment' },
+    { ic:IC.car,    th:t('resvCar'),  en:'Vehicles',      soon:true }
   ];
-  $('#main').innerHTML = `<div class="view">
-    <div class="note info">${IC.info}<div>${esc(t('soonBody'))}</div></div>
-    <div class="rows" style="margin-top:14px">${rows.map(r => `
-      <div class="row" style="opacity:.6">
+  $('#main').innerHTML = `<div class="view"><div class="rows">${rows.map(r => `
+      <button class="row" ${r.soon ? '' : `data-go="${r.go}"`} ${r.soon ? 'style="opacity:.55"' : ''}>
         <div class="thumb" style="background:#EEF3FF;color:var(--primary)">${r.ic}</div>
         <div class="body"><div class="t">${esc(r.th)}</div><div class="s">${esc(r.en)}</div></div>
-        <span class="pill new">${esc(t('soon'))}</span>
-      </div>`).join('')}</div>
-    <div style="margin-top:16px"><button class="btn ghost" id="bk">${esc(t('backHome'))}</button></div>
+        ${r.soon ? `<span class="pill new">${esc(t('soon'))}</span>` : `<span class="go">${IC.chev}</span>`}
+      </button>`).join('')}</div>
+    ${rows.some(r => r.soon) ? `<div class="note info" style="margin-top:14px">${IC.info}<div>${esc(t('soonBody'))}</div></div>` : ''}
   </div>`;
-  $('#bk').onclick = () => { S.stack = []; go('home'); };
+  document.querySelectorAll('[data-go]').forEach(b => b.onclick = () => go(b.dataset.go));
 };
 
 ROUTES.admin = async () => {
@@ -1961,6 +2001,241 @@ ROUTES['issue-detail'] = async ({ id } = {}) => {
     });
   };
 };
+
+
+/* ── ห้องประชุม ─────────────────────────────────────────────── */
+const dayKey = d => {
+  const x = new Date(d);
+  return `${x.getFullYear()}-${String(x.getMonth()+1).padStart(2,'0')}-${String(x.getDate()).padStart(2,'0')}`;
+};
+const hhmm = iso => { try{ return new Date(iso).toLocaleTimeString(
+  S.lang==='th'?'th-TH':'en-GB', {hour:'2-digit',minute:'2-digit'}); }catch(e){ return ''; } };
+
+ROUTES.rooms = async (params = {}) => {
+  setTitle(t('rmTitle'));
+  const base = new Date(); const days = [];
+  for(let i = 0; i < 7; i++){ const d = new Date(base); d.setDate(base.getDate()+i); days.push(d); }
+  let sel = params.date || dayKey(base);
+
+  $('#main').innerHTML = `<div class="view">
+    <div class="chips" id="dch" style="margin-bottom:12px">${days.map(d => `
+      <button class="chip ${dayKey(d)===sel?'on':''}" data-d="${dayKey(d)}">
+        ${d.toLocaleDateString(S.lang==='th'?'th-TH':'en-GB',{weekday:'short'})}
+        <span class="d">${d.getDate()}</span></button>`).join('')}</div>
+    <div id="rl">${skeleton(3)}</div>
+    <div class="sticky-cta"><button class="btn primary" id="bk">＋ ${esc(t('rmBook'))}</button></div>
+  </div>`;
+  $('#bk').onclick = () => go('room-new', { date:sel });
+  document.querySelectorAll('#dch .chip').forEach(c => c.onclick = () => go('rooms', { date:c.dataset.d }, true));
+
+  let r = null;
+  try{ r = await apiRetry('getRoomDay', { date:sel }, 'GET'); }catch(e){}
+  if(!r?.ok){ $('#rl').innerHTML = emptyState(IC.info, t('netErr'), ''); return; }
+
+  $('#rl').innerHTML = r.rooms.map(rm => {
+    const bs = r.bookings.filter(b => b.resource_id === rm.resource_id);
+    return `<div class="card" style="margin-bottom:11px">
+      <div style="display:flex;justify-content:space-between;align-items:center">
+        <div style="font-size:15px;font-weight:700">${esc(rm.name_th)}</div>
+        ${bs.length ? '' : `<span class="pill done">${esc(t('rmFree'))}</span>`}
+      </div>
+      ${bs.length ? bs.map(b => `
+        <div style="display:flex;gap:10px;margin-top:10px;padding-top:10px;border-top:1px solid var(--line)">
+          <div style="font-size:13px;font-weight:800;color:var(--primary);white-space:nowrap">
+            ${esc(hhmm(b.start_at))}<br><span style="color:var(--ink-3);font-weight:600">${esc(hhmm(b.end_at))}</span></div>
+          <div style="flex:1;min-width:0">
+            <div style="font-size:14px;font-weight:600">${esc(b.title)}</div>
+            <div style="font-size:11.5px;color:var(--ink-3)">${esc(b.who)}</div>
+          </div>
+          ${String(b.requester_id) === String(S.me?.kenan_user_id)
+            ? `<button class="mini" data-cancel="${esc(b.record_id)}"
+                 style="background:var(--bad-bg,#FEF2F2);color:var(--bad)">✕</button>` : ''}
+        </div>`).join('')
+        : `<div style="font-size:12.5px;color:var(--ink-3);margin-top:6px">${esc(t('rmNoBook'))}</div>`}
+    </div>`;
+  }).join('');
+
+  document.querySelectorAll('[data-cancel]').forEach(b => b.onclick = async () => {
+    try{ await apiRetry('cancelRoomBooking', { record_id:b.dataset.cancel }, 'POST');
+         toast(t('rmCancelled'), 'ok'); go('rooms', { date:sel }, true); }
+    catch(e){ toast(t('netErr'), 'bad'); }
+  });
+};
+
+ROUTES['room-new'] = async ({ date } = {}) => {
+  setTitle(t('rmBook'));
+  const day = date || dayKey(new Date());
+  let rooms = [];
+  try{ const r = await apiRetry('getRoomDay', { date:day }, 'GET'); rooms = r?.rooms || []; }catch(e){}
+
+  $('#main').innerHTML = `<div class="view">
+    <div class="card">
+      <div style="font-size:13px;font-weight:600;margin-bottom:9px">${esc(t('rmPick'))}</div>
+      <div id="rp">${rooms.map((rm, i) => `
+        <button class="row" data-v="${esc(rm.resource_id)}" style="border:1.5px solid ${
+          i===0?'var(--primary)':'var(--line)'};border-radius:12px;margin-bottom:8px;
+          background:${i===0?'#EEF3FF':'#fff'}">
+          <div class="body"><div class="t">${esc(rm.name_th)}</div>
+            <div class="s">${esc(rm.note || rm.name_en || '')}</div></div>
+          <span class="ck" style="color:var(--primary);font-weight:800;${i===0?'':'visibility:hidden'}">✓</span>
+        </button>`).join('')}</div>
+    </div>
+    <div class="card">
+      <div class="field"><label>${esc(t('rmWhen'))}</label>
+        <input type="date" id="dd" value="${day}"></div>
+      <div class="times">
+        <div class="tbox"><div class="k">${esc(t('rmFrom'))}</div>
+          <input type="time" id="t1" value="09:00" style="border:none;font-size:17px;font-weight:800;
+            text-align:center;width:100%;background:transparent"></div>
+        <div class="arrow">→</div>
+        <div class="tbox hl"><div class="k">${esc(t('rmTo'))}</div>
+          <input type="time" id="t2" value="10:00" style="border:none;font-size:17px;font-weight:800;
+            text-align:center;width:100%;background:transparent"></div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="field" style="margin:0"><label>${esc(t('rmSubject'))}<span class="req">*</span></label>
+        <input id="ti" placeholder="${esc(t('rmSubjectPh'))}"></div>
+    </div>
+    <div class="note info">${IC.info}<div>${esc(t('rmIcsHint'))}</div></div>
+    <div class="sticky-cta"><button class="btn primary" id="go">${esc(t('rmGo'))}</button></div>
+  </div>`;
+
+  let room = rooms[0]?.resource_id || '';
+  document.querySelectorAll('#rp .row').forEach(b => b.onclick = () => {
+    room = b.dataset.v;
+    document.querySelectorAll('#rp .row').forEach(x => {
+      const on = x === b;
+      x.style.borderColor = on ? 'var(--primary)' : 'var(--line)';
+      x.style.background  = on ? '#EEF3FF' : '#fff';
+      x.querySelector('.ck').style.visibility = on ? 'visible' : 'hidden';
+    });
+  });
+  $('#go').onclick = async () => {
+    const title = $('#ti').value.trim();
+    if(!title){ toast(t('admNeedTitle'), 'bad'); return; }
+    const d = $('#dd').value, a = $('#t1').value, z = $('#t2').value;
+    if(!d || !a || !z){ toast(t('rmBadTime'), 'bad'); return; }
+    if(z <= a){ toast(t('rmBadTime'), 'bad'); return; }
+    const b = $('#go'); b.disabled = true;
+    try{
+      const r = await apiRetry('createRoomBooking', {
+        resource_id:room, title,
+        start_at:`${d}T${a}:00+07:00`, end_at:`${d}T${z}:00+07:00`
+      }, 'POST');
+      if(r?.error === 'CLASH'){
+        toast(`${t('rmClash')} · ${r.clash?.who || ''}`, 'bad');
+        b.disabled = false; return;
+      }
+      if(r?.ok === false) throw 0;
+      toast(t('rmOk'), 'ok');
+      S.stack = [{ name:'home', params:{} }]; go('rooms', { date:d });
+    }catch(e){ toast(t('netErr'), 'bad'); b.disabled = false; }
+  };
+};
+
+/* ── ยืม-คืนอุปกรณ์ ─────────────────────────────────────────── */
+ROUTES.equipment = async () => {
+  setTitle(t('eqTitle'));
+  $('#main').innerHTML = `<div class="view">
+    <div class="note info">${IC.info}<div>${esc(t('eqWhy'))}</div></div>
+    <div id="el" style="margin-top:12px">${skeleton(3)}</div></div>`;
+  let items = [];
+  try{ const r = await apiRetry('getEquipment', {}, 'GET'); items = r?.items || []; }catch(e){}
+  if(!items.length){ $('#el').innerHTML = emptyState(IC.laptop, t('eqEmpty'), t('eqEmptyBody')); return; }
+
+  const mine = items.filter(i => i.mine);
+  const row = i => `
+    <button class="row" data-id="${esc(i.resource_id)}" data-loan="${esc(i.loan_id || '')}">
+      <div class="thumb" style="background:${i.available ? 'var(--ok-bg)' : 'var(--warn-bg)'};
+        color:${i.available ? 'var(--ok)' : 'var(--warn)'}">${IC.laptop}</div>
+      <div class="body">
+        <div class="t">${esc(i.name_th)}</div>
+        <div class="s">${esc(i.available ? (i.storage_location || i.category || '') : t('eqBy')(i.holder))}</div>
+      </div>
+      <span class="pill ${i.available ? 'done' : 'wait'}">${esc(i.available ? t('eqAvail') : t('eqOut'))}</span>
+    </button>`;
+  $('#el').innerHTML =
+    (mine.length ? `<div class="section-title">${esc(t('eqMine'))}</div>
+      <div class="rows">${mine.map(row).join('')}</div>` : '') +
+    `<div class="section-title">${esc(t('eqTitle'))}</div>
+     <div class="rows">${items.map(row).join('')}</div>`;
+
+  document.querySelectorAll('#el .row').forEach(b => b.onclick = () => {
+    const i = items.find(x => x.resource_id === b.dataset.id); if(!i) return;
+    if(i.available)   borrowSheet(i);
+    else if(i.mine)   returnSheet(i);
+    else toast(t('eqBy')(i.holder));
+  });
+};
+
+function photoField(id, label){
+  return `<div class="field"><label>${esc(label)}<span class="req">*</span></label>
+    <label class="shot" id="${id}s" style="aspect-ratio:16/9">
+      <input type="file" accept="image/*" capture="environment" id="${id}" hidden>
+      <div class="ph">${IC.cam}<p>${esc(t('inShoot'))}</p></div>
+    </label></div>`;
+}
+function wirePhoto(id, store){
+  const el = document.getElementById(id);
+  const box = document.getElementById(id + 's');
+  box.onclick = e => { if(e.target.tagName !== 'INPUT') el.click(); };
+  el.onchange = async () => {
+    const f = el.files[0]; if(!f) return;
+    const im = await shrink2(f); store.v = im;
+    box.innerHTML = `<img src="${im.full}" alt=""><span class="retake">${esc(t('inRetake'))}</span>`;
+    box.onclick = () => el.click();
+  };
+}
+
+function borrowSheet(i){
+  const before = { v:null };
+  sheet(`<h3>${esc(i.name_th)}</h3>
+    <p class="sub">${esc(i.storage_location ? t('eqShelfAt')(i.storage_location) : (i.note || ''))}</p>
+    ${photoField('bf', t('eqPhotoBefore'))}
+    <div class="field"><label>${esc(t('eqPurpose'))}</label>
+      <input id="bp" placeholder="${esc(t('eqPurposePh'))}"></div>
+    <button class="btn primary" id="bgo">${esc(t('eqBorrow'))}</button>
+    <button class="btn ghost" id="bx">${esc(t('cancel'))}</button>`);
+  wirePhoto('bf', before);
+  $('#bx').onclick = closeSheet;
+  $('#bgo').onclick = async () => {
+    if(!before.v){ toast(t('eqNeedPhoto'), 'bad'); return; }
+    const b = $('#bgo'); b.disabled = true;
+    try{
+      const r = await apiRetry('borrowItem', { resource_id:i.resource_id,
+        purpose:$('#bp').value.trim(), photo:before.v.full, thumb:before.v.thumb }, 'POST');
+      closeSheet();
+      toast(r?.error === 'BUSY' ? t('eqBusy') : t('eqBorrowed'), r?.error ? 'bad' : 'ok');
+      go('equipment', {}, true);
+    }catch(e){ toast(t('netErr'), 'bad'); b.disabled = false; }
+  };
+}
+
+function returnSheet(i){
+  const after = { v:null }, shelf = { v:null };
+  sheet(`<h3>${esc(i.name_th)}</h3>
+    <p class="sub">${esc(t('eqSince')(fmtDate(i.since)))}</p>
+    ${photoField('af', t('eqPhotoAfter'))}
+    ${photoField('sf', t('eqPhotoShelf'))}
+    ${i.storage_location ? `<div class="note warn">📍<div>${esc(t('eqShelfAt')(i.storage_location))}</div></div>` : ''}
+    <div class="field" style="margin-top:11px"><label>${esc(t('isuNote'))}</label>
+      <input id="rn" placeholder="—"></div>
+    <button class="btn g" id="rgo" style="background:var(--ok);color:#fff">${esc(t('eqReturn'))}</button>
+    <button class="btn ghost" id="rx">${esc(t('cancel'))}</button>`);
+  wirePhoto('af', after); wirePhoto('sf', shelf);
+  $('#rx').onclick = closeSheet;
+  $('#rgo').onclick = async () => {
+    if(!after.v){ toast(t('eqNeedPhoto'), 'bad'); return; }
+    if(!shelf.v){ toast(t('eqNeedShelf'), 'bad'); return; }   // กันของกลับมาแต่วางผิดที่
+    const b = $('#rgo'); b.disabled = true;
+    try{
+      await apiRetry('returnItem', { record_id:i.loan_id, note:$('#rn').value.trim(),
+        photo:after.v.full, shelfPhoto:shelf.v.thumb }, 'POST');
+      closeSheet(); toast(t('eqReturned'), 'ok'); go('equipment', {}, true);
+    }catch(e){ toast(t('netErr'), 'bad'); b.disabled = false; }
+  };
+}
 
 /* ── กระดานสถานะฉุกเฉิน ─────────────────────────────────────
    ตัวเลขที่สำคัญที่สุดคือ "ยังไม่ตอบ" ไม่ใช่ "ปลอดภัย"
