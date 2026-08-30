@@ -2,507 +2,1311 @@
 <html lang="th">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Kenan Connect - หน้าหลัก</title>
-<script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#0033CC">
+<title>Kenan Connect</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&family=Noto+Sans+Thai:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
-  :root { --green:#06C755; --ink:#1b1b1b; --muted:#777; --line:#e6e6e6; --bg:#f7f7f7; --navy:#0b4a7a; }
-  * { box-sizing:border-box; }
-  body { font-family:-apple-system, Helvetica, Arial, sans-serif; margin:0; background:var(--bg); color:var(--ink); }
-  a { color:inherit; text-decoration:none; }
+/* ─────────────────────────────────────────────────────────────
+   DESIGN TOKENS — ตรงกับ Kenan Connect Vision ใน Stitch
+   ───────────────────────────────────────────────────────────── */
+:root{
+  --primary:#0033CC;
+  --primary-dark:#0011AD;
+  --secondary:#0044FF;
+  --neutral:#EBECEF;
 
-  /* Top bar */
-  .topbar { position:sticky; top:0; z-index:10; background:#fff; border-bottom:1px solid var(--line);
-            display:flex; align-items:center; gap:12px; padding:12px 16px; }
-  .topbar .brand { display:flex; flex-direction:column; line-height:1.15; }
-  .topbar .brand .title { font-size:16px; font-weight:bold; color:var(--green); }
-  .topbar .brand .sub { font-size:11px; color:var(--muted); }
-  .topbar .spacer { flex:1; }
-  .iconbtn { position:relative; width:38px; height:38px; border:none; background:transparent; border-radius:10px;
-             cursor:pointer; display:flex; align-items:center; justify-content:center; color:var(--ink); }
-  .iconbtn:hover { background:#f0f0f0; }
-  .iconbtn svg { width:22px; height:22px; }
-  .bell-dot { position:absolute; top:6px; right:6px; min-width:16px; height:16px; padding:0 4px; border-radius:9px;
-              background:#e74c3c; border:2px solid #fff; color:#fff; font-size:10px; font-weight:bold; line-height:12px;
-              display:none; align-items:center; justify-content:center; box-sizing:content-box; }
+  --ink:#0F172A;
+  --ink-2:#475569;
+  --ink-3:#94A3B8;
+  --bg:#F6F7F9;
+  --surface:#FFFFFF;
+  --line:#E2E6EC;
 
-  /* Notification dropdown */
-  .notif-wrap { position:relative; }
-  .notif-panel { position:absolute; top:46px; right:0; width:320px; max-width:86vw; background:#fff; border:1px solid var(--line);
-                 border-radius:14px; box-shadow:0 10px 30px rgba(0,0,0,.14); overflow:hidden; display:none; z-index:20; }
-  .notif-panel.open { display:block; }
-  .notif-head { display:flex; align-items:center; justify-content:space-between; padding:12px 14px; border-bottom:1px solid var(--line); }
-  .notif-head b { font-size:14px; }
-  .notif-head .hclear { font-size:11px; color:var(--navy); cursor:pointer; background:none; border:none; padding:0; }
-  .notif-list { max-height:60vh; overflow-y:auto; }
-  .notif-item { display:flex; gap:10px; padding:12px 14px; border-bottom:1px solid #f2f2f2; cursor:pointer; text-align:left; }
-  .notif-item:last-child { border-bottom:none; }
-  .notif-item:hover { background:#f7fbf8; }
-  .notif-item .nic { width:30px; height:30px; border-radius:8px; flex:0 0 auto; display:flex; align-items:center; justify-content:center;
-                     background:#e9f7ef; color:var(--green); }
-  .notif-item.warn .nic { background:#fff3cd; color:#a97a10; }
-  .notif-item .nic svg { width:16px; height:16px; }
-  .notif-item .ntitle { display:block; font-size:13px; font-weight:bold; line-height:1.3; }
-  .notif-item .nsub { display:block; font-size:11px; color:var(--muted); margin-top:2px; }
-  .notif-empty { padding:22px 14px; text-align:center; color:var(--muted); font-size:13px; }
-  .avatar { display:flex; align-items:center; gap:8px; }
-  .avatar .pic { width:34px; height:34px; border-radius:50%; background:#dfe7ef; color:var(--navy);
-                 display:flex; align-items:center; justify-content:center; font-size:13px; font-weight:bold;
-                 background-size:cover; background-position:center; overflow:hidden; }
-  .avatar .who { font-size:12px; color:var(--muted); max-width:120px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
-  @media (max-width:520px){ .avatar .who { display:none; } }
+  --ok:#059669;
+  --ok-bg:#ECFDF5;
+  --warn:#D97706;
+  --warn-bg:#FFFBEB;
+  --danger:#DC2626;
+  --danger-bg:#FEF2F2;
 
-  .wrap { max-width:720px; margin:0 auto; padding:16px; }
+  --r-sm:8px; --r:12px; --r-lg:16px; --r-xl:20px;
+  --shadow:0 1px 2px rgba(15,23,42,.06),0 4px 16px rgba(15,23,42,.06);
+  --shadow-lg:0 8px 32px rgba(15,23,42,.14);
 
-  /* Status strip */
-  .strip { display:flex; gap:10px; flex-wrap:wrap; }
-  .chip { flex:1 1 160px; max-width:320px; background:#fff; border:1px solid var(--line); border-radius:12px; padding:12px 14px;
-          min-width:150px; display:flex; align-items:center; gap:10px; }
-  .chip .ic { width:34px; height:34px; border-radius:9px; display:flex; align-items:center; justify-content:center; flex:0 0 auto; }
-  .chip .ic svg { width:19px; height:19px; }
-  .chip.parcel .ic { background:#fff3e0; color:#e67e22; }
-  .chip.approve .ic { background:#e9f7ef; color:var(--green); }
-  .chip .label { font-size:12px; color:var(--muted); }
-  .chip .value { font-size:16px; font-weight:bold; }
-  .chip .value .unit { font-size:12px; font-weight:normal; color:var(--muted); margin-left:2px; }
+  --topbar-h:56px;
+  --nav-h:64px;
+  --safe-b:env(safe-area-inset-bottom,0px);
 
-  .section-title { font-size:13px; color:var(--muted); margin:22px 2px 10px; }
+  --font:'Plus Jakarta Sans','Noto Sans Thai',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;padding:0}
+body{
+  font-family:var(--font);
+  background:var(--bg);color:var(--ink);
+  font-size:15px;line-height:1.5;
+  overscroll-behavior-y:none;
+}
+button,input,select,textarea{font-family:inherit;font-size:inherit;color:inherit}
+button{cursor:pointer;border:none;background:none}
+[hidden]{display:none!important}
 
-  /* Tile grid */
-  .grid { display:grid; grid-template-columns:repeat(3, 1fr); gap:12px; }
-  @media (max-width:560px){ .grid { grid-template-columns:repeat(2, 1fr); } }
-  .tile { position:relative; background:#fff; border:1px solid var(--line); border-radius:14px; padding:16px 14px;
-          display:flex; flex-direction:column; gap:10px; min-height:112px; cursor:pointer; transition:transform .06s, box-shadow .12s; }
-  .tile:hover { box-shadow:0 4px 14px rgba(0,0,0,.07); transform:translateY(-1px); }
-  .tile .ticon { width:42px; height:42px; border-radius:11px; background:#e9f7ef; color:var(--green);
-                 display:flex; align-items:center; justify-content:center; }
-  .tile .ticon svg { width:23px; height:23px; }
-  .tile .tname { font-size:14px; font-weight:bold; line-height:1.25; }
-  .tile .ten { font-size:11px; color:var(--muted); }
-  .tile.soon { cursor:default; opacity:.72; }
-  .tile.soon:hover { box-shadow:none; transform:none; }
-  .soon-tag { position:absolute; top:10px; right:10px; font-size:10px; color:var(--muted);
-              background:#f0f0f0; border-radius:999px; padding:3px 8px; }
+/* ── App shell ─────────────────────────────────────────────── */
+#app{min-height:100dvh;display:flex;flex-direction:column}
 
-  /* Admin entry */
-  .admin-entry { display:none; margin-top:14px; }
-  .admin-entry a { display:flex; align-items:center; gap:12px; background:#fff; border:1px solid var(--line);
-                   border-left:4px solid var(--navy); border-radius:12px; padding:14px 16px; }
-  .admin-entry .ic { width:38px; height:38px; border-radius:10px; background:#eef6ff; color:var(--navy);
-                     display:flex; align-items:center; justify-content:center; flex:0 0 auto; }
-  .admin-entry .ic svg { width:20px; height:20px; }
-  .admin-entry .txt b { font-size:14px; }
-  .admin-entry .txt div { font-size:11px; color:var(--muted); }
-  .admin-entry .chev { margin-left:auto; color:var(--muted); }
+.topbar{
+  position:sticky;top:0;z-index:40;
+  height:var(--topbar-h);flex:0 0 auto;
+  display:flex;align-items:center;gap:4px;
+  padding:0 6px;
+  background:var(--surface);border-bottom:1px solid var(--line);
+}
+.topbar .icon-btn{
+  width:40px;height:40px;border-radius:var(--r-sm);
+  display:grid;place-items:center;color:var(--ink-2);flex:0 0 auto;
+}
+.topbar .icon-btn:active{background:var(--neutral)}
+.topbar h1{
+  flex:1;min-width:0;margin:0;padding:0 4px;
+  font-size:16px;font-weight:700;letter-spacing:-.01em;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+}
+.brand{display:flex;align-items:center;gap:8px;flex:1;min-width:0;padding-left:8px}
+.brand .mark{
+  width:28px;height:28px;border-radius:8px;flex:0 0 auto;
+  background:var(--primary);color:#fff;
+  display:grid;place-items:center;font-weight:700;font-size:15px;
+}
+.brand .txt{font-size:16px;font-weight:700;letter-spacing:-.01em}
+.bell{position:relative}
+.bell .dot{
+  position:absolute;top:6px;right:6px;min-width:17px;height:17px;padding:0 4px;
+  border-radius:9px;background:var(--danger);color:#fff;
+  font-size:10px;font-weight:700;line-height:17px;text-align:center;
+  border:2px solid var(--surface);
+}
 
-  /* Auth / status boxes (same language as existing modules) */
-  #status { margin:14px 0; padding:12px; border-radius:8px; font-size:14px; display:none; white-space:pre-line; }
-  .ok { background:#d4edda; color:#155724; }
-  .err { background:#f8d7da; color:#721c24; }
-  #checkingBox { margin:16px; padding:14px; border-radius:8px; font-size:14px; background:#eee; color:#555; }
-  #loginBox { display:none; margin:16px; padding:16px; border-radius:10px; background:#fff; border:1px solid var(--line); }
-  #loginBox b { font-size:15px; }
-  #loginBox p { font-size:13px; color:var(--muted); }
-  #loginBox button { width:100%; padding:12px; font-size:15px; border:none; border-radius:8px; margin-top:10px;
-                     color:#fff; font-weight:bold; cursor:pointer; background:var(--green); }
-  #manualEntryBox { margin-top:12px; padding:12px; border-radius:8px; font-size:13px; background:#f0f0f0; color:#333; }
-  #manualEntryBox input { width:100%; padding:10px; font-size:14px; border-radius:8px; border:1px solid #ccc; box-sizing:border-box; }
-  #manualEntryBox button { width:100%; background:#666; margin-top:8px; }
-  #manualEntryMsg { margin-top:6px; }
-  .tiny { font-size:11px; color:var(--muted); }
-  #idFoot { margin:20px 16px; font-size:11px; color:#aaa; word-break:break-all; text-align:center; }
+main{flex:1 1 auto;padding:16px 16px calc(var(--nav-h) + var(--safe-b) + 24px)}
+.view{animation:fade .18s ease}
+@keyframes fade{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:none}}
+
+/* ── Bottom nav ────────────────────────────────────────────── */
+.nav{
+  position:fixed;left:0;right:0;bottom:0;z-index:40;
+  height:calc(var(--nav-h) + var(--safe-b));
+  padding-bottom:var(--safe-b);
+  display:grid;grid-template-columns:repeat(4,1fr);
+  background:var(--surface);border-top:1px solid var(--line);
+}
+.nav button{
+  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;
+  color:var(--ink-3);font-size:10.5px;font-weight:600;
+}
+.nav button.on{color:var(--primary)}
+.nav svg{width:23px;height:23px}
+
+/* ── FAB: ปุ่มบันทึกพัสดุเข้า — เข้าถึงได้ 1 แตะจากทุกหน้า ──── */
+.fab{
+  position:fixed;right:16px;z-index:45;
+  bottom:calc(var(--nav-h) + var(--safe-b) + 16px);
+  height:52px;padding:0 20px 0 16px;border-radius:26px;
+  display:flex;align-items:center;gap:8px;
+  background:var(--primary);color:#fff;
+  font-weight:700;font-size:14px;
+  box-shadow:0 6px 20px rgba(0,51,204,.36);
+}
+.fab:active{transform:scale(.97)}
+.fab svg{width:22px;height:22px}
+
+/* ── Cards & layout ────────────────────────────────────────── */
+.card{background:var(--surface);border:1px solid var(--line);border-radius:var(--r-lg);padding:16px}
+.card + .card{margin-top:12px}
+.section-title{font-size:13px;font-weight:700;color:var(--ink-2);margin:22px 0 10px;letter-spacing:.01em}
+.section-title:first-child{margin-top:0}
+.section-title .en{font-weight:500;color:var(--ink-3);font-size:11px;margin-left:6px}
+
+.greet{margin:0 0 18px}
+.greet h2{margin:0;font-size:21px;font-weight:700;letter-spacing:-.02em}
+.greet p{margin:3px 0 0;color:var(--ink-3);font-size:13px}
+
+/* ── Module tiles ──────────────────────────────────────────── */
+.tiles{display:grid;grid-template-columns:1fr 1fr;gap:11px}
+.tile{
+  position:relative;text-align:left;
+  background:var(--surface);border:1px solid var(--line);border-radius:var(--r-lg);
+  padding:15px 14px;min-height:104px;
+  display:flex;flex-direction:column;justify-content:space-between;
+  transition:transform .12s,box-shadow .12s;
+}
+.tile:active{transform:scale(.975);box-shadow:var(--shadow)}
+.tile .ic{
+  width:38px;height:38px;border-radius:11px;
+  background:#EEF3FF;color:var(--primary);
+  display:grid;place-items:center;
+}
+.tile .ic svg{width:21px;height:21px}
+.tile .nm{font-size:14.5px;font-weight:700;line-height:1.3}
+.tile .en{font-size:11px;color:var(--ink-3);font-weight:500;margin-top:1px}
+.tile .badge{
+  position:absolute;top:11px;right:11px;
+  padding:3px 8px;border-radius:99px;
+  font-size:10.5px;font-weight:700;
+  background:var(--primary);color:#fff;
+}
+.tile .badge.warn{background:var(--warn)}
+.tile.soon{opacity:.5}
+.tile.soon .badge{background:var(--neutral);color:var(--ink-3)}
+.tile.sos .ic{background:#FEF2F2;color:var(--danger)}
+
+/* ── List rows ─────────────────────────────────────────────── */
+.rows{background:var(--surface);border:1px solid var(--line);border-radius:var(--r-lg);overflow:hidden}
+.row{display:flex;align-items:center;gap:12px;padding:13px 14px;width:100%;text-align:left}
+.row + .row{border-top:1px solid var(--line)}
+.row:active{background:var(--bg)}
+.row .thumb{
+  width:48px;height:48px;border-radius:10px;flex:0 0 auto;
+  background:var(--neutral);object-fit:cover;
+  display:grid;place-items:center;color:var(--ink-3)
+}
+.row .body{flex:1;min-width:0}
+.row .t{font-size:14.5px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.row .s{font-size:12px;color:var(--ink-3);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.row .go{color:var(--ink-3);flex:0 0 auto}
+.row .go svg{width:18px;height:18px;display:block}
+
+.pill{display:inline-block;padding:3px 9px;border-radius:99px;font-size:11px;font-weight:700}
+.pill.wait{background:var(--warn-bg);color:var(--warn)}
+.pill.done{background:var(--ok-bg);color:var(--ok)}
+.pill.new{background:#EEF3FF;color:var(--primary)}
+
+/* ── Forms ─────────────────────────────────────────────────── */
+.field{margin-bottom:15px}
+.field label{display:block;font-size:13px;font-weight:600;margin-bottom:6px}
+.field label .en{font-weight:400;color:var(--ink-3);font-size:11px;margin-left:5px}
+.field label .req{color:var(--danger);margin-left:3px}
+.field input,.field select,.field textarea{
+  width:100%;padding:13px 14px;
+  border:1.5px solid var(--line);border-radius:var(--r);
+  background:var(--surface);font-size:16px; /* 16px กัน iOS zoom */
+}
+.field input:focus,.field select:focus,.field textarea:focus{
+  outline:none;border-color:var(--primary);box-shadow:0 0 0 3px rgba(0,51,204,.1)
+}
+.field .hint{font-size:11.5px;color:var(--ink-3);margin-top:5px}
+.field .err{font-size:12px;color:var(--danger);margin-top:5px;font-weight:600}
+
+.btn{
+  width:100%;padding:15px;border-radius:var(--r);
+  font-size:15.5px;font-weight:700;text-align:center;
+  display:flex;align-items:center;justify-content:center;gap:8px;
+}
+.btn:disabled{opacity:.45}
+.btn.primary{background:var(--primary);color:#fff}
+.btn.primary:active:not(:disabled){background:var(--primary-dark)}
+.btn.ghost{background:var(--surface);color:var(--ink);border:1.5px solid var(--line)}
+.btn.soft{background:#EEF3FF;color:var(--primary)}
+.btn.danger{background:var(--danger);color:#fff}
+.btn + .btn{margin-top:9px}
+.btn svg{width:20px;height:20px}
+
+/* ปุ่มหลักติดขอบล่าง — อยู่ในระยะนิ้วโป้งเสมอ */
+.sticky-cta{
+  position:sticky;bottom:calc(var(--nav-h) + var(--safe-b) + 12px);
+  margin-top:20px;z-index:20;
+}
+
+/* ── Camera capture ────────────────────────────────────────── */
+.shot{
+  position:relative;width:100%;aspect-ratio:4/3;
+  border-radius:var(--r-lg);overflow:hidden;
+  background:var(--ink);display:grid;place-items:center;
+}
+.shot img{width:100%;height:100%;object-fit:cover}
+.shot .ph{color:#fff;text-align:center;opacity:.85;padding:20px}
+.shot .ph svg{width:44px;height:44px;margin-bottom:8px}
+.shot .ph p{margin:0;font-size:13px;font-weight:600}
+.shot .retake{
+  position:absolute;right:10px;bottom:10px;
+  padding:8px 14px;border-radius:99px;
+  background:rgba(15,23,42,.72);color:#fff;
+  font-size:12.5px;font-weight:700;backdrop-filter:blur(8px);
+}
+
+/* ── Skeleton — ไม่เคยแสดงหน้าขาว ───────────────────────────── */
+.sk{background:linear-gradient(90deg,#E9ECF1 25%,#F2F4F7 50%,#E9ECF1 75%);
+  background-size:200% 100%;animation:sh 1.3s infinite;border-radius:var(--r-sm)}
+@keyframes sh{0%{background-position:200% 0}100%{background-position:-200% 0}}
+.sk-row{height:74px;margin-bottom:10px;border-radius:var(--r-lg)}
+
+/* ── Empty state ───────────────────────────────────────────── */
+.empty{text-align:center;padding:44px 24px;color:var(--ink-3)}
+.empty svg{width:46px;height:46px;margin-bottom:12px;opacity:.5}
+.empty h3{margin:0 0 5px;font-size:15px;font-weight:700;color:var(--ink-2)}
+.empty p{margin:0;font-size:13px;line-height:1.6}
+
+/* ── Toast ─────────────────────────────────────────────────── */
+#toast{
+  position:fixed;left:16px;right:16px;z-index:80;
+  bottom:calc(var(--nav-h) + var(--safe-b) + 78px);
+  padding:14px 16px;border-radius:var(--r);
+  background:var(--ink);color:#fff;font-size:14px;font-weight:600;
+  box-shadow:var(--shadow-lg);
+  transform:translateY(20px);opacity:0;pointer-events:none;
+  transition:.22s;
+}
+#toast.on{transform:none;opacity:1}
+#toast.ok{background:var(--ok)}
+#toast.bad{background:var(--danger)}
+
+/* ── Bottom sheet — ยืนยันเร็วๆ โดยไม่ต้องเปลี่ยนหน้า ────────── */
+#scrim{position:fixed;inset:0;z-index:60;background:rgba(15,23,42,.42);opacity:0;transition:.22s;pointer-events:none}
+#scrim.on{opacity:1;pointer-events:auto}
+#sheet{
+  position:fixed;left:0;right:0;bottom:0;z-index:70;
+  background:var(--surface);border-radius:var(--r-xl) var(--r-xl) 0 0;
+  padding:8px 16px calc(20px + var(--safe-b));
+  transform:translateY(100%);transition:transform .26s cubic-bezier(.32,.72,0,1);
+  max-height:86dvh;overflow:auto;
+}
+#sheet.on{transform:none}
+#sheet .grip{width:38px;height:4px;border-radius:2px;background:var(--line);margin:6px auto 14px}
+#sheet h3{margin:0 0 4px;font-size:17px;font-weight:700}
+#sheet .sub{margin:0 0 16px;font-size:13px;color:var(--ink-3)}
+
+/* ── Consent / PDPA ────────────────────────────────────────── */
+.legal{
+  background:var(--surface);border:1px solid var(--line);border-radius:var(--r);
+  padding:15px;max-height:38dvh;overflow:auto;
+  font-size:13px;line-height:1.75;color:var(--ink-2);
+}
+.legal h4{margin:14px 0 5px;font-size:13.5px;color:var(--ink);font-weight:700}
+.legal h4:first-child{margin-top:0}
+.legal ul{margin:5px 0;padding-left:18px}
+.check{display:flex;gap:11px;align-items:flex-start;margin:15px 0;cursor:pointer}
+.check input{width:21px;height:21px;flex:0 0 auto;margin-top:1px;accent-color:var(--primary)}
+.check span{font-size:13.5px;line-height:1.55}
+
+/* ── Lang toggle ───────────────────────────────────────────── */
+.langsw{display:inline-flex;background:var(--neutral);border-radius:9px;padding:2px}
+.langsw button{padding:6px 15px;border-radius:7px;font-size:12.5px;font-weight:700;color:var(--ink-3)}
+.langsw button.on{background:var(--surface);color:var(--primary);box-shadow:0 1px 3px rgba(0,0,0,.09)}
+
+.note{
+  display:flex;gap:10px;padding:12px 14px;border-radius:var(--r);
+  background:var(--warn-bg);border:1px solid #FDE68A;
+  font-size:12.5px;line-height:1.6;color:#92400E;
+}
+.note.info{background:#EEF3FF;border-color:#C7D7FE;color:#1E40AF}
+.note svg{width:18px;height:18px;flex:0 0 auto;margin-top:1px}
+
+.contact-group{margin-bottom:18px}
+.contact-group > h3{margin:0 0 8px;font-size:13px;font-weight:700;color:var(--ink-2)}
+.callbtn{
+  width:42px;height:42px;border-radius:50%;flex:0 0 auto;
+  background:var(--ok);color:#fff;display:grid;place-items:center;
+}
+.callbtn.sos{background:var(--danger)}
+.callbtn svg{width:20px;height:20px}
+
+@media(min-width:600px){
+  main{max-width:560px;margin:0 auto;width:100%}
+  .tiles{grid-template-columns:repeat(3,1fr)}
+}
 </style>
 </head>
 <body>
 
-  <!-- ===================== Top bar ===================== -->
-  <div class="topbar">
-    <div class="brand">
-      <span class="title">Kenan Connect</span>
-      <span class="sub">หน้าหลัก / Home</span>
-    </div>
-    <div class="spacer"></div>
-    <div class="notif-wrap">
-      <button class="iconbtn" id="bellBtn" title="การแจ้งเตือน / Notifications" onclick="toggleNotif(event)" aria-label="Notifications">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <path d="M18 8a6 6 0 1 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.7 21a2 2 0 0 1-3.4 0"/></svg>
-        <span class="bell-dot" id="bellDot"></span>
-      </button>
-      <div class="notif-panel" id="notifPanel">
-        <div class="notif-head">
-          <b>การแจ้งเตือน / Notifications</b>
-        </div>
-        <div class="notif-list" id="notifList"></div>
-      </div>
-    </div>
-    <div class="avatar">
-      <span class="who" id="avatarWho"></span>
-      <span class="pic" id="avatarPic">–</span>
-    </div>
-  </div>
+<div id="app">
+  <header class="topbar">
+    <button class="icon-btn" id="backBtn" hidden aria-label="ย้อนกลับ">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
+    </button>
+    <div class="brand" id="brand"><div class="mark">K</div><div class="txt">Kenan Connect</div></div>
+    <h1 id="title" hidden></h1>
+    <button class="icon-btn bell" id="bellBtn" aria-label="การแจ้งเตือน">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.7 21a2 2 0 01-3.4 0"/></svg>
+      <span class="dot" id="bellDot" hidden>0</span>
+    </button>
+  </header>
 
-  <div id="checkingBox">กำลังตรวจสอบสถานะการเข้าสู่ระบบ...</div>
+  <main id="main"></main>
 
-  <!-- Login fallback (browser login / manual UID), mirrors existing modules -->
-  <div id="loginBox">
-    <b>เข้าสู่ระบบด้วย LINE</b>
-    <p>เข้าสู่ระบบเพื่อดูหน้าหลักของ Kenan Connect</p>
-    <button type="button" id="manualLoginBtn" onclick="doManualLogin()">เข้าสู่ระบบ LINE (กดครั้งเดียว)</button>
-    <div id="manualEntryBox">
-      <b>เข้าใช้งานแบบไม่พึ่ง LIFF (ถ้ากดล็อกอิน LINE ข้างบนไม่สำเร็จ)</b>
-      <p class="tiny" style="margin:6px 0;">แชทกับ Kenan Connect OA แล้วพิมพ์ "ขอสิทธิ์" เพื่อรับรหัสผู้ใช้ LINE ของคุณ จากนั้นวางรหัสในช่องด้านล่าง</p>
-      <input type="text" id="manualUidInput" placeholder="เช่น Uxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx">
-      <button type="button" onclick="useManualUid()">ใช้รหัสนี้</button>
-      <div id="manualEntryMsg" class="tiny"></div>
-    </div>
-  </div>
+  <nav class="nav" id="nav" hidden>
+    <button data-go="home" class="on">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 10l9-7 9 7v10a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><path d="M9 22V12h6v10"/></svg>
+      <span>หน้าแรก</span>
+    </button>
+    <button data-go="my-parcels">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 16V8a2 2 0 00-1-1.73l-7-4a2 2 0 00-2 0l-7 4A2 2 0 003 8v8a2 2 0 001 1.73l7 4a2 2 0 002 0l7-4A2 2 0 0021 16z"/><path d="M3.3 7L12 12l8.7-5M12 22V12"/></svg>
+      <span>พัสดุ</span>
+    </button>
+    <button data-go="calltree">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.9v3a2 2 0 01-2.2 2 19.8 19.8 0 01-8.6-3.1 19.5 19.5 0 01-6-6A19.8 19.8 0 012.1 4.2 2 2 0 014.1 2h3a2 2 0 012 1.7c.1 1 .4 1.9.7 2.8a2 2 0 01-.5 2.1L8.1 9.9a16 16 0 006 6l1.3-1.3a2 2 0 012.1-.4c.9.3 1.8.6 2.8.7a2 2 0 011.7 2z"/></svg>
+      <span>ฉุกเฉิน</span>
+    </button>
+    <button data-go="profile">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+      <span>ฉัน</span>
+    </button>
+  </nav>
 
-  <!-- ===================== Dashboard ===================== -->
-  <div class="wrap" id="dashArea" style="display:none;">
-    <div id="status"></div>
+  <button class="fab" id="fab" hidden>
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 01-2 2H3a2 2 0 01-2-2V8a2 2 0 012-2h4l2-3h6l2 3h4a2 2 0 012 2z"/><circle cx="12" cy="13" r="4"/></svg>
+    <span>บันทึกพัสดุ</span>
+  </button>
+</div>
 
-    <!-- Status strip -->
-    <div class="strip">
-      <div class="chip parcel">
-        <span class="ic">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M21 8 12 3 3 8v8l9 5 9-5V8z"/><path d="m3 8 9 5 9-5"/><path d="M12 13v8"/></svg>
-        </span>
-        <div>
-          <div class="label">พัสดุใหม่ / New parcel</div>
-          <div class="value" id="parcelValue">–</div>
-        </div>
-      </div>
-      <div class="chip approve" id="approveChip" style="display:none;">
-        <span class="ic">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
-        </span>
-        <div>
-          <div class="label">รออนุมัติ / Pending approvals</div>
-          <div class="value" id="approveValue">–</div>
-        </div>
-      </div>
-    </div>
+<div id="scrim"></div>
+<div id="sheet"><div class="grip"></div><div id="sheetBody"></div></div>
+<div id="toast"></div>
 
-    <!-- Tile grid -->
-    <div class="section-title">บริการ / Services</div>
-    <div class="grid" id="tileGrid"></div>
+<script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
+<script>
+/* ═══════════════════════════════════════════════════════════════
+   KENAN CONNECT — Single Page App
+   ทุกโมดูลอยู่ในไฟล์เดียว URL เดียว LIFF init ครั้งเดียว
+   ═══════════════════════════════════════════════════════════════ */
 
-    <!-- Admin-only entry -->
-    <div class="admin-entry" id="adminEntry">
-      <a id="adminLink" href="#">
-        <span class="ic">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M12 2 4 6v6c0 5 3.5 8 8 10 4.5-2 8-5 8-10V6z"/><path d="M9 12l2 2 4-4"/></svg>
-        </span>
-        <span class="txt"><b>Admin hub</b><div>จัดการข้อมูลและอนุมัติคำขอ / Manage data and approvals</div></span>
-        <span class="chev">
-          <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg>
-        </span>
-      </a>
-    </div>
-  </div>
+/* ── 1. CONFIG — แก้แค่ตรงนี้ ─────────────────────────────────── */
+const CFG = {
+  LIFF_ID : '2010937586-Ko0ID2zY',                   // LIFF "Kenan Connect" (Full)
+  GAS_URL : 'https://script.google.com/macros/s/AKfycbyOjh4BAAbzY5QfZNG_oGuxbmvZwHjEAKazRMuMxrDeoNknE_rqEoAFdkuJldOPP_q_eg/exec',
+  LIFF_TIMEOUT_MS : 3500,
+  CONSENT_VERSION : '2026-09-01'
+};
 
-  <div id="idFoot"></div>
+/* ── 2. STATE (ในหน่วยความจำ ไม่ใช้ localStorage) ─────────────── */
+const S = {
+  lang:'th', uid:null, profile:null, me:null,
+  isAdmin:false, isOfficer:false, regStatus:'unknown',
+  liffReady:false, notifCount:0,
+  draft:{ photo:null, thumb:null, scan:null, recipient:null, tracking:'' },
+  regDraft:null, employees:[], stack:[]
+};
 
-  <script>
-    /* ============================================================
-       CONFIG
-       ------------------------------------------------------------
-       SCRIPT_URL : single shared GAS Web App backend. Value below is
-                    identical to the one already live in kenan-register /
-                    kenan-admin-hub / kenan-parcel (verified). Change only
-                    if the backend is ever redeployed to a new /exec URL.
-       LIFF_ID    : Hub needs its OWN LIFF app under LINE Login channel
-                    2010937586 (each module has a distinct LIFF ID).
-                    >>> TODO: create it in LINE Developers Console and paste here. <<<
-       ============================================================ */
-    const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzMzOnY7z76qPTY0HXLKGOsJpJStszSmJ57_Rgo7WyRGQ0Q-K8vdQj531B-_yUYRwUa/exec';
-    // Reuse the shared channel LIFF ID (channel 2010937586). kenan-parcel and kenan-call-tree already
-    // reuse this exact ID for direct GitHub Pages access. Create a dedicated Hub LIFF app in LINE
-    // Developers Console only if you later need in-LINE deep-linking to the Hub URL specifically.
-    const LIFF_ID = '2010937586-a4GJnU8o';
+/* ── 3. COPY DECK — ข้อความจริงทุกบรรทัด ไทย/อังกฤษ ───────────── */
+const T = {
+  th:{
+    appName:'Kenan Connect',
+    greet:n=>`สวัสดีครับ ${n}`, greetSub:'วันนี้มีอะไรให้ช่วยไหม',
+    loading:'กำลังโหลด…', retry:'ลองอีกครั้ง', cancel:'ยกเลิก', save:'บันทึก',
+    back:'ย้อนกลับ', close:'ปิด', confirm:'ยืนยัน', soon:'เร็วๆ นี้',
+    netErr:'เชื่อมต่อไม่ได้ ลองใหม่อีกครั้ง',
+    netErrHint:'ถ้ายังไม่ได้ ให้ปิดแล้วเปิดใหม่ หรือแจ้ง IT',
 
-    // Backend readiness flags. The live GAS backend (Kenan_QuickWin_Backend) does NOT yet expose a
-    // per-user parcel-count or a notifications/ActivityLog endpoint. Flip these to true once those
-    // actions exist (Phase 1 item 6). Until then the parcel chip shows a neutral "not linked" state
-    // and the bell shows only real, currently-available alerts (pending approvals, for admins).
-    const PARCEL_SUMMARY_READY = false;     // set true when a getMyParcelSummary action exists
-    const NOTIFICATIONS_ENDPOINT_READY = true; // getNotifications provided by Activity.gs (item 6)
+    mParcel:'พัสดุและไปรษณีย์', mParcelEn:'Parcel & Mail',
+    mCall:'เบอร์ติดต่อฉุกเฉิน',  mCallEn:'Emergency Call Tree',
+    mCar:'จองรถยนต์',           mCarEn:'Car Booking',
+    mLoan:'ยืมอุปกรณ์',          mLoanEn:'Equipment Loan',
+    mHelp:'แจ้งปัญหา',          mHelpEn:'Helpdesk',
+    mFaq:'ถาม-ตอบอัตโนมัติ',     mFaqEn:'AI FAQ',
+    services:'บริการ', servicesEn:'Services',
+    news:'ประกาศล่าสุด', newsEn:'Recent News',
 
-    // GitHub Pages base for org 'kenanacademy'. Each tile links to its module repo page.
-    const PAGES_BASE = 'https://kenanacademy.github.io';
+    regTitle:'ลงทะเบียนใช้งาน', regLead:'ใช้ครั้งเดียว แล้วเข้าใช้ผ่าน LINE ได้เลย',
+    fName:'ชื่อ-นามสกุล (ไทย)', fNameEn:'Full name (Thai)',
+    fNameE:'ชื่อ-นามสกุล (อังกฤษ)', fNameEEn:'Full name (English)',
+    fNick:'ชื่อเล่น / ชื่อที่คนอื่นเรียก', fNickEn:'Nickname',
+    fNickHint:'ใช้จับคู่ชื่อบนกล่องพัสดุ ใส่ไว้จะหาเจอง่ายขึ้นมาก',
+    fEmail:'อีเมลองค์กร', fEmailEn:'Work email',
+    fEmailHint:'ต้องเป็น @kenan-asia.org — ใช้ส่งแจ้งเตือนสำรองเมื่อ LINE ส่งไม่ถึง',
+    fDept:'แผนก', fDeptEn:'Department',
+    fOffice:'ที่ตั้ง', fOfficeEn:'Office',
+    errName:'กรุณากรอกชื่อ-นามสกุล',
+    errEmail:'ต้องเป็นอีเมล @kenan-asia.org เท่านั้น',
+    regSubmit:'ถัดไป · รับรหัสยืนยันทางอีเมล',
+    regPending:'รออนุมัติ',
+    regPendingBody:'ส่งคำขอแล้ว รอผู้ดูแลอนุมัติ จะแจ้งกลับทาง LINE เมื่ออนุมัติเรียบร้อย',
+    regDone:'ลงทะเบียนเรียบร้อย',
+    otpTitle:'ยืนยันอีเมล',
+    otpLead:e=>`ส่งรหัส 6 หลักไปที่ ${e} แล้ว`,
+    otpLabel:'รหัสยืนยัน 6 หลัก',
+    otpVerify:'ยืนยันและเริ่มใช้งาน',
+    otpResend:'ยังไม่ได้รับ · ส่งใหม่',
+    otpBack:'แก้ไขข้อมูล',
+    otpSent:'ส่งรหัสใหม่แล้ว',
+    otpWrong:'รหัสไม่ถูกต้อง ลองอีกครั้ง',
+    otpExpired:'รหัสหมดอายุแล้ว กรุณาขอรหัสใหม่',
+    emailTaken:'อีเมลนี้ถูกใช้ลงทะเบียนแล้ว',
+    otpHint:'ถ้าไม่เห็นอีเมล ลองดูในโฟลเดอร์ Junk หรือ Spam',
+    regOk:'ลงทะเบียนสำเร็จ ยินดีต้อนรับครับ',
 
-    // Tiles per spec Phase 1, item 1. Call Tree is intentionally NOT a tile
-    // (it is Broadcaster-only inside Admin Hub); ประกาศองค์กร replaces it.
-    // 'live:false' = module page not deployed yet (built in later Phase 1 items) -> shown as "เร็วๆ นี้".
-    // Repo names for not-yet-built modules follow the kenan-* convention and are marked TODO for Pipat to confirm.
-    const MODULES = [
-      { key:'car',       th:'จองรถ',          en:'Car booking',     repo:'kenan-car-booking',    live:true,  icon:'car' },        // map UI stubbed until Maps API key
-      { key:'room',      th:'จองห้องประชุม',  en:'Room booking',    repo:'kenan-room-booking',   live:true,  icon:'room' },
-      { key:'equipment', th:'ยืมอุปกรณ์',      en:'Equipment loan',  repo:'kenan-equipment-loan', live:true,  icon:'box' },
-      { key:'parcel',    th:'พัสดุ',           en:'Parcel',          repo:'kenan-parcel',         live:true,  icon:'parcel' },
-      { key:'announce',  th:'ประกาศองค์กร',    en:'Announcements',   repo:'kenan-announcements',  live:true,  icon:'mega' },
-      { key:'directory', th:'ทำเนียบพนักงาน',  en:'Employee directory', repo:'kenan-directory',   live:true,  icon:'people' },
-      { key:'history',   th:'ประวัติของฉัน',   en:'My history',      repo:'kenan-history',        live:true,  icon:'clock' }
-    ];
+    consentTitle:'การคุ้มครองข้อมูลส่วนบุคคล', consentTitleEn:'Personal Data Protection',
+    consentAgree:'ข้าพเจ้าได้อ่านและรับทราบการเก็บและใช้ข้อมูลตามที่ระบุข้างต้น',
+    consentBtn:'รับทราบและเริ่มใช้งาน',
 
-    const ICONS = {
-      car:'<path d="M5 13l1.5-4.5A2 2 0 0 1 8.4 7h7.2a2 2 0 0 1 1.9 1.5L19 13"/><path d="M5 13h14v5H5z"/><circle cx="7.5" cy="18" r="1.5"/><circle cx="16.5" cy="18" r="1.5"/>',
-      room:'<path d="M3 21h18"/><path d="M5 21V5a1 1 0 0 1 1-1h9a1 1 0 0 1 1 1v16"/><path d="M12 12h.01"/>',
-      box:'<path d="M21 8 12 3 3 8v8l9 5 9-5V8z"/><path d="m3 8 9 5 9-5"/><path d="M12 13v8"/>',
-      parcel:'<rect x="4" y="7" width="16" height="12" rx="1"/><path d="M4 11h16"/><path d="M12 7v12"/>',
-      mega:'<path d="M3 11v2a1 1 0 0 0 1 1h2l4 4V6L6 10H4a1 1 0 0 0-1 1z"/><path d="M14 8a4 4 0 0 1 0 8"/>',
-      clock:'<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>',
-      people:'<path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>'
-    };
+    pcTitle:'พัสดุของฉัน', pcTitleEn:'My Parcels',
+    pcWaiting:'รอมารับ', pcHistory:'ประวัติ',
+    pcEmpty:'ยังไม่มีพัสดุ', pcEmptyBody:'เมื่อมีคนบันทึกพัสดุที่ส่งถึงคุณ จะแจ้งเตือนทาง LINE และขึ้นที่นี่',
+    pcClaim:'รับแล้ว', pcNotMine:'ไม่ใช่ของฉัน',
+    pcClaimed:'บันทึกการรับเรียบร้อย', pcNotMineDone:'ส่งกลับเข้ากองไม่ทราบผู้รับแล้ว',
+    pcArrived:d=>`ถึงเมื่อ ${d}`, pcFrom:'จาก',
 
-    let currentUid = '';
+    inTitle:'บันทึกพัสดุเข้า', inTitleEn:'Log a Parcel',
+    inShoot:'แตะเพื่อถ่ายรูปกล่อง', inShootSub:'ถ่ายให้เห็นชื่อผู้รับชัดๆ',
+    inRetake:'ถ่ายใหม่',
+    inScan:'ให้ AI อ่านฉลาก', inScanning:'กำลังอ่าน…',
+    inScanOk:'อ่านได้แล้ว ตรวจสอบให้ถูกก่อนบันทึก',
+    inScanFail:'อ่านไม่ออก เลือกชื่อเองได้เลย',
+    inRecipient:'ผู้รับ', inRecipientEn:'Recipient',
+    inPick:'— เลือกผู้รับ —', inUnknown:'ไม่ทราบผู้รับ (เข้ากองรอระบุ)',
+    inTracking:'เลขพัสดุ (ถ้ามี)', inTrackingEn:'Tracking no.',
+    inSave:'บันทึกและแจ้งผู้รับ',
+    inSaveUnknown:'บันทึกเข้ากองไม่ทราบผู้รับ',
+    inNeedPhoto:'ต้องถ่ายรูปกล่องก่อน',
+    inDone:'บันทึกแล้ว แจ้งผู้รับเรียบร้อย',
+    inDoneUnknown:'บันทึกเข้ากองไม่ทราบผู้รับแล้ว',
+    inAgain:'บันทึกชิ้นต่อไป',
 
-    /* ---------- helpers (verbatim from existing modules) ---------- */
-    function escapeHtml(s){ return String(s==null?'':s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+    unTitle:'พัสดุไม่ทราบผู้รับ', unTitleEn:'Unidentified Parcels',
+    unLead:'ถ้าเห็นของตัวเองหรือรู้ว่าเป็นของใคร ช่วยกดระบุให้หน่อยครับ',
+    unMine:'นี่ของฉัน', unKnow:'รู้ว่าเป็นของใคร',
+    unEmpty:'ไม่มีพัสดุค้าง', unEmptyBody:'ตอนนี้ระบุผู้รับได้ครบทุกชิ้นแล้ว',
 
-    function setId(msg){ const el=document.getElementById('idFoot'); if(el) el.textContent = msg; }
+    ctTitle:'เบอร์ติดต่อฉุกเฉิน', ctTitleEn:'Emergency Contacts',
+    ctExternal:'เหตุฉุกเฉินภายนอก', ctInternal:'ติดต่อภายใน Kenan', ctLead:'หัวหน้าสายงาน',
+    ctCall:'โทร',
 
-    function showStatus(ok, message){
-      const el=document.getElementById('status'); if(!el) return;
-      el.style.display='block'; el.className = ok?'ok':'err'; el.textContent = message;
-    }
+    prTitle:'โปรไฟล์', prInfo:'ข้อมูลส่วนตัว', prSettings:'ตั้งค่า',
+    prLang:'ภาษา', prEmpId:'รหัสพนักงาน', prDept:'แผนก', prEmail:'อีเมล',
+    prPrivacy:'นโยบายความเป็นส่วนตัว', prLogout:'ออกจากระบบ',
 
-    // GAS web app บางครั้งตอบเป็นหน้า HTML ชั่วคราวถ้ายิงหลาย request พร้อมกัน (concurrency) - ลองใหม่อัตโนมัติ
-    async function callApiGet(params, retries){
-      if (retries === undefined) retries = 2;
-      const url = new URL(SCRIPT_URL);
-      url.searchParams.set('format','json');
-      Object.keys(params).forEach(k => url.searchParams.set(k, params[k]));
-      const res = await fetch(url.toString());
-      const text = await res.text();
-      try {
-        return JSON.parse(text);
-      } catch (e) {
-        if (retries > 0) {
-          await new Promise(r => setTimeout(r, 400));
-          return callApiGet(params, retries - 1);
-        }
-        throw new Error('เซิร์ฟเวอร์ตอบไม่ถูกต้อง (ลองใหม่แล้วไม่สำเร็จ)');
-      }
-    }
+    notifTitle:'การแจ้งเตือน', notifEmpty:'ยังไม่มีการแจ้งเตือน',
+    needLogin:'ต้องเข้าผ่าน LINE', needLoginBody:'เปิดหน้านี้จากแอป LINE หรือกดปุ่มด้านล่างเพื่อเข้าสู่ระบบ',
+    loginLine:'เข้าสู่ระบบด้วย LINE',
+    noConfig:'ยังไม่ได้ตั้งค่าเซิร์ฟเวอร์',
+    noConfigBody:'ใส่ URL ของ Apps Script (ลงท้าย /exec) ในตัวแปร CFG.GAS_URL ที่ต้นไฟล์ก่อนใช้งาน'
+  },
+  en:{
+    appName:'Kenan Connect',
+    greet:n=>`Hello, ${n}`, greetSub:'What can we help with today?',
+    loading:'Loading…', retry:'Try again', cancel:'Cancel', save:'Save',
+    back:'Back', close:'Close', confirm:'Confirm', soon:'Coming soon',
+    netErr:'Connection failed. Please try again.',
+    netErrHint:'If it keeps failing, close and reopen, or contact IT.',
 
-    async function callApiPost(payload){
-      const res = await fetch(SCRIPT_URL, {
-        method:'POST',
-        headers:{ 'Content-Type':'text/plain;charset=utf-8' },
-        body: JSON.stringify(payload)
-      });
-      return res.json();
-    }
+    mParcel:'Parcel & Mail', mParcelEn:'พัสดุและไปรษณีย์',
+    mCall:'Emergency Contacts', mCallEn:'เบอร์ติดต่อฉุกเฉิน',
+    mCar:'Car Booking', mCarEn:'จองรถยนต์',
+    mLoan:'Equipment Loan', mLoanEn:'ยืมอุปกรณ์',
+    mHelp:'Helpdesk', mHelpEn:'แจ้งปัญหา',
+    mFaq:'AI FAQ', mFaqEn:'ถาม-ตอบอัตโนมัติ',
+    services:'Services', servicesEn:'บริการ',
+    news:'Recent News', newsEn:'ประกาศล่าสุด',
 
-    /* ---------- rendering ---------- */
-    function moduleUrl(repo){ return PAGES_BASE + '/' + repo + '/'; }
+    regTitle:'Register', regLead:'One time only, then sign in with LINE',
+    fName:'Full name (Thai)', fNameEn:'ชื่อ-นามสกุล (ไทย)',
+    fNameE:'Full name (English)', fNameEEn:'ชื่อ-นามสกุล (อังกฤษ)',
+    fNick:'Nickname', fNickEn:'ชื่อเล่น',
+    fNickHint:'Used to match names on parcel labels — adding this helps a lot',
+    fEmail:'Work email', fEmailEn:'อีเมลองค์กร',
+    fEmailHint:'Must be @kenan-asia.org — backup channel when LINE cannot reach you',
+    fDept:'Department', fDeptEn:'แผนก',
+    fOffice:'Office', fOfficeEn:'ที่ตั้ง',
+    errName:'Please enter your full name',
+    errEmail:'Must be an @kenan-asia.org address',
+    regSubmit:'Next · Send verification code',
+    regPending:'Awaiting approval',
+    regPendingBody:'Your request was submitted. An administrator will approve it and you will be notified on LINE.',
+    regDone:'Registration complete',
+    otpTitle:'Verify your email',
+    otpLead:e=>`We sent a 6-digit code to ${e}`,
+    otpLabel:'6-digit code',
+    otpVerify:'Verify and start',
+    otpResend:'Didn’t get it · Resend',
+    otpBack:'Edit details',
+    otpSent:'Code sent again',
+    otpWrong:'Incorrect code — please try again',
+    otpExpired:'Code expired — please request a new one',
+    emailTaken:'That email is already registered',
+    otpHint:'If you don’t see it, check your Junk or Spam folder',
+    regOk:'Registration complete — welcome!',
 
-    /* ---------- notifications (bell) ---------- */
-    // notifications = [{ title, sub, href, warn(bool) }]
-    let notifications = [];
+    consentTitle:'Personal Data Protection', consentTitleEn:'การคุ้มครองข้อมูลส่วนบุคคล',
+    consentAgree:'I have read and acknowledge the collection and use of my data as described above.',
+    consentBtn:'Acknowledge and continue',
 
-    const NOTIF_ICON = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>';
+    pcTitle:'My Parcels', pcTitleEn:'พัสดุของฉัน',
+    pcWaiting:'To pick up', pcHistory:'History',
+    pcEmpty:'No parcels yet', pcEmptyBody:'When someone logs a parcel addressed to you, you will get a LINE notification and it will appear here.',
+    pcClaim:'Picked up', pcNotMine:'Not mine',
+    pcClaimed:'Pickup recorded', pcNotMineDone:'Returned to the unidentified pile',
+    pcArrived:d=>`Arrived ${d}`, pcFrom:'From',
 
-    function toggleNotif(ev){
-      if (ev) ev.stopPropagation();
-      const panel = document.getElementById('notifPanel');
-      panel.classList.toggle('open');
-    }
-    function closeNotif(){ document.getElementById('notifPanel').classList.remove('open'); }
-    // close when clicking outside the bell/panel
-    document.addEventListener('click', function(e){
-      const wrap = e.target.closest && e.target.closest('.notif-wrap');
-      if (!wrap) closeNotif();
+    inTitle:'Log a Parcel', inTitleEn:'บันทึกพัสดุเข้า',
+    inShoot:'Tap to photograph the parcel', inShootSub:'Make sure the recipient name is readable',
+    inRetake:'Retake',
+    inScan:'Let AI read the label', inScanning:'Reading…',
+    inScanOk:'Read successfully — please check before saving',
+    inScanFail:'Could not read it — pick the name manually',
+    inRecipient:'Recipient', inRecipientEn:'ผู้รับ',
+    inPick:'— Select recipient —', inUnknown:'Unknown recipient (send to pile)',
+    inTracking:'Tracking no. (optional)', inTrackingEn:'เลขพัสดุ',
+    inSave:'Save and notify recipient',
+    inSaveUnknown:'Save to unidentified pile',
+    inNeedPhoto:'Please take a photo first',
+    inDone:'Saved and recipient notified',
+    inDoneUnknown:'Saved to the unidentified pile',
+    inAgain:'Log the next one',
+
+    unTitle:'Unidentified Parcels', unTitleEn:'พัสดุไม่ทราบผู้รับ',
+    unLead:'If you see yours, or know whose it is, please help identify it.',
+    unMine:'This is mine', unKnow:'I know whose it is',
+    unEmpty:'Nothing pending', unEmptyBody:'Every parcel currently has an identified recipient.',
+
+    ctTitle:'Emergency Contacts', ctTitleEn:'เบอร์ติดต่อฉุกเฉิน',
+    ctExternal:'External emergency', ctInternal:'Inside Kenan', ctLead:'Line managers',
+    ctCall:'Call',
+
+    prTitle:'Profile', prInfo:'Personal information', prSettings:'Settings',
+    prLang:'Language', prEmpId:'Employee ID', prDept:'Department', prEmail:'Email',
+    prPrivacy:'Privacy policy', prLogout:'Log out',
+
+    notifTitle:'Notifications', notifEmpty:'No notifications yet',
+    needLogin:'LINE sign-in required', needLoginBody:'Open this page from the LINE app, or tap below to sign in.',
+    loginLine:'Sign in with LINE',
+    noConfig:'Server not configured',
+    noConfigBody:'Set CFG.GAS_URL at the top of this file to your Apps Script /exec URL.'
+  }
+};
+const t = k => T[S.lang][k];
+
+/* ── 3.5 DEMO MODE — เปิดอัตโนมัติเมื่อยังไม่ได้ตั้งค่า GAS_URL
+       ใช้ดู UI ทุกหน้าในเบราว์เซอร์ปกติได้เลย ไม่ต้องมี LINE
+       พอใส่ GAS_URL จริงแล้ว โหมดนี้ปิดเอง                     ── */
+const DEMO = !CFG.GAS_URL || CFG.GAS_URL.startsWith('PASTE_') || location.search.includes('demo');
+const MOCK = {
+  getAuthState:{ ok:true, isAdmin:true, isOfficer:true, registrationStatus:'approved', notificationCount:2,
+    user:{ kenan_user_id:'K-4920', name_th:'พิพัฒน์ ส.', name_en:'Pipat S.', nickname:'พิ',
+           department:'Social Impact and Innovation', email:'pipat@kenan-asia.org',
+           office:'BKK', consent_at:'2026-08-20T03:00:00Z' } },
+  getEmployees:{ items:[
+    { kenan_user_id:'K-4920', name_th:'พิพัฒน์ ส.',  nickname:'พิ',   email:'pipat@kenan-asia.org' },
+    { kenan_user_id:'K-1180', name_th:'สมชาย ก.',    nickname:'ชาย',  email:'somchai@kenan-asia.org' },
+    { kenan_user_id:'K-2260', name_th:'วราภรณ์ ท.',  nickname:'หนิง', email:'waraporn@kenan-asia.org' },
+    { kenan_user_id:'K-3310', name_th:'ณัฐพล ม.',    nickname:'เบส',  email:'nattapon@kenan-asia.org' }]},
+  getMyParcels:{ items:[
+    { record_id:'PCL-260830-001', title:'กล่อง Shopee', tracking_no:'TH01234567890',
+      status:'notified', created_at:'2026-08-30T02:15:00Z' },
+    { record_id:'PCL-260829-004', title:'เอกสารจาก HR', status:'notified',
+      created_at:'2026-08-29T07:40:00Z' },
+    { record_id:'PCL-260826-002', title:'หนังสือ',      status:'claimed',
+      created_at:'2026-08-26T04:05:00Z' }]},
+  getUnidentifiedParcels:{ items:[
+    { record_id:'PCL-260830-007', tracking_no:'TH99887766554', created_at:'2026-08-30T03:20:00Z' },
+    { record_id:'PCL-260830-008', tracking_no:'',              created_at:'2026-08-30T03:22:00Z' }]},
+  requestOtp:{ ok:true }, getPhoto:{ ok:false },
+  getContacts:{ items:[
+    { group:'external', name_th:'เหตุฉุกเฉินแห่งชาติ', name_en:'National Emergency', phone:'191' },
+    { group:'external', name_th:'การแพทย์ฉุกเฉิน',     name_en:'Emergency Medical',  phone:'1669' },
+    { group:'external', name_th:'ดับเพลิง',             name_en:'Fire',               phone:'199' },
+    { group:'internal', name_th:'ฝ่ายบุคคล (HR)',       name_en:'Human Resources',    phone:'020000000' },
+    { group:'internal', name_th:'ฝ่ายไอที',             name_en:'IT Support',         phone:'020000001' },
+    { group:'internal', name_th:'นิติบุคคลอาคาร',        name_en:'Building Management',phone:'020000002' }]},
+  getAnnouncements:{ items:[
+    { title:'อัปเดตนโยบายการเบิกค่าเดินทาง (Travel Expense Policy)', at:'2026-08-28T02:00:00Z' },
+    { title:'ซ้อมอพยพหนีไฟประจำปี 12 ก.ย.',                          at:'2026-08-25T06:30:00Z' }]},
+  getNotifications:{ items:[
+    { title:'มีพัสดุถึงคุณ 1 ชิ้น — กล่อง Shopee', at:'2026-08-30T02:15:00Z' },
+    { title:'เอกสารจาก HR รอคุณมารับ',            at:'2026-08-29T07:40:00Z' }]},
+  scanParcelPhoto:{ recipientName:'วราภรณ์', trackingNo:'TH99887766554' },
+  logParcel:{ ok:true }, claimParcel:{ ok:true }, notMyParcel:{ ok:true },
+  acceptConsent:{ ok:true }, submitRegistration:{ ok:true }
+};
+
+/* ── 4. API — คุยกับ Apps Script เดิม (ไม่ต้องรื้อ backend) ───── */
+async function api(action, payload = {}, method = 'GET'){
+  if(DEMO){
+    await new Promise(r => setTimeout(r, 260));       // จำลองดีเลย์จริง จะได้เห็น skeleton
+    return MOCK[action] ?? { ok:true };
+  }
+  if(!CFG.GAS_URL || CFG.GAS_URL.startsWith('PASTE_')) throw new Error('NO_CONFIG');
+  const base = CFG.GAS_URL;
+  let res;
+  if(method === 'GET'){
+    const q = new URLSearchParams({ action, uid:S.uid||'', ...payload });
+    res = await fetch(`${base}?${q}`, { method:'GET', redirect:'follow' });
+  }else{
+    // text/plain = simple request → ไม่มี CORS preflight ที่ Apps Script ตอบไม่ได้
+    res = await fetch(base, {
+      method:'POST', redirect:'follow',
+      headers:{ 'Content-Type':'text/plain;charset=utf-8' },
+      body: JSON.stringify({ action, uid:S.uid, ...payload })
     });
-
-    function setBellCount(n){
-      const dot = document.getElementById('bellDot');
-      if (!dot) return;
-      if (n > 0) { dot.textContent = n > 99 ? '99+' : String(n); dot.style.display = 'flex'; }
-      else { dot.style.display = 'none'; }
+  }
+  const text = await res.text();
+  try { return JSON.parse(text); }
+  catch(e){ throw new Error('BAD_RESPONSE'); }
+}
+// GAS ตอบ HTML แทน JSON เป็นครั้งคราวตอนโหลดหนัก → ลองซ้ำสั้นๆ
+async function apiRetry(action, payload, method, tries = 2){
+  for(let i = 0; i <= tries; i++){
+    try{ return await api(action, payload, method); }
+    catch(e){
+      if(e.message === 'NO_CONFIG' || i === tries) throw e;
+      await new Promise(r => setTimeout(r, 400 * (i + 1)));
     }
+  }
+}
 
-    function renderNotifications(){
-      const list = document.getElementById('notifList');
-      list.innerHTML = '';
-      if (!notifications.length){
-        list.innerHTML = '<div class="notif-empty">ยังไม่มีการแจ้งเตือน<br>No notifications</div>';
-        setBellCount(0);
-        return;
-      }
-      notifications.forEach(n => {
-        const item = document.createElement(n.href ? 'a' : 'div');
-        item.className = 'notif-item' + (n.warn ? ' warn' : '');
-        if (n.href) item.href = n.href;
-        item.innerHTML =
-          '<span class="nic">' + NOTIF_ICON + '</span>' +
-          '<span><span class="ntitle">' + escapeHtml(n.title) + '</span>' +
-          (n.sub ? '<span class="nsub">' + escapeHtml(n.sub) + '</span>' : '') + '</span>';
-        list.appendChild(item);
-      });
-      setBellCount(notifications.length);
+/* ── 5. UI helpers ────────────────────────────────────────────── */
+const $  = s => document.querySelector(s);
+const el = (h) => { const d = document.createElement('div'); d.innerHTML = h.trim(); return d.firstElementChild; };
+const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+
+let toastTimer;
+function toast(msg, kind = ''){
+  const n = $('#toast');
+  n.textContent = msg; n.className = 'on ' + kind;
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => n.className = kind, 2600);
+}
+function sheet(html){
+  $('#sheetBody').innerHTML = html;
+  $('#sheet').classList.add('on'); $('#scrim').classList.add('on');
+}
+function closeSheet(){ $('#sheet').classList.remove('on'); $('#scrim').classList.remove('on'); }
+$('#scrim').onclick = closeSheet;
+
+function fmtDate(v){
+  if(!v) return '—';
+  const d = new Date(v); if(isNaN(d)) return String(v);
+  return d.toLocaleString(S.lang === 'th' ? 'th-TH' : 'en-GB',
+    { day:'numeric', month:'short', hour:'2-digit', minute:'2-digit' });
+}
+function skeleton(n = 3){ return Array.from({length:n}, () => '<div class="sk sk-row"></div>').join(''); }
+function emptyState(icon, title, body){
+  return `<div class="empty">${icon}<h3>${esc(title)}</h3><p>${esc(body)}</p></div>`;
+}
+const IC = {
+  box:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 16V8a2 2 0 00-1-1.73l-7-4a2 2 0 00-2 0l-7 4A2 2 0 003 8v8a2 2 0 001 1.73l7 4a2 2 0 002 0l7-4A2 2 0 0021 16z"/><path d="M3.3 7L12 12l8.7-5M12 22V12"/></svg>',
+  chev:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18l6-6-6-6"/></svg>',
+  cam:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 01-2 2H3a2 2 0 01-2-2V8a2 2 0 012-2h4l2-3h6l2 3h4a2 2 0 012 2z"/><circle cx="12" cy="13" r="4"/></svg>',
+  phone:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.9v3a2 2 0 01-2.2 2 19.8 19.8 0 01-8.6-3.1 19.5 19.5 0 01-6-6A19.8 19.8 0 012.1 4.2 2 2 0 014.1 2h3a2 2 0 012 1.7c.1 1 .4 1.9.7 2.8a2 2 0 01-.5 2.1L8.1 9.9a16 16 0 006 6l1.3-1.3a2 2 0 012.1-.4c.9.3 1.8.6 2.8.7a2 2 0 011.7 2z"/></svg>',
+  car:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M5 17h14M6 17l-1.5-5 2-5h11l2 5L18 17M7 17v2M17 17v2"/><circle cx="7.5" cy="14.5" r="1"/><circle cx="16.5" cy="14.5" r="1"/></svg>',
+  tool:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14.7 6.3a4 4 0 01-5.4 5.4L4 17v3h3l5.3-5.3a4 4 0 015.4-5.4l-2.5 2.5-1.4-1.4z"/></svg>',
+  chat:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.4 8.4 0 01-.9 3.8 8.5 8.5 0 01-7.6 4.7 8.4 8.4 0 01-3.8-.9L3 21l1.9-5.7a8.4 8.4 0 01-.9-3.8 8.5 8.5 0 014.7-7.6 8.4 8.4 0 013.8-.9h.5a8.5 8.5 0 018 8z"/></svg>',
+  laptop:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="12" rx="2"/><path d="M2 20h20"/></svg>',
+  sos:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M10.3 3.9L1.8 18a2 2 0 001.7 3h17a2 2 0 001.7-3L13.7 3.9a2 2 0 00-3.4 0z"/><path d="M12 9v4M12 17h.01"/></svg>',
+  bellBig:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.7 21a2 2 0 01-3.4 0"/></svg>',
+  info:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>'
+};
+
+/* ── 6. ROUTER — เปลี่ยนหน้าทันที ไม่โหลดใหม่ ─────────────────── */
+const ROUTES = {};
+function go(name, params = {}, replace = false){
+  if(!replace) S.stack.push({ name, params });
+  render(name, params);
+}
+function back(){
+  S.stack.pop();
+  const prev = S.stack[S.stack.length - 1] || { name:'home', params:{} };
+  render(prev.name, prev.params);
+}
+$('#backBtn').onclick = back;
+
+function chrome(name){
+  const isHome = name === 'home';
+  const isFull = ['register','otp','consent','gate'].includes(name);
+  $('#backBtn').hidden = isHome || isFull;
+  $('#brand').hidden   = !isHome;
+  $('#title').hidden   = isHome;
+  $('#nav').hidden     = isFull;
+  $('#bellBtn').hidden = isFull;
+  // FAB โผล่เฉพาะหน้าที่ไม่ใช่หน้าบันทึกเอง — บันทึกพัสดุได้จากทุกที่ใน 1 แตะ
+  $('#fab').hidden = isFull || name === 'parcel-in' || !S.isOfficer;
+  document.querySelectorAll('.nav button').forEach(b =>
+    b.classList.toggle('on', b.dataset.go === name || (name === 'parcel-in' && b.dataset.go === 'my-parcels')));
+}
+async function render(name, params){
+  chrome(name);
+  const fn = ROUTES[name] || ROUTES.home;
+  $('#main').innerHTML = `<div class="view">${skeleton(2)}</div>`;
+  try{ await fn(params); }
+  catch(e){
+    if(e.message === 'NO_CONFIG'){
+      $('#main').innerHTML = `<div class="view"><div class="note">${IC.info}<div><b>${t('noConfig')}</b><br>${t('noConfigBody')}</div></div></div>`;
+    }else{
+      $('#main').innerHTML = `<div class="view">
+        <div class="empty">${IC.info}<h3>${t('netErr')}</h3><p>${t('netErrHint')}</p></div>
+        <button class="btn primary" onclick="location.reload()">${t('retry')}</button></div>`;
     }
+  }
+}
+function setTitle(s){ $('#title').textContent = s; }
+document.querySelectorAll('.nav button').forEach(b => b.onclick = () => { S.stack = []; go(b.dataset.go); });
+$('#fab').onclick = () => go('parcel-in');
+$('#bellBtn').onclick = () => go('notifications');
 
-    function renderTiles(){
-      const grid = document.getElementById('tileGrid');
-      grid.innerHTML = '';
-      MODULES.forEach(m => {
-        const tile = document.createElement(m.live ? 'a' : 'div');
-        tile.className = 'tile' + (m.live ? '' : ' soon');
-        if (m.live) tile.href = moduleUrl(m.repo);
-        tile.innerHTML =
-          (m.live ? '' : '<span class="soon-tag">เร็วๆ นี้</span>') +
-          '<span class="ticon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">' + ICONS[m.icon] + '</svg></span>' +
-          '<div><div class="tname">' + escapeHtml(m.th) + '</div><div class="ten">' + escapeHtml(m.en) + '</div></div>';
-        grid.appendChild(tile);
-      });
-    }
+/* ── 7. VIEWS ─────────────────────────────────────────────────── */
 
-    function setAvatar(displayName, pictureUrl){
-      const pic = document.getElementById('avatarPic');
-      const who = document.getElementById('avatarWho');
-      if (who) who.textContent = displayName || '';
-      if (!pic) return;
-      if (pictureUrl) { pic.style.backgroundImage = 'url("' + pictureUrl + '")'; pic.textContent = ''; }
-      else { pic.textContent = (displayName || '?').trim().charAt(0).toUpperCase() || '?'; }
-    }
+ROUTES.home = async () => {
+  const name = S.me?.nickname || S.me?.name_th || S.profile?.displayName || '';
+  const mods = [
+    { k:'parcel', ic:IC.box,   th:t('mParcel'), en:t('mParcelEn'), go:'my-parcels', badge:S.notifCount ? `${S.notifCount} ใหม่` : '' },
+    { k:'call',   ic:IC.sos,   th:t('mCall'),   en:t('mCallEn'),   go:'calltree', sos:true },
+    { k:'car',    ic:IC.car,   th:t('mCar'),    en:t('mCarEn'),    soon:true },
+    { k:'loan',   ic:IC.laptop,th:t('mLoan'),   en:t('mLoanEn'),   soon:true },
+    { k:'help',   ic:IC.tool,  th:t('mHelp'),   en:t('mHelpEn'),   soon:true },
+    { k:'faq',    ic:IC.chat,  th:t('mFaq'),    en:t('mFaqEn'),    soon:true }
+  ];
+  $('#main').innerHTML = `<div class="view">
+    <div class="greet"><h2>${esc(t('greet')(name))}</h2><p>${esc(t('greetSub'))}</p></div>
+    <div class="section-title">${esc(t('services'))}<span class="en">${esc(t('servicesEn'))}</span></div>
+    <div class="tiles">${mods.map(m => `
+      <button class="tile ${m.soon ? 'soon' : ''} ${m.sos ? 'sos' : ''}" data-go="${m.soon ? '' : m.go}">
+        ${m.badge ? `<span class="badge">${esc(m.badge)}</span>` : ''}
+        ${m.soon ? `<span class="badge">${esc(t('soon'))}</span>` : ''}
+        <div class="ic">${m.ic}</div>
+        <div><div class="nm">${esc(m.th)}</div><div class="en">${esc(m.en)}</div></div>
+      </button>`).join('')}</div>
+    <div class="section-title">${esc(t('news'))}<span class="en">${esc(t('newsEn'))}</span></div>
+    <div id="newsBox">${skeleton(1)}</div>
+  </div>`;
+  document.querySelectorAll('.tile[data-go]').forEach(b => {
+    if(b.dataset.go) b.onclick = () => go(b.dataset.go);
+  });
+  try{
+    const r = await apiRetry('getAnnouncements', {}, 'GET');
+    const list = r?.items || [];
+    $('#newsBox').innerHTML = list.length
+      ? `<div class="rows">${list.slice(0,3).map(a => `
+          <div class="row"><div class="body">
+            <div class="t">${esc(a.title)}</div>
+            <div class="s">${esc(fmtDate(a.at))}</div>
+          </div></div>`).join('')}</div>`
+      : emptyState(IC.bellBig, S.lang === 'th' ? 'ยังไม่มีประกาศ' : 'No announcements', '');
+  }catch(e){ $('#newsBox').innerHTML = ''; }
+};
 
-    /* ---------- dashboard data (all GETs sequential, never Promise.all) ---------- */
-    async function loadDashboard(uid){
-      currentUid = uid;
-      document.getElementById('checkingBox').style.display = 'none';
-      document.getElementById('loginBox').style.display = 'none';
-      document.getElementById('dashArea').style.display = 'block';
-      renderTiles();
-      setId('รหัสผู้ใช้ LINE ของคุณ: ' + uid);
+ROUTES['my-parcels'] = async () => {
+  setTitle(t('pcTitle'));
+  $('#main').innerHTML = `<div class="view">
+    ${S.isOfficer ? `<button class="btn soft" id="toUn" style="margin-bottom:14px">${esc(t('unTitle'))}</button>` : ''}
+    <div id="list">${skeleton(3)}</div></div>`;
+  if($('#toUn')) $('#toUn').onclick = () => go('unidentified');
+  const r = await apiRetry('getMyParcels', {}, 'GET');
+  const items = r?.items || [];
+  const waiting = items.filter(i => i.status === 'arrived' || i.status === 'notified');
+  const done    = items.filter(i => i.status === 'claimed' || i.status === 'closed');
+  if(!items.length){
+    $('#list').innerHTML = emptyState(IC.box, t('pcEmpty'), t('pcEmptyBody'));
+    return;
+  }
+  const rowHtml = (p, act) => `
+    <button class="row" data-id="${esc(p.record_id)}" ${act ? 'data-act="1"' : ''}>
+      ${p.thumb_id ? `<img class="thumb" data-ph="${esc(p.thumb_id)}" alt="">` : `<div class="thumb">${IC.box}</div>`}
+      <div class="body">
+        <div class="t">${esc(p.title || p.tracking_no || (S.lang === 'th' ? 'พัสดุ' : 'Parcel'))}</div>
+        <div class="s">${esc(t('pcArrived')(fmtDate(p.created_at)))}</div>
+      </div>
+      ${act ? `<span class="pill wait">${esc(t('pcWaiting'))}</span>` : `<span class="pill done">${esc(t('pcClaim'))}</span>`}
+    </button>`;
+  $('#list').innerHTML = `
+    ${waiting.length ? `<div class="section-title">${esc(t('pcWaiting'))}</div>
+      <div class="rows">${waiting.map(p => rowHtml(p, true)).join('')}</div>` : ''}
+    ${done.length ? `<div class="section-title">${esc(t('pcHistory'))}</div>
+      <div class="rows">${done.map(p => rowHtml(p, false)).join('')}</div>` : ''}`;
+  document.querySelectorAll('#list .row[data-act]').forEach(b => b.onclick = () => claimSheet(b.dataset.id));
+  document.querySelectorAll('#list img[data-ph]').forEach(im => loadPhoto(im.dataset.ph, im));
+};
 
-      notifications = [];
-      let isAdmin = false;
+function claimSheet(id){
+  sheet(`<h3>${esc(t('pcClaim'))}?</h3>
+    <p class="sub">${esc(S.lang === 'th' ? 'ระบบจะบันทึกเวลาที่คุณกดรับไว้เป็นหลักฐาน' : 'The time you confirm is recorded as evidence.')}</p>
+    <button class="btn primary" id="okClaim">${esc(t('pcClaim'))}</button>
+    <button class="btn ghost" id="notMine">${esc(t('pcNotMine'))}</button>
+    <button class="btn ghost" id="cx">${esc(t('cancel'))}</button>`);
+  $('#cx').onclick = closeSheet;
+  $('#okClaim').onclick = async () => {
+    closeSheet();
+    try{ await apiRetry('claimParcel', { record_id:id }, 'POST'); toast(t('pcClaimed'), 'ok'); go('my-parcels', {}, true); }
+    catch(e){ toast(t('netErr'), 'bad'); }
+  };
+  $('#notMine').onclick = async () => {
+    closeSheet();
+    try{ await apiRetry('notMyParcel', { record_id:id }, 'POST'); toast(t('pcNotMineDone'), 'ok'); go('my-parcels', {}, true); }
+    catch(e){ toast(t('netErr'), 'bad'); }
+  };
+}
 
-      // 1) admin state (also gates the Admin hub entry)
-      try {
-        const auth = await callApiGet({ action:'getAuthState', uid });
-        isAdmin = !!auth.authorized;
-      } catch (e) { /* leave isAdmin=false, dashboard still usable */ }
+ROUTES['parcel-in'] = async () => {
+  setTitle(t('inTitle'));
+  $('#main').innerHTML = `<div class="view">
+    <label class="shot" id="shot">
+      <input type="file" accept="image/*" capture="environment" id="file" hidden>
+      <div class="ph">${IC.cam}<p>${esc(t('inShoot'))}</p>
+        <p style="opacity:.7;font-weight:400;margin-top:4px">${esc(t('inShootSub'))}</p></div>
+    </label>
+    <div style="margin-top:14px" id="afterShot" hidden>
+      <button class="btn soft" id="scanBtn">${esc(t('inScan'))}</button>
+      <div class="field" style="margin-top:16px">
+        <label>${esc(t('inRecipient'))}<span class="en">${esc(t('inRecipientEn'))}</span></label>
+        <select id="rcp"><option value="">${esc(t('inPick'))}</option>
+          <option value="__unknown__">${esc(t('inUnknown'))}</option></select>
+      </div>
+      <div class="field">
+        <label>${esc(t('inTracking'))}</label>
+        <input id="trk" inputmode="latin" autocomplete="off" placeholder="TH01234567890">
+      </div>
+      <div class="sticky-cta"><button class="btn primary" id="saveBtn">${esc(t('inSave'))}</button></div>
+    </div>
+  </div>`;
 
-      if (isAdmin) {
-        document.getElementById('adminEntry').style.display = 'block';
-        document.getElementById('adminLink').href = moduleUrl('kenan-admin-hub');
-        document.getElementById('approveChip').style.display = 'flex';
-      }
+  const fileEl = $('#file');
+  $('#shot').onclick = e => { if(e.target.tagName !== 'INPUT') fileEl.click(); };
+  fileEl.onchange = async () => {
+    const f = fileEl.files[0]; if(!f) return;
+    const im = await shrink2(f);
+    S.draft.photo = im.full; S.draft.thumb = im.thumb;
+    $('#shot').innerHTML = `<img src="${im.full}" alt=""><span class="retake">${esc(t('inRetake'))}</span>`;
+    $('#shot').onclick = () => fileEl.click();
+    $('#afterShot').hidden = false;
+  };
 
-      // 2) new-parcel chip. Backend has no per-user parcel-count endpoint yet, and the Parcels sheet
-      //    is keyed by RecipientName/Email (not LineUserId), so we do NOT fake a "0". Gated by flag.
-      if (PARCEL_SUMMARY_READY) {
-        try {
-          const p = await callApiGet({ action:'getMyParcelSummary', uid });
-          const parcelCount = Number(p && (p.count != null ? p.count : (p.newCount != null ? p.newCount : 0))) || 0;
-          document.getElementById('parcelValue').innerHTML = parcelCount + '<span class="unit">รายการ</span>';
-          if (parcelCount > 0) {
-            notifications.push({ title:'มีพัสดุใหม่ ' + parcelCount + ' รายการ', sub:'พัสดุ / Parcel', href:moduleUrl('kenan-parcel'), warn:false });
+  // โหลดรายชื่อพนักงานล่วงหน้า — ตอนกดจะไม่ต้องรอ
+  if(!S.employees.length){
+    try{ const r = await apiRetry('getEmployees', {}, 'GET'); S.employees = r?.items || r?.employees || []; }catch(e){}
+  }
+  const sel = $('#rcp');
+  S.employees.forEach(p => {
+    const o = document.createElement('option');
+    o.value = p.kenan_user_id || p.uid || p.email || p.name;
+    o.textContent = p.nickname ? `${p.name_th || p.name} (${p.nickname})` : (p.name_th || p.name);
+    o.dataset.json = JSON.stringify(p);
+    sel.appendChild(o);
+  });
+  sel.onchange = () => {
+    const btn = $('#saveBtn');
+    btn.textContent = sel.value === '__unknown__' ? t('inSaveUnknown') : t('inSave');
+  };
+
+  $('#scanBtn').onclick = async () => {
+    const b = $('#scanBtn'); b.disabled = true; b.textContent = t('inScanning');
+    try{
+      const r = await apiRetry('scanParcelPhoto', { photo:S.draft.photo }, 'POST');
+      if(r?.trackingNo) $('#trk').value = r.trackingNo;
+      const guess = (r?.recipientName || '').trim();
+      let matched = false;
+      if(guess){
+        for(const o of sel.options){
+          if(o.textContent.includes(guess) || guess.includes(o.textContent.split(' (')[0])){
+            sel.value = o.value; matched = true; break;
           }
-        } catch (e) {
-          document.getElementById('parcelValue').textContent = '—';
-        }
-      } else {
-        document.getElementById('parcelValue').innerHTML = '<span class="unit">รอเชื่อมต่อ</span>';
-      }
-
-      // 3) pending approvals (admin only) - reuse EXISTING admin-hub actions, sequential.
-      //    These are the only real per-user alerts the backend exposes today -> feed the bell.
-      if (isAdmin) {
-        try {
-          const reg = await callApiGet({ action:'getPendingRegistrations', uid });
-          const adm = await callApiGet({ action:'getPendingAdminRequests', uid });
-          const regN = (reg && reg.registrations ? reg.registrations.length : 0);
-          const admN = (adm && adm.requests ? adm.requests.length : 0);
-          document.getElementById('approveValue').innerHTML = (regN + admN) + '<span class="unit">รายการ</span>';
-          const adminHref = moduleUrl('kenan-admin-hub');
-          if (regN > 0) notifications.push({ title:'คำขอลงทะเบียน ' + regN + ' รายการรออนุมัติ', sub:'Admin hub · registrations', href:adminHref, warn:true });
-          if (admN > 0) notifications.push({ title:'คำขอสิทธิ์ Admin ' + admN + ' รายการรออนุมัติ', sub:'Admin hub · admin access', href:adminHref, warn:true });
-        } catch (e) {
-          document.getElementById('approveValue').textContent = '—';
         }
       }
+      toast(matched ? t('inScanOk') : t('inScanFail'), matched ? 'ok' : '');
+    }catch(e){ toast(t('inScanFail')); }
+    b.disabled = false; b.textContent = t('inScan');
+  };
 
-      // 4) future ActivityLog-backed notifications (flag off until Phase 1 item 6 wires the endpoint)
-      if (NOTIFICATIONS_ENDPOINT_READY) {
-        try {
-          const n = await callApiGet({ action:'getNotifications', uid });
-          (n && n.notifications ? n.notifications : []).forEach(x => {
-            notifications.push({ title:x.message || x.title || '', sub:x.module || '', href:x.href || '', warn:false });
-          });
-        } catch (e) { /* ignore */ }
-      }
+  $('#saveBtn').onclick = async () => {
+    if(!S.draft.photo){ toast(t('inNeedPhoto'), 'bad'); return; }
+    const unknown = sel.value === '__unknown__' || !sel.value;
+    const btn = $('#saveBtn'); btn.disabled = true;
+    try{
+      const chosen = sel.selectedOptions[0]?.dataset.json ? JSON.parse(sel.selectedOptions[0].dataset.json) : null;
+      await apiRetry('logParcel', {
+        photo:S.draft.photo,
+        thumb:S.draft.thumb,
+        recipient_id: unknown ? '' : (chosen?.kenan_user_id || sel.value),
+        recipient_name: unknown ? '' : (chosen?.name_th || chosen?.name || ''),
+        tracking_no: $('#trk').value.trim()
+      }, 'POST');
+      S.draft = { photo:null, thumb:null, scan:null, recipient:null, tracking:'' };
+      toast(unknown ? t('inDoneUnknown') : t('inDone'), 'ok');
+      go('parcel-in', {}, true);   // พร้อมถ่ายชิ้นถัดไปทันที ไม่ต้องกดกลับ
+    }catch(e){ toast(t('netErr'), 'bad'); btn.disabled = false; }
+  };
+};
 
-      renderNotifications();
+ROUTES.unidentified = async () => {
+  setTitle(t('unTitle'));
+  $('#main').innerHTML = `<div class="view">
+    <div class="note info">${IC.info}<div>${esc(t('unLead'))}</div></div>
+    <div id="list" style="margin-top:14px">${skeleton(3)}</div></div>`;
+  const r = await apiRetry('getUnidentifiedParcels', {}, 'GET');
+  const items = r?.items || [];
+  if(!items.length){ $('#list').innerHTML = emptyState(IC.box, t('unEmpty'), t('unEmptyBody')); return; }
+  $('#list').innerHTML = `<div class="rows">${items.map(p => `
+    <button class="row" data-id="${esc(p.record_id)}">
+      ${p.thumb_id ? `<img class="thumb" data-ph="${esc(p.thumb_id)}" alt="">` : `<div class="thumb">${IC.box}</div>`}
+      <div class="body">
+        <div class="t">${esc(p.tracking_no || (S.lang === 'th' ? 'ไม่ทราบผู้รับ' : 'Unidentified'))}</div>
+        <div class="s">${esc(t('pcArrived')(fmtDate(p.created_at)))}</div>
+      </div><span class="go">${IC.chev}</span>
+    </button>`).join('')}</div>`;
+  document.querySelectorAll('#list img[data-ph]').forEach(im => loadPhoto(im.dataset.ph, im));
+  document.querySelectorAll('#list .row').forEach(b => b.onclick = () => {
+    sheet(`<h3>${esc(t('unTitle'))}</h3>
+      <p class="sub">${esc(S.lang === 'th' ? 'ระบุผู้รับของพัสดุชิ้นนี้' : 'Identify the recipient of this parcel')}</p>
+      <button class="btn primary" id="mine">${esc(t('unMine'))}</button>
+      <button class="btn ghost" id="cx">${esc(t('cancel'))}</button>`);
+    $('#cx').onclick = closeSheet;
+    $('#mine').onclick = async () => {
+      closeSheet();
+      try{ await apiRetry('claimParcel', { record_id:b.dataset.id }, 'POST'); toast(t('pcClaimed'), 'ok'); go('unidentified', {}, true); }
+      catch(e){ toast(t('netErr'), 'bad'); }
+    };
+  });
+};
+
+ROUTES.calltree = async () => {
+  setTitle(t('ctTitle'));
+  $('#main').innerHTML = `<div class="view"><div id="list">${skeleton(4)}</div></div>`;
+  let items = [];
+  try{ const r = await apiRetry('getContacts', {}, 'GET'); items = r?.items || []; }catch(e){}
+  if(!items.length){
+    // ค่าตั้งต้นสำหรับกรณีที่ยังไม่ได้ใส่ในชีท — เบอร์ฉุกเฉินสาธารณะของไทย
+    items = [
+      { group:'external', name_th:'เหตุฉุกเฉินแห่งชาติ', name_en:'National Emergency', phone:'191' },
+      { group:'external', name_th:'การแพทย์ฉุกเฉิน',    name_en:'Emergency Medical',   phone:'1669' },
+      { group:'external', name_th:'ดับเพลิง',            name_en:'Fire',                phone:'199' }
+    ];
+  }
+  const groups = [
+    { k:'external', label:t('ctExternal'), sos:true },
+    { k:'internal', label:t('ctInternal') },
+    { k:'lead',     label:t('ctLead') }
+  ];
+  $('#list').innerHTML = groups.map(g => {
+    const rows = items.filter(i => (i.group || 'internal') === g.k);
+    if(!rows.length) return '';
+    return `<div class="contact-group"><h3>${esc(g.label)}</h3><div class="rows">${rows.map(c => `
+      <div class="row">
+        <div class="body">
+          <div class="t">${esc(S.lang === 'th' ? (c.name_th || c.name_en) : (c.name_en || c.name_th))}</div>
+          <div class="s">${esc(c.phone)}</div>
+        </div>
+        <a class="callbtn ${g.sos ? 'sos' : ''}" href="tel:${esc(c.phone)}" aria-label="${esc(t('ctCall'))}">${IC.phone}</a>
+      </div>`).join('')}</div></div>`;
+  }).join('');
+};
+
+ROUTES.profile = async () => {
+  setTitle(t('prTitle'));
+  const m = S.me || {};
+  $('#main').innerHTML = `<div class="view">
+    <div class="card" style="text-align:center">
+      ${S.profile?.pictureUrl ? `<img src="${esc(S.profile.pictureUrl)}" style="width:76px;height:76px;border-radius:50%;object-fit:cover">` : ''}
+      <h2 style="margin:10px 0 2px;font-size:18px">${esc(m.name_th || S.profile?.displayName || '')}</h2>
+      <p style="margin:0;color:var(--ink-3);font-size:13px">${esc(m.department || '')}</p>
+    </div>
+    <div class="section-title">${esc(t('prInfo'))}</div>
+    <div class="rows">
+      <div class="row"><div class="body"><div class="s">${esc(t('prEmpId'))}</div><div class="t">${esc(m.kenan_user_id || '—')}</div></div></div>
+      <div class="row"><div class="body"><div class="s">${esc(t('prDept'))}</div><div class="t">${esc(m.department || '—')}</div></div></div>
+      <div class="row"><div class="body"><div class="s">${esc(t('prEmail'))}</div><div class="t">${esc(m.email || '—')}</div></div></div>
+    </div>
+    <div class="section-title">${esc(t('prSettings'))}</div>
+    <div class="card" style="display:flex;align-items:center;justify-content:space-between">
+      <span style="font-weight:600;font-size:14px">${esc(t('prLang'))}</span>
+      <div class="langsw">
+        <button data-l="th" class="${S.lang === 'th' ? 'on' : ''}">ไทย</button>
+        <button data-l="en" class="${S.lang === 'en' ? 'on' : ''}">EN</button>
+      </div>
+    </div>
+    <div style="margin-top:12px"><button class="btn ghost" id="pol">${esc(t('prPrivacy'))}</button></div>
+  </div>`;
+  document.querySelectorAll('.langsw button').forEach(b => b.onclick = () => {
+    S.lang = b.dataset.l; go('profile', {}, true);
+  });
+  $('#pol').onclick = () => go('consent', { readonly:true });
+};
+
+ROUTES.notifications = async () => {
+  setTitle(t('notifTitle'));
+  $('#main').innerHTML = `<div class="view"><div id="list">${skeleton(3)}</div></div>`;
+  let items = [];
+  try{ const r = await apiRetry('getNotifications', {}, 'GET'); items = r?.items || []; }catch(e){}
+  $('#list').innerHTML = items.length
+    ? `<div class="rows">${items.map(n => `
+        <div class="row"><div class="body">
+          <div class="t">${esc(n.title || n.message)}</div>
+          <div class="s">${esc(fmtDate(n.at))}</div></div></div>`).join('')}</div>`
+    : emptyState(IC.bellBig, t('notifEmpty'), '');
+  S.notifCount = 0; $('#bellDot').hidden = true;
+};
+
+/* ── Registration ─────────────────────────────────────────────── */
+ROUTES.register = async () => {
+  if(S.regStatus === 'pending'){
+    $('#main').innerHTML = `<div class="view" style="padding-top:40px">
+      ${emptyState(IC.bellBig, t('regPending'), t('regPendingBody'))}</div>`;
+    return;
+  }
+  $('#main').innerHTML = `<div class="view">
+    <div class="greet"><h2>${esc(t('regTitle'))}</h2><p>${esc(t('regLead'))}</p></div>
+    <div class="card">
+      <div class="field"><label>${esc(t('fName'))}<span class="req">*</span><span class="en">${esc(t('fNameEn'))}</span></label>
+        <input id="rName" autocomplete="name"><div class="err" id="eName" hidden>${esc(t('errName'))}</div></div>
+      <div class="field"><label>${esc(t('fNameE'))}</label><input id="rNameEn" autocomplete="name"></div>
+      <div class="field"><label>${esc(t('fNick'))}</label><input id="rNick">
+        <div class="hint">${esc(t('fNickHint'))}</div></div>
+      <div class="field"><label>${esc(t('fEmail'))}<span class="req">*</span></label>
+        <input id="rEmail" type="email" inputmode="email" autocomplete="email" placeholder="name@kenan-asia.org">
+        <div class="hint">${esc(t('fEmailHint'))}</div>
+        <div class="err" id="eEmail" hidden>${esc(t('errEmail'))}</div></div>
+      <div class="field"><label>${esc(t('fDept'))}</label>
+        <select id="rDept">
+          <option value="">—</option>
+          <option>HR</option><option>Finance and Accounting</option>
+          <option>Education Program</option><option>Business and Economy Program</option>
+          <option>Social Impact and Innovation Program</option><option>Partnership and Communications</option>
+          <option>IT</option><option>General Administration</option><option>Purchasing</option>
+        </select></div>
+      <div class="field"><label>${esc(t('fOffice'))}</label>
+        <select id="rOffice"><option value="BKK">Bangkok</option><option value="DEEPSOUTH">Deep South</option></select></div>
+    </div>
+    <div class="sticky-cta"><button class="btn primary" id="rSubmit">${esc(t('regSubmit'))}</button></div>
+  </div>`;
+  // เติมค่าเดิมกลับ ถ้าเคยกรอกแล้วกด "แก้ไขข้อมูล"
+  if(S.regDraft){
+    $('#rName').value = S.regDraft.name_th; $('#rNameEn').value = S.regDraft.name_en;
+    $('#rNick').value = S.regDraft.nickname; $('#rEmail').value = S.regDraft.email;
+    $('#rDept').value = S.regDraft.department; $('#rOffice').value = S.regDraft.office;
+  }
+
+  $('#rSubmit').onclick = async () => {
+    const name  = $('#rName').value.trim();
+    const email = $('#rEmail').value.trim().toLowerCase();
+    const okName = !!name, okMail = /^[^@\s]+@kenan-asia\.org$/.test(email);
+    $('#eName').hidden = okName; $('#eEmail').hidden = okMail;
+    if(!okName || !okMail) return;
+
+    S.regDraft = {
+      name_th:name, name_en:$('#rNameEn').value.trim(), nickname:$('#rNick').value.trim(),
+      email, department:$('#rDept').value, office:$('#rOffice').value
+    };
+    const b = $('#rSubmit'); b.disabled = true; b.textContent = t('loading');
+    try{
+      const r = await apiRetry('requestOtp', { email }, 'POST');
+      if(r?.error === 'EMAIL_TAKEN'){ $('#eEmail').textContent = t('emailTaken'); $('#eEmail').hidden = false; throw 0; }
+      if(r?.ok === false) throw 0;
+      go('otp');
+    }catch(e){
+      if(e !== 0) toast(t('netErr'), 'bad');
+      b.disabled = false; b.textContent = t('regSubmit');
     }
+  };
+};
 
-    /* ---------- LINE auth flow (mirrors existing modules) ---------- */
-    function showLogin(showBtn){
-      document.getElementById('checkingBox').style.display = 'none';
-      document.getElementById('dashArea').style.display = 'none';
-      document.getElementById('loginBox').style.display = 'block';
-      document.getElementById('manualLoginBtn').style.display = showBtn ? 'block' : 'none';
-    }
+/* ── ยืนยันอีเมลด้วยรหัส 6 หลัก ─────────────────────────────── */
+ROUTES.otp = async () => {
+  const d = S.regDraft || {};
+  $('#main').innerHTML = `<div class="view">
+    <div class="greet"><h2>${esc(t('otpTitle'))}</h2><p>${esc(t('otpLead')(d.email || ''))}</p></div>
+    <div class="card">
+      <div class="field" style="margin-bottom:0">
+        <label>${esc(t('otpLabel'))}</label>
+        <input id="otp" inputmode="numeric" autocomplete="one-time-code" maxlength="6"
+               placeholder="000000"
+               style="text-align:center;font-size:30px;font-weight:800;letter-spacing:10px;padding:16px">
+        <div class="err" id="eOtp" hidden></div>
+        <div class="hint" style="text-align:center">${esc(t('otpHint'))}</div>
+      </div>
+    </div>
+    <button class="btn primary" id="okOtp" disabled>${esc(t('otpVerify'))}</button>
+    <div style="height:9px"></div>
+    <button class="btn ghost" id="resend">${esc(t('otpResend'))}</button>
+    <div style="height:9px"></div>
+    <button class="btn ghost" id="editReg">${esc(t('otpBack'))}</button>
+  </div>`;
 
-    function doManualLogin(){
-      try { liff.login(); } catch (e) { setId('login ล้มเหลว: ' + (e && e.message ? e.message : e)); }
-    }
-
-    function useManualUid(){
-      const input = document.getElementById('manualUidInput');
-      const msgEl = document.getElementById('manualEntryMsg');
-      const uid = input ? input.value.trim() : '';
-      if (!uid) { if (msgEl) msgEl.textContent = 'กรุณาวางรหัสผู้ใช้ LINE ก่อน'; return; }
-      setAvatar(null, null);
-      loadDashboard(uid).then(() => { if (msgEl) msgEl.textContent = 'เข้าสู่ระบบด้วยรหัสที่กรอกแล้ว'; });
-    }
-
-    async function tryLoadProfile(){
-      try {
-        const profile = await liff.getProfile();
-        setAvatar(profile.displayName, profile.pictureUrl);
-        await loadDashboard(profile.userId);
-      } catch (e) {
-        setId('getProfile ล้มเหลว: ' + (e && e.message ? e.message : JSON.stringify(e)));
-        showLogin(true);
-      }
-    }
-
-    (async function init(){
-      let settled = false;
-      const timeout = setTimeout(() => {
-        if (!settled) { setId('หมดเวลารอ LIFF - ใช้ช่องกรอกรหัสด้วยตนเองแทนได้เลย'); showLogin(true); }
-      }, 6000);
-
-      if (typeof liff === 'undefined') {
-        setId('LIFF SDK โหลดไม่สำเร็จ - ใช้ช่องกรอกรหัสด้วยตนเองแทนได้เลย');
-        showLogin(true);
+  const inp = $('#otp'), ok = $('#okOtp');
+  inp.focus();
+  inp.oninput = () => {
+    inp.value = inp.value.replace(/\D/g, '').slice(0, 6);
+    ok.disabled = inp.value.length !== 6;
+    $('#eOtp').hidden = true;
+  };
+  $('#editReg').onclick = () => go('register', {}, true);
+  $('#resend').onclick = async () => {
+    try{ await apiRetry('requestOtp', { email:d.email }, 'POST'); toast(t('otpSent'), 'ok'); }
+    catch(e){ toast(t('netErr'), 'bad'); }
+  };
+  ok.onclick = async () => {
+    ok.disabled = true; ok.textContent = t('loading');
+    try{
+      const r = await apiRetry('submitRegistration',
+        Object.assign({}, d, { otp:inp.value, consent_version:CFG.CONSENT_VERSION }), 'POST');
+      if(r?.error === 'OTP_WRONG' || r?.error === 'OTP_EXPIRED'){
+        $('#eOtp').textContent = t(r.error === 'OTP_WRONG' ? 'otpWrong' : 'otpExpired');
+        $('#eOtp').hidden = false;
+        ok.disabled = false; ok.textContent = t('otpVerify');
         return;
       }
+      if(r?.ok === false) throw 0;
+      // ลงทะเบียนสำเร็จ — โหลดสถานะใหม่แล้วเข้าหน้าแรก
+      const auth = await apiRetry('getAuthState', {}, 'GET');
+      S.me = auth?.user || null;
+      S.isAdmin = !!auth?.isAdmin;
+      S.isOfficer = !!(auth?.isAdmin || auth?.isOfficer);
+      S.regStatus = auth?.registrationStatus || 'approved';
+      S.regDraft = null;
+      S.stack = [];
+      toast(t('regOk'), 'ok');
+      go('home');
+    }catch(e){
+      toast(t('netErr'), 'bad');
+      ok.disabled = false; ok.textContent = t('otpVerify');
+    }
+  };
+};
 
-      try {
-        await liff.init({ liffId: LIFF_ID });
-        settled = true;
-        clearTimeout(timeout);
+/* ── PDPA consent ─────────────────────────────────────────────── */
+ROUTES.consent = async ({ readonly } = {}) => {
+  setTitle(t('consentTitle'));
+  const body = S.lang === 'th' ? `
+    <h4>ข้อมูลที่เก็บ</h4>
+    <ul><li>ชื่อ-นามสกุล ชื่อเล่น แผนก ที่ตั้ง อีเมลองค์กร</li>
+    <li>รหัสผู้ใช้ LINE (สำหรับส่งการแจ้งเตือน)</li>
+    <li>ภาพถ่ายพัสดุ อุปกรณ์ หรือปัญหาที่แจ้ง และเวลาที่บันทึกแต่ละขั้นตอน</li></ul>
+    <h4>ใช้ทำอะไร</h4>
+    <ul><li>ระบุตัวผู้รับพัสดุและแจ้งเตือนให้มารับ</li>
+    <li>ยืนยันการส่งมอบและการคืนของ</li>
+    <li>ติดต่อในกรณีฉุกเฉิน</li></ul>
+    <p>ไม่ใช้เพื่อประเมินผลการปฏิบัติงาน และไม่เปิดเผยต่อบุคคลภายนอกองค์กร</p>
+    <h4>ภาพถ่ายฉลากพัสดุ</h4>
+    <p>อาจมีชื่อและที่อยู่ของผู้ส่งซึ่งเป็นบุคคลภายนอก ระบบจะแสดงเฉพาะส่วนที่จำเป็นต่อการระบุผู้รับ และลบภาพเมื่อครบกำหนดเก็บ</p>
+    <h4>ผู้ให้บริการที่เกี่ยวข้อง</h4>
+    <p>LINE (การแจ้งเตือนและการเข้าสู่ระบบ) และ Google (การจัดเก็บข้อมูลและไฟล์ภาพ)</p>
+    <h4>สิทธิของคุณ</h4>
+    <p>ขอดู แก้ไข หรือขอลบข้อมูลของคุณได้ตลอดเวลา รวมถึงยกเลิกการผูกบัญชี LINE โดยติดต่อผู้ดูแลระบบ</p>
+  ` : `
+    <h4>What we collect</h4>
+    <ul><li>Name, nickname, department, office, work email</li>
+    <li>LINE user ID (for notifications)</li>
+    <li>Photos of parcels, equipment or reported issues, and timestamps of each step</li></ul>
+    <h4>How it is used</h4>
+    <ul><li>Identifying parcel recipients and notifying them</li>
+    <li>Confirming handover and return of items</li>
+    <li>Contacting you in an emergency</li></ul>
+    <p>It is not used for performance evaluation and is not disclosed outside the organisation.</p>
+    <h4>Parcel label photos</h4>
+    <p>These may contain a third-party sender's name and address. Only the portion needed to identify the recipient is displayed, and images are deleted at the end of the retention period.</p>
+    <h4>Service providers involved</h4>
+    <p>LINE (notifications and sign-in) and Google (data and image storage).</p>
+    <h4>Your rights</h4>
+    <p>You may request access, correction or deletion of your data at any time, and unlink your LINE account, by contacting the system administrator.</p>`;
 
-        let loggedIn = false;
-        try { loggedIn = liff.isLoggedIn(); } catch (e0) {}
+  $('#main').innerHTML = `<div class="view">
+    <div class="greet"><h2>${esc(t('consentTitle'))}</h2><p>${esc(t('consentTitleEn'))}</p></div>
+    <div class="legal">${body}</div>
+    ${readonly ? '' : `
+      <label class="check"><input type="checkbox" id="agree"><span>${esc(t('consentAgree'))}</span></label>
+      <button class="btn primary" id="okConsent" disabled>${esc(t('consentBtn'))}</button>`}
+  </div>`;
+  if(readonly) return;
+  $('#agree').onchange = e => $('#okConsent').disabled = !e.target.checked;
+  $('#okConsent').onclick = async () => {
+    const b = $('#okConsent'); b.disabled = true;
+    try{ await apiRetry('acceptConsent', { consent_version:CFG.CONSENT_VERSION }, 'POST'); }catch(e){}
+    S.me = S.me || {}; S.me.consent_at = new Date().toISOString();
+    S.stack = [];
+    go(S.regStatus === 'approved' ? 'home' : 'register');
+  };
+};
 
-        if (!loggedIn) { showLogin(true); return; }
-        await tryLoadProfile();
-      } catch (e) {
-        settled = true;
-        clearTimeout(timeout);
-        setId('LIFF init ล้มเหลว: ' + (e && e.message ? e.message : JSON.stringify(e)) + ' - ใช้ช่องกรอกรหัสด้วยตนเองแทนได้เลย');
-        showLogin(true);
-      }
-    })();
-  </script>
+/* ── Gate: ยังไม่ได้ล็อกอิน ───────────────────────────────────── */
+ROUTES.gate = async () => {
+  $('#main').innerHTML = `<div class="view" style="padding-top:48px">
+    ${emptyState(IC.info, t('needLogin'), t('needLoginBody'))}
+    <button class="btn primary" id="lg">${esc(t('loginLine'))}</button></div>`;
+  $('#lg').onclick = () => { if(S.liffReady) liff.login(); else location.reload(); };
+};
+
+/* ── 8. Utils ─────────────────────────────────────────────────── */
+/** ย่อรูปเป็น 2 ขนาด: full (อ่านฉลาก) + thumb (แสดงในรายการ)
+    วาดผ่าน canvas ทำให้ EXIF ทั้งหมดรวมถึงพิกัด GPS หายไปเอง */
+function shrink2(file){
+  return new Promise((res, rej) => {
+    const img = new Image(), fr = new FileReader();
+    fr.onload = () => img.src = fr.result;
+    fr.onerror = rej;
+    img.onload = () => {
+      const draw = (max, q) => {
+        let { width:w, height:h } = img;
+        const sc = Math.min(1, max / Math.max(w, h));
+        w = Math.round(w * sc); h = Math.round(h * sc);
+        const c = document.createElement('canvas');
+        c.width = w; c.height = h;
+        c.getContext('2d').drawImage(img, 0, 0, w, h);
+        return c.toDataURL('image/jpeg', q);
+      };
+      res({ full: draw(1280, .82), thumb: draw(400, .7) });
+    };
+    img.onerror = rej;
+    fr.readAsDataURL(file);
+  });
+}
+
+/** ดึงรูปจากเซิร์ฟเวอร์ (ไฟล์ใน Drive เป็นส่วนตัว ไม่ได้เปิดลิงก์สาธารณะ) */
+const photoCache = {};
+async function loadPhoto(fileId, imgEl){
+  if(!fileId || !imgEl) return;
+  if(photoCache[fileId]){ imgEl.src = photoCache[fileId]; return; }
+  try{
+    const r = await api('getPhoto', { file_id:fileId }, 'GET');
+    if(r?.data){ photoCache[fileId] = r.data; imgEl.src = r.data; }
+  }catch(e){}
+}
+
+/* ── 9. BOOT — LIFF init ครั้งเดียวสำหรับทั้งแอป ───────────────── */
+(async function boot(){
+  try{ if(navigator.language?.startsWith('en')) S.lang = 'en'; }catch(e){}
+
+  if(DEMO){
+    S.uid = 'U-demo';
+    S.profile = { displayName:'พิพัฒน์ ส.', pictureUrl:'' };
+    const a = MOCK.getAuthState;
+    S.me = a.user; S.isAdmin = a.isAdmin; S.isOfficer = a.isOfficer;
+    S.regStatus = a.registrationStatus; S.notifCount = a.notificationCount;
+    $('#bellDot').textContent = S.notifCount; $('#bellDot').hidden = false;
+    const banner = el(`<div style="background:#FFFBEB;border-bottom:1px solid #FDE68A;color:#92400E;
+      font-size:11.5px;font-weight:600;text-align:center;padding:6px 12px">
+      โหมดพรีวิว · ข้อมูลตัวอย่าง · ใส่ CFG.GAS_URL เพื่อใช้งานจริง</div>`);
+    document.querySelector('.topbar').after(banner);
+    go('home');
+    return;
+  }
+
+  const timeout = new Promise(r => setTimeout(() => r('timeout'), CFG.LIFF_TIMEOUT_MS));
+  try{
+    const r = await Promise.race([
+      liff.init({ liffId:CFG.LIFF_ID }).then(() => 'ok').catch(() => 'fail'),
+      timeout
+    ]);
+    if(r === 'ok'){
+      S.liffReady = true;
+      if(!liff.isLoggedIn()){ liff.login(); return; }
+      S.profile = await liff.getProfile();
+      S.uid = S.profile.userId;
+    }
+  }catch(e){}
+
+  if(!S.uid){ go('gate'); return; }
+
+  try{
+    const auth = await apiRetry('getAuthState', {}, 'GET');
+    S.me       = auth?.user || null;
+    S.isAdmin  = !!auth?.isAdmin;
+    S.isOfficer= !!(auth?.isAdmin || auth?.isOfficer);
+    S.regStatus= auth?.registrationStatus || (S.me ? 'approved' : 'none');
+    S.notifCount = auth?.notificationCount || 0;
+    if(S.notifCount){ $('#bellDot').textContent = S.notifCount; $('#bellDot').hidden = false; }
+  }catch(e){
+    if(e.message === 'NO_CONFIG'){ render('home'); return; }
+    S.regStatus = 'none';
+  }
+
+  if(!S.me?.consent_at)          go('consent');
+  else if(S.regStatus !== 'approved') go('register');
+  else                                go('home');
+})();
+</script>
 </body>
 </html>
