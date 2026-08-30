@@ -414,19 +414,19 @@ main{flex:1 1 auto;padding:16px 16px calc(var(--nav-h) + var(--safe-b) + 24px)}
   <nav class="nav" id="nav" hidden>
     <button data-go="home" class="on">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 10l9-7 9 7v10a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><path d="M9 22V12h6v10"/></svg>
-      <span>หน้าแรก</span>
+      <span data-nav="navHome">หน้าแรก</span>
     </button>
     <button data-go="my-parcels">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 16V8a2 2 0 00-1-1.73l-7-4a2 2 0 00-2 0l-7 4A2 2 0 003 8v8a2 2 0 001 1.73l7 4a2 2 0 002 0l7-4A2 2 0 0021 16z"/><path d="M3.3 7L12 12l8.7-5M12 22V12"/></svg>
-      <span>พัสดุ</span>
+      <span data-nav="navParcel">พัสดุ</span>
     </button>
     <button data-go="calltree">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.9v3a2 2 0 01-2.2 2 19.8 19.8 0 01-8.6-3.1 19.5 19.5 0 01-6-6A19.8 19.8 0 012.1 4.2 2 2 0 014.1 2h3a2 2 0 012 1.7c.1 1 .4 1.9.7 2.8a2 2 0 01-.5 2.1L8.1 9.9a16 16 0 006 6l1.3-1.3a2 2 0 012.1-.4c.9.3 1.8.6 2.8.7a2 2 0 011.7 2z"/></svg>
-      <span>ฉุกเฉิน</span>
+      <span data-nav="navSos">ฉุกเฉิน</span>
     </button>
     <button data-go="profile">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
-      <span>ฉัน</span>
+      <span data-nav="navMe">ฉัน</span>
     </button>
   </nav>
 
@@ -507,6 +507,7 @@ const clearCache = k => { if(k) delete S.cache[k]; else S.cache = {}; };
 const T = {
   th:{
     appName:'Kenan Connect',
+    navHome:'หน้าแรก', navParcel:'พัสดุ', navSos:'ฉุกเฉิน', navMe:'ฉัน',
     greet:n=>`สวัสดีครับ ${n}`, greetSub:'วันนี้มีอะไรให้ช่วยไหม',
     loading:'กำลังโหลด…', retry:'ลองอีกครั้ง', cancel:'ยกเลิก', save:'บันทึก',
     back:'ย้อนกลับ', close:'ปิด', confirm:'ยืนยัน', soon:'เร็วๆ นี้',
@@ -574,6 +575,7 @@ const T = {
     eqUpcoming:'คิวจองถัดไป', eqReserved:'จองไว้แล้ว', eqMyResv:'คิวของฉัน',
     eqCancelResv:'ยกเลิกการจอง', eqResvOk:'จองอุปกรณ์เรียบร้อย',
     eqClash:'ช่วงเวลานี้มีคนจองไว้แล้ว', eqDue:'กำหนดคืน',
+    admSettings:'ตั้งค่าระบบ',
     admRes:'จัดการห้อง / อุปกรณ์', admResAdd:'เพิ่มรายการใหม่',
     admResKind:'ประเภท', admResRoom:'ห้องประชุม', admResEq:'อุปกรณ์',
     admResName:'ชื่อ (ไทย)', admResNameEn:'ชื่อ (อังกฤษ)', admResCat:'หมวด',
@@ -722,6 +724,7 @@ const T = {
   },
   en:{
     appName:'Kenan Connect',
+    navHome:'Home', navParcel:'Parcels', navSos:'Emergency', navMe:'Me',
     greet:n=>`Hello, ${n}`, greetSub:'What can we help with today?',
     loading:'Loading…', retry:'Try again', cancel:'Cancel', save:'Save',
     back:'Back', close:'Close', confirm:'Confirm', soon:'Coming soon',
@@ -789,6 +792,7 @@ const T = {
     eqUpcoming:'Upcoming bookings', eqReserved:'Reserved', eqMyResv:'My bookings',
     eqCancelResv:'Cancel booking', eqResvOk:'Equipment reserved',
     eqClash:'That time is already booked', eqDue:'Due back',
+    admSettings:'System settings',
     admRes:'Rooms & equipment', admResAdd:'Add new',
     admResKind:'Type', admResRoom:'Meeting room', admResEq:'Equipment',
     admResName:'Name (Thai)', admResNameEn:'Name (English)', admResCat:'Category',
@@ -989,18 +993,23 @@ async function api(action, payload = {}, method = 'GET'){
   }
   if(!CFG.GAS_URL || CFG.GAS_URL.startsWith('PASTE_')) throw new Error('NO_CONFIG');
   const base = CFG.GAS_URL;
+  const ac = (typeof AbortController !== 'undefined') ? new AbortController() : null;
+  const tm = ac ? setTimeout(() => ac.abort(), 20000) : null;
   let res;
   if(method === 'GET'){
     const q = new URLSearchParams({ action, uid:S.uid||'', _t:Date.now(), ...payload });
-    res = await fetch(`${base}?${q}`, { method:'GET', redirect:'follow', cache:'no-store' });
+    res = await fetch(`${base}?${q}`, { method:'GET', redirect:'follow', cache:'no-store',
+                                        signal: ac ? ac.signal : undefined });
   }else{
     // text/plain = simple request → ไม่มี CORS preflight ที่ Apps Script ตอบไม่ได้
     res = await fetch(base, {
       method:'POST', redirect:'follow',
       headers:{ 'Content-Type':'text/plain;charset=utf-8' },
-      body: JSON.stringify({ action, uid:S.uid, ...payload })
+      body: JSON.stringify({ action, uid:S.uid, ...payload }),
+      signal: ac ? ac.signal : undefined
     });
   }
+  if(tm) clearTimeout(tm);
   const text = await res.text();
   try { return JSON.parse(text); }
   catch(e){
@@ -1103,7 +1112,11 @@ window.addEventListener('popstate', () => {
 });
 $('#backBtn').onclick = back;
 
+function paintNav(){
+  document.querySelectorAll('[data-nav]').forEach(el => el.textContent = t(el.dataset.nav));
+}
 function chrome(name){
+  paintNav();
   const isHome = name === 'home';
   // 'privacy' = หน้าเดียวกับ consent แต่เปิดจากโปรไฟล์ → ต้องมีปุ่มกลับและเมนูล่าง
   const isFull = ['register','otp','consent','gate','offline'].includes(name);
@@ -1255,8 +1268,8 @@ ROUTES['my-parcels'] = async (params = {}) => {
   }else if(focus){
     toast(t('recGone'));
   }
+  paintPhotos($('#list'));
   document.querySelectorAll('#list img[data-ph]').forEach(im => {
-    loadPhoto(im.dataset.ph, im);
     // แตะที่รูปเล็ก = เปิดดูจ่าหน้าเต็มจอทันที ไม่ต้องผ่านหน้ายืนยัน
     im.onclick = ev => {
       ev.stopPropagation();
@@ -1416,8 +1429,8 @@ ROUTES.unidentified = async () => {
       </div><span class="go">${IC.chev}</span>
     </button>`).join('')}</div>`;
   const byId = {}; items.forEach(p => byId[p.record_id] = p);
+  paintPhotos($('#list'));
   document.querySelectorAll('#list img[data-ph]').forEach(im => {
-    loadPhoto(im.dataset.ph, im);
     im.onclick = ev => {
       ev.stopPropagation();
       const p = byId[im.closest('.row').dataset.id] || {};
@@ -1641,30 +1654,32 @@ ROUTES.admin = async () => {
       ${emptyState(IC.info, t('adminNo'), t('adminNoBody'))}</div>`;
     return;
   }
-  // ปุ่มกล้องอยู่บนสุด เพราะคนที่เข้าเมนูนี้คือคนที่ต้องบันทึกพัสดุ
+  // เรียงตามความถี่ที่ใช้จริง: งานประจำวันบนสุด · ตั้งค่าที่นานๆ แตะทีไว้ล่างสุด
   $('#main').innerHTML = `<div class="view">
     <button class="btn primary" id="toCam" style="padding:18px;font-size:16px">
       ${IC.cam}<span>${esc(t('inTitle'))}</span></button>
     <div style="height:9px"></div>
     <button class="btn ghost" id="toUn">${esc(t('unTitle'))}</button>
+    ${S.isOfficer ? `<div style="height:9px"></div>
+      <button class="btn ghost" id="toQ">${esc(t('isuQueue'))}</button>` : ''}
+
     <div class="section-title">${esc(t('adminToday'))}</div>
     <div id="sum">${skeleton(2)}</div>
+
+    ${S.isAdmin ? `
+      <div class="section-title">${esc(t('admSettings'))}</div>
+      <button class="btn ghost" id="toNews">${esc(t('admPostNews'))}</button>
+      <div style="height:9px"></div>
+      <button class="btn ghost" id="toRes">${esc(t('admRes'))}</button>
+      ${S.isSuper ? `<div style="height:9px"></div>
+        <button class="btn ghost" id="toRoles">${esc(t('admRoles'))}</button>` : ''}` : ''}
   </div>`;
   $('#toCam').onclick = () => go('parcel-in');
   $('#toUn').onclick  = () => go('unidentified');
-
-  if(S.isAdmin){
-    $('#toUn').insertAdjacentHTML('afterend',
-      `<div style="height:9px"></div>
-       <button class="btn ghost" id="toNews">${esc(t('admPostNews'))}</button>` +
-      `<div style="height:9px"></div>
-       <button class="btn ghost" id="toRes">${esc(t('admRes'))}</button>` +
-      (S.isSuper ? `<div style="height:9px"></div>
-       <button class="btn ghost" id="toRoles">${esc(t('admRoles'))}</button>` : ''));
-    $('#toNews').onclick = () => go('admin-news');
-    $('#toRes').onclick  = () => go('admin-res');
-    if($('#toRoles')) $('#toRoles').onclick = () => go('admin-roles');
-  }
+  if($('#toQ'))     $('#toQ').onclick     = () => go('issue-queue');
+  if($('#toNews'))  $('#toNews').onclick  = () => go('admin-news');
+  if($('#toRes'))   $('#toRes').onclick   = () => go('admin-res');
+  if($('#toRoles')) $('#toRoles').onclick = () => go('admin-roles');
 
   let s = null;
   try{ s = await apiRetry('getAdminSummary', {}, 'GET'); }catch(e){}
@@ -1685,14 +1700,11 @@ ROUTES.admin = async () => {
     <div class="note ${warn ? '' : 'info'}" style="margin-top:12px">${IC.info}<div>
       <b>${esc(t('admQuota'))} ${s.lineUsed}/${s.lineQuota}</b> (${pct}%)<br>
       ${esc(warn ? t('admQuotaWarn') : t('admQuotaOk'))}</div></div>
-    <div style="margin-top:12px">
+    ${S.isAdmin ? `<div style="margin-top:12px">
       <a class="btn ghost" href="${esc(s.sheetUrl)}" target="_blank"
-         style="display:flex;text-decoration:none">${esc(t('admOpenSheet'))}</a></div>`;
+         style="display:flex;text-decoration:none">${esc(t('admOpenSheet'))}</a></div>` : ''}`;
 };
 
-/* ── ลงประกาศ (admin) ─────────────────────────────────────────
-   HR ประกาศทางอีเมลอยู่แล้ว ปุ่ม "ดึงจากอีเมล" จึงสำคัญกว่าฟอร์ม
-   เพราะไม่ต้องพิมพ์ซ้ำ — แค่ forward เข้ามาแล้วกดปุ่มเดียว */
 ROUTES['admin-news'] = async () => {
   setTitle(t('admPostNews'));
   $('#main').innerHTML = `<div class="view">
@@ -2167,6 +2179,15 @@ const hhmm = iso => { try{ return new Date(iso).toLocaleTimeString(
   S.lang==='th'?'th-TH':'en-GB',{hour:'2-digit',minute:'2-digit'}); }catch(e){ return ''; } };
 const H0 = 8, H1 = 18, HPX = 44;            // ตาราง 08:00–18:00 ช่องละ 44px
 const minsFrom8 = iso => { const d = new Date(iso); return (d.getHours()-H0)*60 + d.getMinutes(); };
+/* ในช่องแคบๆ ของตาราง เวลาเริ่มกับชื่อเต็มอ่านไม่ทัน
+   บอก "ยาวแค่ไหน" กับ "ใคร" พอ — เวลาเริ่มดูได้จากตำแหน่งของบล็อกอยู่แล้ว */
+const durLabel = (s, e) => {
+  const m = Math.round((Date.parse(e) - Date.parse(s)) / 60000);
+  if(m < 60) return m + (S.lang==='th' ? ' น.' : 'm');
+  const hh = Math.floor(m/60), mm = m%60;
+  return hh + (mm ? '.' + Math.round(mm/6) : '') + (S.lang==='th' ? ' ชม.' : ' hr');
+};
+const firstName = n => String(n || '').trim().split(/\s+/)[0] || '';
 
 ROUTES.rooms = async (params = {}) => {
   setTitle(t('rmTitle'));
@@ -2242,8 +2263,8 @@ ROUTES.rooms = async (params = {}) => {
           const mine = String(b.requester_id) === String(S.me?.kenan_user_id);
           return `<button class="gev ${mine?'mine':''}" data-b="${esc(b.record_id)}"
             style="top:${top}px;height:${hgt}px">
-            <div class="t">${esc(hhmm(b.start_at))}</div>
-            <div class="w">${esc(b.who)}</div></button>`;
+            <div class="t">${esc(durLabel(b.start_at, b.end_at))}</div>
+            <div class="w">${esc(firstName(b.who))}</div></button>`;
         }).join('')}
       </div>`).join('')}
       ${nowTop!==null?`<div class="gnow" style="top:${nowTop}px"></div>`:''}
@@ -2293,7 +2314,7 @@ ROUTES.rooms = async (params = {}) => {
           esc([rm.capacity ? t('rmSeats')(rm.capacity) : '', rm.category, rm.note].filter(Boolean).join(' · '))}</div>
       </div><span class="go">${IC.chev}</span>
     </button>`).join('');
-  document.querySelectorAll('#rooms img[data-ph]').forEach(im => loadPhoto(im.dataset.ph, im));
+  paintPhotos($('#rooms'));
   document.querySelectorAll('#rooms .rcard').forEach(b =>
     b.onclick = () => go('room-new', { date:sel, room:b.dataset.r }));
 };
@@ -2343,7 +2364,7 @@ ROUTES['room-new'] = async ({ date, room:preRoom, hour } = {}) => {
   </div>`;
 
   let room = preRoom || rooms[0]?.resource_id || '';
-  document.querySelectorAll('#rp img[data-ph]').forEach(im => loadPhoto(im.dataset.ph, im));
+  paintPhotos($('#rp'));
   document.querySelectorAll('#rp .row').forEach(b => b.onclick = () => {
     room = b.dataset.v;
     document.querySelectorAll('#rp .row').forEach(x => {
@@ -2408,7 +2429,7 @@ ROUTES.equipment = async () => {
     (myRes.length ? `<div class="section-title">${esc(t('eqMyResv'))}</div>${myRes.map(card).join('')}` : '') +
     `<div class="section-title">${esc(t('eqTitle'))}</div>${items.map(card).join('')}`;
 
-  document.querySelectorAll('#el img[data-ph]').forEach(im => loadPhoto(im.dataset.ph, im));
+  paintPhotos($('#el'));
   document.querySelectorAll('#el .rcard').forEach(b => b.onclick = () => {
     const i = items.find(x => x.resource_id === b.dataset.id); if(i) itemSheet(i);
   });
@@ -2656,7 +2677,7 @@ ROUTES['admin-res'] = async () => {
                       : `<span class="pill" style="background:var(--neutral);color:var(--ink-3)">${esc(t('admResInactive'))}</span>`}
       </button>`).join('')}` : '';
   $('#rs').innerHTML = sec('room', t('admResRoom')) + sec('equipment', t('admResEq')) + sec('vehicle','รถ');
-  document.querySelectorAll('#rs img[data-ph]').forEach(im => loadPhoto(im.dataset.ph, im));
+  paintPhotos($('#rs'));
   document.querySelectorAll('#rs .rcard').forEach(b =>
     b.onclick = () => resEdit(items.find(x => x.resource_id === b.dataset.id)));
 
@@ -2955,8 +2976,22 @@ function shrink2(file){
   });
 }
 
-/** ดึงรูปจากเซิร์ฟเวอร์ (ไฟล์ใน Drive เป็นส่วนตัว ไม่ได้เปิดลิงก์สาธารณะ) */
+/** โหลดรูปทุกใบในหน้าเดียวด้วยคำขอเดียว — เดิมยิงทีละใบแล้วต่อคิวกันจนช้า */
 const photoCache = {};
+async function paintPhotos(scope){
+  const els = [...(scope || document).querySelectorAll('img[data-ph]')];
+  if(!els.length) return;
+  els.forEach(e => { if(photoCache[e.dataset.ph]) e.src = photoCache[e.dataset.ph]; });
+  const need = [...new Set(els.map(e => e.dataset.ph).filter(id => id && !photoCache[id]))];
+  if(!need.length) return;
+  try{
+    const r = await apiRetry('getPhotos', { ids:need.slice(0,12).join(',') }, 'POST');
+    Object.keys(r?.photos || {}).forEach(k => photoCache[k] = r.photos[k]);
+    els.forEach(e => { if(photoCache[e.dataset.ph]) e.src = photoCache[e.dataset.ph]; });
+  }catch(e){}
+}
+
+/** ดึงรูปจากเซิร์ฟเวอร์ (ไฟล์ใน Drive เป็นส่วนตัว ไม่ได้เปิดลิงก์สาธารณะ) */
 async function loadPhoto(fileId, imgEl){
   if(!fileId || !imgEl) return null;
   if(photoCache[fileId]){ imgEl.src = photoCache[fileId]; return photoCache[fileId]; }
