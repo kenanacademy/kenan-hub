@@ -500,7 +500,7 @@ const T = {
     tParcel:'พัสดุ', tBorrow:'ยืมอุปกรณ์', tCar:'จองรถ', tIssue:'แจ้งเหตุ',
     mDir:'ทำเนียบบุคลากร', mDirEn:'Directory',
     mAct:'ประวัติของฉัน', mActEn:'My Activity',
-    mIssue:'แจ้งเหตุ', mIssueEn:'Report an Issue',
+    mIssue:'แจ้งเรื่อง / สอบถาม', mIssueEn:'Requests & Issues',
     emgSafe:'ฉันปลอดภัย', emgSafeSub:'ออกจากอาคารแล้ว หรืออยู่ที่จุดรวมพล',
     emgHelp:'ต้องการความช่วยเหลือ', emgHelpSub:'ติดอยู่ · บาดเจ็บ · ออกไม่ได้',
     emgSent:'บันทึกสถานะแล้ว', emgYouSaid:s=>`คุณแจ้งว่า: ${s}`,
@@ -521,7 +521,7 @@ const T = {
     prShowPhoneSub:'ถ้าปิดไว้ เพื่อนร่วมงานจะเห็นแค่อีเมล',
     prSave:'บันทึก', prSaved:'บันทึกแล้ว',
     dirCall:'โทร', dirMail:'ส่งอีเมล', dirCopy:'คัดลอกเบอร์', dirCopied:'คัดลอกแล้ว',
-    isuNew:'แจ้งเรื่องใหม่', isuMine:'เรื่องที่ฉันแจ้ง', isuQueue:'คิวที่ต้องจัดการ',
+    isuNew:'แจ้งเรื่อง / สอบถาม', isuMine:'เรื่องที่ฉันแจ้ง', isuQueue:'คิวที่ต้องจัดการ',
     isuCat:'เรื่องอะไร', isuDetail:'รายละเอียด',
     isuDetailPh:'เล่าให้ละเอียดหน่อยว่าเกิดอะไรขึ้น',
     isuWhere:'อยู่ตรงไหน', isuWherePh:'เช่น ห้องประชุม Inspiration',
@@ -534,8 +534,13 @@ const T = {
     isuTake:'รับเรื่องนี้', isuNote:'หมายเหตุ (ถ้ามี)', isuUpdate:'อัปเดตสถานะ',
     isuUpdated:'อัปเดตแล้ว แจ้งผู้แจ้งเรียบร้อย', isuBy:'แจ้งโดย', isuAssignee:'ผู้รับผิดชอบ',
     isuNoAssignee:'ยังไม่มีผู้รับผิดชอบ', isuTimeline:'ความคืบหน้า',
-    catIT:'IT / คอมพิวเตอร์', catElec:'ไฟฟ้า / แสงสว่าง', catWater:'ประปา / ห้องน้ำ',
-    catAir:'แอร์ / อากาศ', catBuild:'อาคาร / เฟอร์นิเจอร์', catOther:'อื่นๆ',
+    isuDept:'เรื่องนี้ควรถึงใคร', isuFwd:'ส่งต่อแผนกอื่น', isuFwded:'ส่งต่อแล้ว',
+    dIT:'IT', dITs:'คอมพิวเตอร์ · เน็ต · อีเมล · ระบบงาน',
+    dGA:'General Administration', dGAs:'อาคาร · ซ่อม · แอร์ · ไฟฟ้า · ประปา · พัสดุ · รถ',
+    dHR:'HR', dHRs:'ลา · สวัสดิการ · เอกสารบุคคล',
+    dFIN:'Finance and Accounting', dFINs:'เบิกจ่าย · ใบเสร็จ · งบประมาณ',
+    dPUR:'Purchasing', dPURs:'ขอซื้อ · จัดหา · ผู้ขาย',
+    dOTH:'ไม่แน่ใจ', dOTHs:'ให้ GA ช่วยคัดแล้วส่งต่อให้',
 
 
     recGone:'ไม่พบพัสดุชิ้นนี้แล้ว อาจถูกกดรับไปแล้ว',
@@ -676,7 +681,7 @@ const T = {
     tParcel:'Parcel', tBorrow:'Equipment', tCar:'Vehicle', tIssue:'Issue',
     mDir:'Directory', mDirEn:'ทำเนียบบุคลากร',
     mAct:'My Activity', mActEn:'ประวัติของฉัน',
-    mIssue:'Report an Issue', mIssueEn:'แจ้งเหตุ',
+    mIssue:'Requests & Issues', mIssueEn:'แจ้งเรื่อง / สอบถาม',
     emgSafe:'I am safe', emgSafeSub:'Out of the building or at the assembly point',
     emgHelp:'I need help', emgHelpSub:'Trapped · injured · cannot get out',
     emgSent:'Status recorded', emgYouSaid:s=>`You reported: ${s}`,
@@ -710,8 +715,13 @@ const T = {
     isuTake:'Take this', isuNote:'Note (optional)', isuUpdate:'Update status',
     isuUpdated:'Updated — reporter notified', isuBy:'Reported by', isuAssignee:'Owner',
     isuNoAssignee:'Unassigned', isuTimeline:'Progress',
-    catIT:'IT / computer', catElec:'Electrical / lighting', catWater:'Plumbing / toilet',
-    catAir:'Air-con', catBuild:'Building / furniture', catOther:'Other',
+    isuDept:'Who should handle this', isuFwd:'Forward to another team', isuFwded:'Forwarded',
+    dIT:'IT', dITs:'Computer · network · email · systems',
+    dGA:'General Administration', dGAs:'Building · repairs · air-con · parcels · vehicles',
+    dHR:'HR', dHRs:'Leave · benefits · personnel documents',
+    dFIN:'Finance and Accounting', dFINs:'Reimbursement · receipts · budget',
+    dPUR:'Purchasing', dPURs:'Purchase requests · vendors',
+    dOTH:'Not sure', dOTHs:'GA will triage and forward it for you',
 
 
     recGone:'That parcel is no longer listed — it may already be picked up',
@@ -1729,10 +1739,16 @@ ROUTES.activity = async () => {
 };
 
 /* ── แจ้งเหตุ ────────────────────────────────────────────────── */
-const ISSUE_CATS = () => [
-  { v:'IT',    l:t('catIT')    }, { v:'ไฟฟ้า',  l:t('catElec')  },
-  { v:'ประปา', l:t('catWater') }, { v:'แอร์',   l:t('catAir')   },
-  { v:'อาคาร', l:t('catBuild') }, { v:'อื่นๆ',  l:t('catOther') }
+/* ส่งตาม "แผนกที่รับผิดชอบ" ไม่ใช่ "ประเภทปัญหา"
+   ออฟฟิศเล็ก ประเภทปัญหา 6 อย่างวิ่งไปหาคนกลุ่มเดียวกันเกือบหมด
+   แบ่งตามแผนกจึงตรงกับความจริงกว่า และตัดสินได้ว่าเรื่องวิ่งไปหาใคร */
+const ISSUE_DEPTS = () => [
+  { v:'IT',                     l:t('dIT'),  s:t('dITs')  },
+  { v:'General Administration', l:t('dGA'),  s:t('dGAs')  },
+  { v:'HR',                     l:t('dHR'),  s:t('dHRs')  },
+  { v:'Finance and Accounting', l:t('dFIN'), s:t('dFINs') },
+  { v:'Purchasing',             l:t('dPUR'), s:t('dPURs') },
+  { v:'OTHER',                  l:t('dOTH'), s:t('dOTHs') }
 ];
 const issuePill = i => `<span class="pill ${
   i.status === 'closed' || i.status === 'resolved' ? 'done'
@@ -1769,11 +1785,13 @@ ROUTES['issue-new'] = async () => {
   setTitle(t('isuNew'));
   $('#main').innerHTML = `<div class="view">
     <div class="card">
-      <div class="lbl" style="font-size:13px;font-weight:600;margin-bottom:8px">${esc(t('isuCat'))}</div>
-      <div class="tiles" id="cats">${ISSUE_CATS().map((c, i) => `
-        <button class="tile ${i === 0 ? 'on' : ''}" data-v="${esc(c.v)}"
-          style="min-height:62px;padding:11px;${i === 0 ? 'border-color:var(--primary);background:#EEF3FF' : ''}">
-          <div class="nm" style="font-size:13px">${esc(c.l)}</div>
+      <div style="font-size:13px;font-weight:600;margin-bottom:9px">${esc(t('isuDept'))}</div>
+      <div id="cats">${ISSUE_DEPTS().map((c, i) => `
+        <button class="row" data-v="${esc(c.v)}" style="border:1.5px solid ${
+          i === 0 ? 'var(--primary)' : 'var(--line)'};border-radius:12px;margin-bottom:8px;
+          background:${i === 0 ? '#EEF3FF' : '#fff'}">
+          <div class="body"><div class="t">${esc(c.l)}</div><div class="s">${esc(c.s)}</div></div>
+          <span class="ck" style="color:var(--primary);font-weight:800;${i === 0 ? '' : 'visibility:hidden'}">✓</span>
         </button>`).join('')}</div>
     </div>
     <div class="card">
@@ -1797,13 +1815,14 @@ ROUTES['issue-new'] = async () => {
     <div class="sticky-cta"><button class="btn primary" id="go">${esc(t('isuSend'))}</button></div>
   </div>`;
 
-  let cat = ISSUE_CATS()[0].v, img = null;
-  document.querySelectorAll('#cats .tile').forEach(b => b.onclick = () => {
+  let cat = ISSUE_DEPTS()[0].v, img = null;
+  document.querySelectorAll('#cats .row').forEach(b => b.onclick = () => {
     cat = b.dataset.v;
-    document.querySelectorAll('#cats .tile').forEach(x => {
+    document.querySelectorAll('#cats .row').forEach(x => {
       const on = x === b;
       x.style.borderColor = on ? 'var(--primary)' : 'var(--line)';
       x.style.background  = on ? '#EEF3FF' : '#fff';
+      x.querySelector('.ck').style.visibility = on ? 'visible' : 'hidden';
     });
   });
   const fl = $('#fl');
@@ -1820,7 +1839,7 @@ ROUTES['issue-new'] = async () => {
     const b = $('#go'); b.disabled = true;
     try{
       await apiRetry('createIssue', {
-        category:cat, detail, location:$('#lo').value.trim(),
+        department:cat, detail, location:$('#lo').value.trim(),
         urgency:$('#ug').checked ? 'urgent' : 'normal',
         photo:img?.full || '', thumb:img?.thumb || ''
       }, 'POST');
@@ -1888,7 +1907,27 @@ ROUTES['issue-detail'] = async ({ id } = {}) => {
     ${d.canManage && d.next.length ? `<div style="margin-top:16px">
       ${!i.assignee_id ? `<button class="btn soft" id="take">${esc(t('isuTake'))}</button>
         <div style="height:9px"></div>` : ''}
-      <button class="btn primary" id="upd">${esc(t('isuUpdate'))}</button></div>` : ''}`;
+      <button class="btn primary" id="upd">${esc(t('isuUpdate'))}</button>
+      <div style="height:9px"></div>
+      <button class="btn ghost" id="fwd">${esc(t('isuFwd'))}</button></div>` : ''}`;
+
+  if($('#fwd')) $('#fwd').onclick = () => {
+    sheet(`<h3>${esc(t('isuFwd'))}</h3>
+      <p class="sub">${esc(t('isuDept'))}</p>
+      ${ISSUE_DEPTS().filter(c => c.v !== 'OTHER' && c.v !== i.dept).map(c => `
+        <button class="row" data-d="${esc(c.v)}"
+          style="border:1.5px solid var(--line);border-radius:12px;margin-bottom:8px">
+          <div class="body"><div class="t">${esc(c.l)}</div><div class="s">${esc(c.s)}</div></div>
+        </button>`).join('')}
+      <button class="btn ghost" id="fx">${esc(t('cancel'))}</button>`);
+    $('#fx').onclick = closeSheet;
+    document.querySelectorAll('#sheetBody .row[data-d]').forEach(b => b.onclick = async () => {
+      closeSheet();
+      try{ await apiRetry('forwardIssue', { record_id:id, department:b.dataset.d }, 'POST');
+           toast(t('isuFwded'), 'ok'); go('issue-detail', { id }, true); }
+      catch(e){ toast(t('netErr'), 'bad'); }
+    });
+  };
 
   if($('#ip')){
     loadPhoto(i.photo_id || i.thumb_id, $('#ip'));
@@ -1905,8 +1944,9 @@ ROUTES['issue-detail'] = async ({ id } = {}) => {
       ${d.next.map(s => `<button class="row" data-s="${esc(s)}"
         style="border:1.5px solid var(--line);border-radius:12px;margin-bottom:8px">
         <div class="body"><div class="t">${esc(({
-          triaged:t('isuTake'), in_progress:'กำลังดำเนินการ', sent_to_building:'ส่งต่อนิติบุคคลอาคาร',
-          resolved:'แก้ไขเสร็จแล้ว', closed:'ปิดเรื่อง'
+          triaged:'รับเรื่องแล้ว', in_progress:'กำลังดำเนินการ',
+          sent_to_building:'ส่งต่อนิติบุคคลอาคาร (GA)',
+          resolved:'ดำเนินการเสร็จแล้ว', closed:'ปิดเรื่อง'
         })[s] || s)}</div></div></button>`).join('')}
       <div class="field" style="margin-top:6px"><label>${esc(t('isuNote'))}</label>
         <input id="nt" placeholder="—"></div>
