@@ -438,7 +438,8 @@ const CFG = {
 const START_AT = (function(){
   try{
     const g = new URLSearchParams(location.search).get('go');
-    return ['home','parcel-in','my-parcels','unidentified','calltree','profile'].includes(g) ? g : null;
+    return ['home','parcel-in','my-parcels','unidentified','calltree','profile',
+            'news','reservation','admin'].includes(g) ? g : null;
   }catch(e){ return null; }
 })();
 
@@ -471,7 +472,21 @@ const T = {
     mHelp:'แจ้งปัญหา',          mHelpEn:'Helpdesk',
     mFaq:'ถาม-ตอบอัตโนมัติ',     mFaqEn:'AI FAQ',
     services:'บริการ', servicesEn:'Services',
-    news:'ประกาศล่าสุด', newsEn:'Recent News',
+    news:'ข่าวสาร', newsEn:'News',
+    newsEmpty:'ยังไม่มีข่าวสาร', newsEmptyBody:'เมื่อมีประกาศจากองค์กร จะขึ้นที่นี่',
+    mResv:'ระบบจอง-ยืม-คืน', mRoom:'ห้องประชุม', mRoomEn:'Meeting Room',
+    soonBody:'หมวดนี้กำลังพัฒนา จะเปิดใช้เป็นลำดับถัดไป ตอนนี้จองผ่านช่องทางเดิมไปก่อนครับ',
+    backHome:'กลับหน้าแรก',
+    adminTitle:'เมนูผู้ดูแล',
+    adminNo:'เฉพาะผู้ดูแลระบบ',
+    adminNoBody:'ถ้าคุณต้องบันทึกพัสดุเข้าระบบเป็นประจำ แจ้ง IT เพื่อขอสิทธิ์ผู้ดูแลได้ครับ',
+    adminToday:'ภาพรวมวันนี้',
+    admParcelsToday:'พัสดุเข้าวันนี้', admUnclaimed:'ยังไม่มารับ',
+    admUnidentified:'ไม่ทราบผู้รับ', admUsers:'ผู้ใช้ที่ลงทะเบียน',
+    admQuota:'โควตา LINE เดือนนี้',
+    admQuotaOk:'ยังเหลือพอ ระบบแจ้งเตือนทาง LINE ได้ตามปกติ',
+    admQuotaWarn:'ใกล้หมดแล้ว เมื่อครบระบบจะสลับไปแจ้งทางอีเมลแทนโดยอัตโนมัติ',
+    admOpenSheet:'เปิดฐานข้อมูลใน Google Sheet',
 
     regTitle:'ลงทะเบียนใช้งาน', regLead:'ใช้ครั้งเดียว แล้วเข้าใช้ผ่าน LINE ได้เลย',
     fName:'ชื่อ-นามสกุล (ไทย)', fNameEn:'Full name (Thai)',
@@ -571,7 +586,21 @@ const T = {
     mHelp:'Helpdesk', mHelpEn:'แจ้งปัญหา',
     mFaq:'AI FAQ', mFaqEn:'ถาม-ตอบอัตโนมัติ',
     services:'Services', servicesEn:'บริการ',
-    news:'Recent News', newsEn:'ประกาศล่าสุด',
+    news:'News', newsEn:'ข่าวสาร',
+    newsEmpty:'No news yet', newsEmptyBody:'Organisation announcements will appear here.',
+    mResv:'Reservations', mRoom:'Meeting Room', mRoomEn:'ห้องประชุม',
+    soonBody:'This section is still being built and will open next. For now please book through the existing channel.',
+    backHome:'Back to home',
+    adminTitle:'Admin',
+    adminNo:'Admins only',
+    adminNoBody:'If you log parcels regularly, ask IT for officer access.',
+    adminToday:'Today at a glance',
+    admParcelsToday:'Logged today', admUnclaimed:'Not picked up',
+    admUnidentified:'Unidentified', admUsers:'Registered users',
+    admQuota:'LINE quota this month',
+    admQuotaOk:'Plenty left — LINE notifications working normally',
+    admQuotaWarn:'Running low — the system will switch to email automatically when it runs out',
+    admOpenSheet:'Open the database in Google Sheets',
 
     regTitle:'Register', regLead:'One time only, then sign in with LINE',
     fName:'Full name (Thai)', fNameEn:'ชื่อ-นามสกุล (ไทย)',
@@ -884,10 +913,12 @@ ROUTES.home = async () => {
       </button>`).join('')}</div>
     <div class="section-title">${esc(t('news'))}<span class="en">${esc(t('newsEn'))}</span></div>
     <div id="newsBox">${skeleton(1)}</div>
+    <div style="margin-top:10px"><button class="btn ghost" id="allNews">${esc(t('news'))} →</button></div>
   </div>`;
   document.querySelectorAll('.tile[data-go]').forEach(b => {
     if(b.dataset.go) b.onclick = () => go(b.dataset.go);
   });
+  $('#allNews').onclick = () => go('news');
   try{
     const r = await apiRetry('getAnnouncements', {}, 'GET');
     const list = r?.items || [];
@@ -1182,6 +1213,90 @@ ROUTES.profile = async () => {
     S.lang = b.dataset.l; go('profile', {}, true);
   });
   $('#pol').onclick = () => go('privacy');
+};
+
+/* ── ข่าวสาร · ระบบจอง · เมนูผู้ดูแล (ปุ่มบน Rich Menu) ────────── */
+
+ROUTES.news = async () => {
+  setTitle(t('news'));
+  $('#main').innerHTML = `<div class="view"><div id="list">${skeleton(3)}</div></div>`;
+  let items = [];
+  try{ const r = await apiRetry('getAnnouncements', {}, 'GET'); items = r?.items || []; }catch(e){}
+  if(!items.length){
+    $('#list').innerHTML = emptyState(IC.bellBig, t('newsEmpty'), t('newsEmptyBody'));
+    return;
+  }
+  $('#list').innerHTML = items.map(a => `
+    <div class="card">
+      <div style="font-size:11px;color:var(--ink-3);font-weight:700">${esc(fmtDate(a.at))}</div>
+      <h3 style="margin:5px 0 6px;font-size:16px;font-weight:700">
+        ${esc(S.lang==='th' ? (a.title_th || a.title_en) : (a.title_en || a.title_th))}</h3>
+      <div style="font-size:13.5px;color:var(--ink-2);white-space:pre-wrap">${
+        esc(S.lang==='th' ? (a.body_th || a.body_en || '') : (a.body_en || a.body_th || ''))}</div>
+    </div>`).join('');
+};
+
+ROUTES.reservation = async () => {
+  setTitle(t('mResv'));
+  const rows = [
+    { ic:IC.car,    th:t('mCar'),  en:t('mCarEn')  },
+    { ic:IC.laptop, th:t('mLoan'), en:t('mLoanEn') },
+    { ic:IC.box,    th:t('mRoom'), en:t('mRoomEn') }
+  ];
+  $('#main').innerHTML = `<div class="view">
+    <div class="note info">${IC.info}<div>${esc(t('soonBody'))}</div></div>
+    <div class="rows" style="margin-top:14px">${rows.map(r => `
+      <div class="row" style="opacity:.6">
+        <div class="thumb" style="background:#EEF3FF;color:var(--primary)">${r.ic}</div>
+        <div class="body"><div class="t">${esc(r.th)}</div><div class="s">${esc(r.en)}</div></div>
+        <span class="pill new">${esc(t('soon'))}</span>
+      </div>`).join('')}</div>
+    <div style="margin-top:16px"><button class="btn ghost" id="bk">${esc(t('backHome'))}</button></div>
+  </div>`;
+  $('#bk').onclick = () => { S.stack = []; go('home'); };
+};
+
+ROUTES.admin = async () => {
+  setTitle(t('adminTitle'));
+  if(!S.isOfficer && !S.isAdmin){
+    $('#main').innerHTML = `<div class="view" style="padding-top:36px">
+      ${emptyState(IC.info, t('adminNo'), t('adminNoBody'))}</div>`;
+    return;
+  }
+  // ปุ่มกล้องอยู่บนสุด เพราะคนที่เข้าเมนูนี้คือคนที่ต้องบันทึกพัสดุ
+  $('#main').innerHTML = `<div class="view">
+    <button class="btn primary" id="toCam" style="padding:18px;font-size:16px">
+      ${IC.cam}<span>${esc(t('inTitle'))}</span></button>
+    <div style="height:9px"></div>
+    <button class="btn ghost" id="toUn">${esc(t('unTitle'))}</button>
+    <div class="section-title">${esc(t('adminToday'))}</div>
+    <div id="sum">${skeleton(2)}</div>
+  </div>`;
+  $('#toCam').onclick = () => go('parcel-in');
+  $('#toUn').onclick  = () => go('unidentified');
+
+  let s = null;
+  try{ s = await apiRetry('getAdminSummary', {}, 'GET'); }catch(e){}
+  if(!s?.ok){ $('#sum').innerHTML = ''; return; }
+  const pct = Math.round(s.lineUsed / s.lineQuota * 100);
+  const warn = pct >= 80;
+  $('#sum').innerHTML = `
+    <div class="tiles">
+      <div class="tile" style="min-height:82px"><div class="nm" style="font-size:23px">${s.parcelsToday}</div>
+        <div class="en">${esc(t('admParcelsToday'))}</div></div>
+      <div class="tile" style="min-height:82px"><div class="nm" style="font-size:23px">${s.unclaimed}</div>
+        <div class="en">${esc(t('admUnclaimed'))}</div></div>
+      <div class="tile" style="min-height:82px"><div class="nm" style="font-size:23px">${s.unidentified}</div>
+        <div class="en">${esc(t('admUnidentified'))}</div></div>
+      <div class="tile" style="min-height:82px"><div class="nm" style="font-size:23px">${s.users}</div>
+        <div class="en">${esc(t('admUsers'))}</div></div>
+    </div>
+    <div class="note ${warn ? '' : 'info'}" style="margin-top:12px">${IC.info}<div>
+      <b>${esc(t('admQuota'))} ${s.lineUsed}/${s.lineQuota}</b> (${pct}%)<br>
+      ${esc(warn ? t('admQuotaWarn') : t('admQuotaOk'))}</div></div>
+    <div style="margin-top:12px">
+      <a class="btn ghost" href="${esc(s.sheetUrl)}" target="_blank"
+         style="display:flex;text-decoration:none">${esc(t('admOpenSheet'))}</a></div>`;
 };
 
 /** หน้าเดียวกับ consent แต่เปิดจากโปรไฟล์ — อ่านอย่างเดียว มีปุ่มย้อนกลับ */
