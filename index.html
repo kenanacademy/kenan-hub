@@ -395,7 +395,10 @@ const T = {
     loading:'กำลังโหลด…', retry:'ลองอีกครั้ง', cancel:'ยกเลิก', save:'บันทึก',
     back:'ย้อนกลับ', close:'ปิด', confirm:'ยืนยัน', soon:'เร็วๆ นี้',
     netErr:'เชื่อมต่อไม่ได้ ลองใหม่อีกครั้ง',
-    netErrHint:'ถ้ายังไม่ได้ ให้ปิดแล้วเปิดใหม่ หรือแจ้ง IT',
+    netErrHint:'เซิร์ฟเวอร์อาจกำลังตื่นจากพัก ลองกดใหม่สัก 1–2 ครั้ง',
+    diag:'ดูรายละเอียดปัญหา',
+    offlineTitle:'เชื่อมต่อเซิร์ฟเวอร์ไม่ได้',
+    offlineBody:'ยังโหลดข้อมูลของคุณไม่ได้ กดลองใหม่อีกครั้งครับ',
 
     mParcel:'พัสดุและไปรษณีย์', mParcelEn:'Parcel & Mail',
     mCall:'เบอร์ติดต่อฉุกเฉิน',  mCallEn:'Emergency Call Tree',
@@ -486,7 +489,10 @@ const T = {
     loading:'Loading…', retry:'Try again', cancel:'Cancel', save:'Save',
     back:'Back', close:'Close', confirm:'Confirm', soon:'Coming soon',
     netErr:'Connection failed. Please try again.',
-    netErrHint:'If it keeps failing, close and reopen, or contact IT.',
+    netErrHint:'The server may be waking up — try once or twice more.',
+    diag:'Show details',
+    offlineTitle:'Cannot reach the server',
+    offlineBody:'We could not load your data. Please try again.',
 
     mParcel:'Parcel & Mail', mParcelEn:'พัสดุและไปรษณีย์',
     mCall:'Emergency Contacts', mCallEn:'เบอร์ติดต่อฉุกเฉิน',
@@ -627,8 +633,8 @@ async function api(action, payload = {}, method = 'GET'){
   const base = CFG.GAS_URL;
   let res;
   if(method === 'GET'){
-    const q = new URLSearchParams({ action, uid:S.uid||'', ...payload });
-    res = await fetch(`${base}?${q}`, { method:'GET', redirect:'follow' });
+    const q = new URLSearchParams({ action, uid:S.uid||'', _t:Date.now(), ...payload });
+    res = await fetch(`${base}?${q}`, { method:'GET', redirect:'follow', cache:'no-store' });
   }else{
     // text/plain = simple request → ไม่มี CORS preflight ที่ Apps Script ตอบไม่ได้
     res = await fetch(base, {
@@ -639,17 +645,27 @@ async function api(action, payload = {}, method = 'GET'){
   }
   const text = await res.text();
   try { return JSON.parse(text); }
-  catch(e){ throw new Error('BAD_RESPONSE'); }
+  catch(e){
+    // Apps Script คืน HTML แทน JSON ได้ในบางจังหวะ (cold start / หน้า redirect ของ Google)
+    const err = new Error('BAD_RESPONSE');
+    err.snippet = text.slice(0, 120);
+    throw err;
+  }
 }
-// GAS ตอบ HTML แทน JSON เป็นครั้งคราวตอนโหลดหนัก → ลองซ้ำสั้นๆ
-async function apiRetry(action, payload, method, tries = 2){
+
+/* Apps Script ตื่นจากหลับ (cold start) ใช้เวลาได้หลายวินาที และบางครั้งคืน HTML
+   → ลองซ้ำแบบถอยหลังเพิ่มทีละเท่า ก่อนจะยอมแพ้ */
+async function apiRetry(action, payload, method, tries = 3){
+  let last;
   for(let i = 0; i <= tries; i++){
     try{ return await api(action, payload, method); }
     catch(e){
-      if(e.message === 'NO_CONFIG' || i === tries) throw e;
-      await new Promise(r => setTimeout(r, 400 * (i + 1)));
+      last = e;
+      if(e.message === 'NO_CONFIG' || i === tries) break;
+      await new Promise(r => setTimeout(r, 600 * Math.pow(2, i)));   // 0.6s → 1.2s → 2.4s
     }
   }
+  throw last;
 }
 
 /* ── 5. UI helpers ────────────────────────────────────────────── */
@@ -710,7 +726,8 @@ $('#backBtn').onclick = back;
 
 function chrome(name){
   const isHome = name === 'home';
-  const isFull = ['register','otp','consent','gate'].includes(name);
+  // 'privacy' = หน้าเดียวกับ consent แต่เปิดจากโปรไฟล์ → ต้องมีปุ่มกลับและเมนูล่าง
+  const isFull = ['register','otp','consent','gate','offline'].includes(name);
   $('#backBtn').hidden = isHome || isFull;
   $('#brand').hidden   = !isHome;
   $('#title').hidden   = isHome;
@@ -730,11 +747,37 @@ async function render(name, params){
     if(e.message === 'NO_CONFIG'){
       $('#main').innerHTML = `<div class="view"><div class="note">${IC.info}<div><b>${t('noConfig')}</b><br>${t('noConfigBody')}</div></div></div>`;
     }else{
-      $('#main').innerHTML = `<div class="view">
-        <div class="empty">${IC.info}<h3>${t('netErr')}</h3><p>${t('netErrHint')}</p></div>
-        <button class="btn primary" onclick="location.reload()">${t('retry')}</button></div>`;
+      errorScreen(e, () => render(name, params));
     }
   }
+}
+
+/** หน้าจอเวลาเชื่อมต่อไม่ได้ — ลองใหม่ได้ตรงนี้โดยไม่ต้องรีโหลดทั้งแอป
+    และมีปุ่มทดสอบการเชื่อมต่อ เอาไว้ส่งข้อความ error ให้คนแก้ดู */
+function errorScreen(e, retryFn){
+  $('#main').innerHTML = `<div class="view">
+    <div class="empty">${IC.info}<h3>${esc(t('netErr'))}</h3><p>${esc(t('netErrHint'))}</p></div>
+    <button class="btn primary" id="rt">${esc(t('retry'))}</button>
+    <div style="height:9px"></div>
+    <button class="btn ghost" id="dg">${esc(t('diag'))}</button>
+    <pre id="dgOut" hidden style="margin-top:12px;padding:11px;background:var(--surface);
+      border:1px solid var(--line);border-radius:12px;font-size:11px;
+      white-space:pre-wrap;word-break:break-all;color:var(--ink-2)"></pre>
+  </div>`;
+  $('#rt').onclick = () => (retryFn ? retryFn() : location.reload());
+  $('#dg').onclick = async () => {
+    const box = $('#dgOut'); box.hidden = false; box.textContent = t('loading');
+    let out = 'error: ' + (e?.message || e) + (e?.snippet ? '\nsnippet: ' + e.snippet : '') + '\n';
+    out += 'uid: ' + (S.uid ? S.uid.slice(0,8) + '…' : '(none)') + '\n';
+    out += 'liff: ' + (S.liffReady ? 'ok' : 'no') + '\n';
+    try{
+      const r = await api('ping', {}, 'GET');
+      out += 'ping: ' + JSON.stringify(r);
+    }catch(err){
+      out += 'ping FAILED: ' + (err?.message || err) + (err?.snippet ? '\n' + err.snippet : '');
+    }
+    box.textContent = out;
+  };
 }
 function setTitle(s){ $('#title').textContent = s; }
 document.querySelectorAll('.nav button').forEach(b => b.onclick = () => { S.stack = []; go(b.dataset.go); });
@@ -1014,7 +1057,19 @@ ROUTES.profile = async () => {
   document.querySelectorAll('.langsw button').forEach(b => b.onclick = () => {
     S.lang = b.dataset.l; go('profile', {}, true);
   });
-  $('#pol').onclick = () => go('consent', { readonly:true });
+  $('#pol').onclick = () => go('privacy');
+};
+
+/** หน้าเดียวกับ consent แต่เปิดจากโปรไฟล์ — อ่านอย่างเดียว มีปุ่มย้อนกลับ */
+ROUTES.privacy = async () => { await ROUTES.consent({ readonly:true }); };
+
+/** โหลดข้อมูลตัวเองไม่สำเร็จตอนเปิดแอป — อย่าพาไปหน้าลงทะเบียน
+    เพราะผู้ใช้จะกรอกฟอร์มแล้วส่งไม่ผ่าน เสียเวลาเปล่า */
+ROUTES.offline = async () => {
+  $('#main').innerHTML = `<div class="view" style="padding-top:44px">
+    ${emptyState(IC.info, t('offlineTitle'), t('offlineBody'))}
+    <button class="btn primary" id="rt">${esc(t('retry'))}</button></div>`;
+  $('#rt').onclick = () => boot();
 };
 
 ROUTES.notifications = async () => {
@@ -1256,7 +1311,11 @@ async function loadPhoto(fileId, imgEl){
 }
 
 /* ── 9. BOOT — LIFF init ครั้งเดียวสำหรับทั้งแอป ───────────────── */
-(async function boot(){
+// จับ error ที่หลุดออกมา ไม่ให้จอกลายเป็นสีขาวเปล่าจนผู้ใช้คิดว่าแอปตาย
+window.addEventListener('error', ev => { try{ errorScreen(ev.error || ev); }catch(e){} });
+window.addEventListener('unhandledrejection', ev => { try{ errorScreen(ev.reason); }catch(e){} });
+
+async function boot(){
   try{ if(navigator.language?.startsWith('en')) S.lang = 'en'; }catch(e){}
 
   if(DEMO){
@@ -1285,28 +1344,35 @@ async function loadPhoto(fileId, imgEl){
       if(!liff.isLoggedIn()){ liff.login(); return; }
       S.profile = await liff.getProfile();
       S.uid = S.profile.userId;
+      // ล้าง ?code=&state=&liff... ที่ LIFF ต่อท้ายมาหลังล็อกอิน
+      // ไม่ล้างแล้วกดรีเฟรชหรือย้อนกลับจะวนกลับเข้า flow ล็อกอินซ้ำ
+      if(location.search) history.replaceState({}, '', location.pathname);
     }
   }catch(e){}
 
   if(!S.uid){ go('gate'); return; }
 
+  let auth;
   try{
-    const auth = await apiRetry('getAuthState', {}, 'GET');
-    S.me       = auth?.user || null;
-    S.isAdmin  = !!auth?.isAdmin;
-    S.isOfficer= !!(auth?.isAdmin || auth?.isOfficer);
-    S.regStatus= auth?.registrationStatus || (S.me ? 'approved' : 'none');
-    S.notifCount = auth?.notificationCount || 0;
-    if(S.notifCount){ $('#bellDot').textContent = S.notifCount; $('#bellDot').hidden = false; }
+    auth = await apiRetry('getAuthState', {}, 'GET');
   }catch(e){
     if(e.message === 'NO_CONFIG'){ render('home'); return; }
-    S.regStatus = 'none';
+    S.stack = []; render('offline', {}); return;   // ต่อเซิร์ฟเวอร์ไม่ได้ → อย่าพาไปกรอกฟอร์ม
   }
 
-  if(!S.me?.consent_at)          go('consent');
+  S.me        = auth?.user || null;
+  S.isAdmin   = !!auth?.isAdmin;
+  S.isOfficer = !!(auth?.isAdmin || auth?.isOfficer);
+  S.regStatus = auth?.registrationStatus || (S.me ? 'approved' : 'none');
+  S.notifCount= auth?.notificationCount || 0;
+  if(S.notifCount){ $('#bellDot').textContent = S.notifCount; $('#bellDot').hidden = false; }
+
+  S.stack = [];
+  if(!S.me?.consent_at)               go('consent');
   else if(S.regStatus !== 'approved') go('register');
   else                                go('home');
-})();
+}
+boot();
 </script>
 </body>
 </html>
