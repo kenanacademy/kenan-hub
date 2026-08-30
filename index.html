@@ -320,6 +320,39 @@ main{flex:1 1 auto;padding:16px 16px calc(var(--nav-h) + var(--safe-b) + 24px)}
 .pk-row.unknown .av{background:var(--warn-bg);color:var(--warn)}
 .pk-empty{text-align:center;padding:26px 10px;color:var(--ink-3);font-size:13px}
 
+
+/* ── ตารางห้องประชุม 08:00–18:00 ─────────────────────────────── */
+.gridwrap{background:var(--surface);border:1px solid var(--line);border-radius:14px;overflow:hidden}
+.gridscroll{overflow-x:auto;-webkit-overflow-scrolling:touch}
+.ghead{display:flex;position:sticky;top:0;z-index:2;background:var(--surface);border-bottom:1px solid var(--line)}
+.ghead .hcell{flex:0 0 84px;padding:8px 5px;text-align:center;border-left:1px solid var(--line)}
+.ghead .hcell .n{font-size:11.5px;font-weight:800;line-height:1.25}
+.ghead .hcell .c{font-size:9.5px;color:var(--ink-3);font-weight:600}
+.ghead .corner{flex:0 0 34px}
+.gbody{display:flex;position:relative}
+.ghours{flex:0 0 34px}
+.ghours span{display:block;height:44px;font-size:9.5px;color:var(--ink-3);font-weight:700;
+  text-align:right;padding-right:4px;transform:translateY(-5px)}
+.gcol{flex:0 0 84px;position:relative;border-left:1px solid var(--line)}
+.gcol .hr{height:44px;border-bottom:1px dashed var(--line)}
+.gcol .hr:active{background:var(--bk-bg,#EEF3FF)}
+.gev{position:absolute;left:2px;right:2px;border-radius:7px;padding:4px 5px;
+  background:var(--primary);color:#fff;overflow:hidden;text-align:left}
+.gev.mine{background:var(--ok)}
+.gev .t{font-size:9.5px;font-weight:800;line-height:1.2}
+.gev .w{font-size:9px;opacity:.9;line-height:1.25;margin-top:1px}
+.gnow{position:absolute;left:34px;right:0;height:2px;background:var(--bad);z-index:3}
+.gnow::before{content:'';position:absolute;left:-3px;top:-3px;width:8px;height:8px;
+  border-radius:50%;background:var(--bad)}
+.seg2{display:flex;background:var(--neutral);border-radius:10px;padding:3px;margin-bottom:12px}
+.seg2 button{flex:1;padding:8px;border-radius:8px;font-size:12.5px;font-weight:700;color:var(--ink-3)}
+.seg2 button.on{background:#fff;color:var(--primary);box-shadow:0 1px 3px rgba(0,0,0,.08)}
+.rcard{display:flex;gap:11px;align-items:center;padding:11px;border:1px solid var(--line);
+  border-radius:13px;background:var(--surface);margin-bottom:9px;width:100%;text-align:left}
+.rphoto{width:74px;height:56px;border-radius:10px;object-fit:cover;background:var(--neutral);
+  flex:0 0 auto;display:grid;place-items:center;color:var(--ink-3)}
+.rphoto svg{width:26px;height:26px}
+
 /* ── Consent / PDPA ────────────────────────────────────────── */
 .legal{
   background:var(--surface);border:1px solid var(--line);border-radius:var(--r);
@@ -440,8 +473,8 @@ const START_AT = (function(){
     const g = new URLSearchParams(location.search).get('go');
     return ['home','parcel-in','my-parcels','unidentified','calltree','profile',
             'news','reservation','admin','directory','activity','issues',
-            'alert-board','issue-new','issue-queue',
-            'rooms','room-new','equipment'].includes(g) ? g : null;
+            'alert-board','issue-queue',
+            'rooms','room-new','equipment','admin-res'].includes(g) ? g : null;
   }catch(e){ return null; }
 })();
 /* ?rec=PCL-xxx → เปิดพัสดุชิ้นนั้นให้เลย (ลิงก์ที่ส่งไปในข้อความ LINE) */
@@ -521,6 +554,21 @@ const T = {
     prPhone:'เบอร์ติดต่อ', prShowPhone:'เปิดเผยเบอร์ในทำเนียบบุคลากร',
     prShowPhoneSub:'ถ้าปิดไว้ เพื่อนร่วมงานจะเห็นแค่อีเมล',
     prSave:'บันทึก', prSaved:'บันทึกแล้ว',
+    rmGrid:'ตาราง', rmList:'รายการ', rmWeek:'รายสัปดาห์', rmDay:'รายวัน',
+    rmSeats:n=>`${n} ที่นั่ง`, rmTapSlot:'แตะช่องว่างเพื่อจอง',
+    rmSwap:'ติดต่อผู้จอง', rmSwapHint:'ถ้าจำเป็นต้องใช้ห้องนี้จริงๆ ลองติดต่อขอสลับกันดูครับ',
+    rmBookedBy:'ผู้จอง', rmNoPhoto:'ยังไม่มีรูปห้อง',
+    eqReserve:'จองล่วงหน้า', eqBorrowNow:'รับของเลยตอนนี้',
+    eqUpcoming:'คิวจองถัดไป', eqReserved:'จองไว้แล้ว', eqMyResv:'คิวของฉัน',
+    eqCancelResv:'ยกเลิกการจอง', eqResvOk:'จองอุปกรณ์เรียบร้อย',
+    eqClash:'ช่วงเวลานี้มีคนจองไว้แล้ว', eqDue:'กำหนดคืน',
+    admRes:'จัดการห้อง / อุปกรณ์', admResAdd:'เพิ่มรายการใหม่',
+    admResKind:'ประเภท', admResRoom:'ห้องประชุม', admResEq:'อุปกรณ์',
+    admResName:'ชื่อ (ไทย)', admResNameEn:'ชื่อ (อังกฤษ)', admResCat:'หมวด',
+    admResCap:'จำนวนที่นั่ง', admResLoc:'ที่เก็บ', admResNote:'หมายเหตุ / อุปกรณ์ประกอบ',
+    admResPhoto:'รูป', admResSave:'บันทึก', admResSaved:'บันทึกแล้ว',
+    admResOff:'ปิดใช้งาน', admResOn:'เปิดใช้งาน', admResInactive:'ปิดอยู่',
+
     rmTitle:'จองห้องประชุม', rmBook:'จองห้อง', rmFree:'ว่าง', rmToday:'วันนี้',
     rmNoBook:'ยังไม่มีใครจองห้องนี้', rmPick:'เลือกห้อง', rmWhen:'วันและเวลา',
     rmSubject:'เรื่องที่ประชุม', rmSubjectPh:'เช่น ประชุมทีม WING ประจำสัปดาห์',
@@ -721,6 +769,21 @@ const T = {
     prPhone:'Phone', prShowPhone:'Show my phone in the staff directory',
     prShowPhoneSub:'If off, colleagues see only your email',
     prSave:'Save', prSaved:'Saved',
+    rmGrid:'Grid', rmList:'List', rmWeek:'Week', rmDay:'Day',
+    rmSeats:n=>`${n} seats`, rmTapSlot:'Tap an empty slot to book',
+    rmSwap:'Contact the person', rmSwapHint:'If you really need this room, try asking them to swap.',
+    rmBookedBy:'Booked by', rmNoPhoto:'No room photo yet',
+    eqReserve:'Reserve for later', eqBorrowNow:'Take it now',
+    eqUpcoming:'Upcoming bookings', eqReserved:'Reserved', eqMyResv:'My bookings',
+    eqCancelResv:'Cancel booking', eqResvOk:'Equipment reserved',
+    eqClash:'That time is already booked', eqDue:'Due back',
+    admRes:'Rooms & equipment', admResAdd:'Add new',
+    admResKind:'Type', admResRoom:'Meeting room', admResEq:'Equipment',
+    admResName:'Name (Thai)', admResNameEn:'Name (English)', admResCat:'Category',
+    admResCap:'Seats', admResLoc:'Stored at', admResNote:'Notes / accessories',
+    admResPhoto:'Photo', admResSave:'Save', admResSaved:'Saved',
+    admResOff:'Disable', admResOn:'Enable', admResInactive:'Disabled',
+
     rmTitle:'Book a room', rmBook:'Book', rmFree:'Free', rmToday:'Today',
     rmNoBook:'No bookings for this room', rmPick:'Choose a room', rmWhen:'Date and time',
     rmSubject:'Meeting subject', rmSubjectPh:'e.g. WING team weekly',
@@ -1556,9 +1619,12 @@ ROUTES.admin = async () => {
     $('#toUn').insertAdjacentHTML('afterend',
       `<div style="height:9px"></div>
        <button class="btn ghost" id="toNews">${esc(t('admPostNews'))}</button>` +
+      `<div style="height:9px"></div>
+       <button class="btn ghost" id="toRes">${esc(t('admRes'))}</button>` +
       (S.isSuper ? `<div style="height:9px"></div>
        <button class="btn ghost" id="toRoles">${esc(t('admRoles'))}</button>` : ''));
     $('#toNews').onclick = () => go('admin-news');
+    $('#toRes').onclick  = () => go('admin-res');
     if($('#toRoles')) $('#toRoles').onclick = () => go('admin-roles');
   }
 
@@ -1796,26 +1862,76 @@ const issuePill = i => `<span class="pill ${
 
 ROUTES.issues = async (params = {}) => {
   setTitle(t('mIssue'));
+  // ฟอร์มอยู่บนสุดเลย ไม่ต้องกดปุ่มเข้าอีกหน้า — เข้ามาก็แจ้งได้ทันที
   $('#main').innerHTML = `<div class="view">
-    <button class="btn primary" id="new" style="padding:17px">${esc(t('isuNew'))}</button>
-    ${S.isOfficer ? `<div style="height:9px"></div>
-      <button class="btn soft" id="q">${esc(t('isuQueue'))}</button>` : ''}
+    <div class="card">
+      <div style="font-size:16px;font-weight:800;letter-spacing:-.01em">${esc(t('isuNew'))}</div>
+      <div style="font-size:12px;color:var(--ink-3);margin:2px 0 13px">${esc(t('isuDept'))}</div>
+      <div id="cats">${ISSUE_DEPTS().map((c, i) => `
+        <button class="row" data-v="${esc(c.v)}" style="border:1.5px solid ${
+          i===0?'var(--primary)':'var(--line)'};border-radius:12px;margin-bottom:7px;
+          background:${i===0?'#EEF3FF':'#fff'};padding:9px 10px">
+          <div class="body"><div class="t" style="font-size:13.5px">${esc(c.l)}</div>
+            <div class="s" style="font-size:10.5px">${esc(c.s)}</div></div>
+          <span class="ck" style="color:var(--primary);font-weight:800;${i===0?'':'visibility:hidden'}">✓</span>
+        </button>`).join('')}</div>
+
+      <div class="field" style="margin-top:13px"><label>${esc(t('isuDetail'))}<span class="req">*</span></label>
+        <textarea id="dt" rows="3" placeholder="${esc(t('isuDetailPh'))}"></textarea></div>
+      <div class="field"><label>${esc(t('isuWhere'))}</label>
+        <input id="lo" placeholder="${esc(t('isuWherePh'))}"></div>
+      ${photoField('ip2', t('isuPhoto'))}
+      <label class="check" style="margin:0 0 13px">
+        <input type="checkbox" id="ug">
+        <span><b>${esc(t('isuUrgent'))}</b><br>
+        <span style="color:var(--ink-3);font-size:12px">${esc(t('isuUrgentSub'))}</span></span>
+      </label>
+      <button class="btn primary" id="go">${esc(t('isuSend'))}</button>
+    </div>
+
+    ${S.isOfficer ? `<button class="btn soft" id="q">${esc(t('isuQueue'))}</button>
+      <div style="height:6px"></div>` : ''}
     <div class="section-title">${esc(t('isuMine'))}</div>
     <div id="il">${skeleton(2)}</div></div>`;
-  $('#new').onclick = () => go('issue-new');
+
+  let cat = ISSUE_DEPTS()[0].v; const img = { v:null };
+  wirePhoto('ip2', img);
+  document.querySelectorAll('#cats .row').forEach(b => b.onclick = () => {
+    cat = b.dataset.v;
+    document.querySelectorAll('#cats .row').forEach(x => {
+      const on = x === b;
+      x.style.borderColor = on ? 'var(--primary)' : 'var(--line)';
+      x.style.background  = on ? '#EEF3FF' : '#fff';
+      x.querySelector('.ck').style.visibility = on ? 'visible' : 'hidden';
+    });
+  });
   if($('#q')) $('#q').onclick = () => go('issue-queue');
+  $('#go').onclick = async () => {
+    const detail = $('#dt').value.trim();
+    if(!detail){ toast(t('isuNeed'), 'bad'); return; }
+    const b = $('#go'); b.disabled = true;
+    try{
+      await apiRetry('createIssue', {
+        department:cat, detail, location:$('#lo').value.trim(),
+        urgency:$('#ug').checked ? 'urgent' : 'normal',
+        photo:img.v?.full || '', thumb:img.v?.thumb || ''
+      }, 'POST');
+      toast(t('isuSent'), 'ok'); go('issues', {}, true);
+    }catch(e){ toast(t('netErr'), 'bad'); b.disabled = false; }
+  };
 
   let items = [];
   try{ const r = await apiRetry('getMyIssues', {}, 'GET'); items = r?.items || []; }catch(e){}
-  if(!items.length){ $('#il').innerHTML = emptyState(IC.tool, t('isuEmpty'), t('isuEmptyBody')); return; }
-  $('#il').innerHTML = `<div class="rows">${items.map(i => `
-    <button class="row" data-id="${esc(i.record_id)}">
-      <div class="thumb" style="background:#EEF3FF;color:var(--primary)">${IC.tool}</div>
-      <div class="body">
-        <div class="t">${esc(i.category)} · ${esc(String(i.detail).slice(0, 40))}</div>
-        <div class="s">${esc(fmtDate(i.created_at))}</div>
-      </div>${issuePill(i)}
-    </button>`).join('')}</div>`;
+  $('#il').innerHTML = items.length
+    ? `<div class="rows">${items.map(i => `
+        <button class="row" data-id="${esc(i.record_id)}">
+          <div class="thumb" style="background:#EEF3FF;color:var(--primary)">${IC.tool}</div>
+          <div class="body">
+            <div class="t">${esc(String(i.detail).slice(0, 40))}</div>
+            <div class="s">${esc(i.dept)} · ${esc(fmtDate(i.created_at))}</div>
+          </div>${issuePill(i)}
+        </button>`).join('')}</div>`
+    : emptyState(IC.tool, t('isuEmpty'), t('isuEmptyBody'));
   document.querySelectorAll('#il .row').forEach(b =>
     b.onclick = () => go('issue-detail', { id:b.dataset.id }));
   if(params.rec) go('issue-detail', { id:params.rec });
@@ -2009,62 +2125,145 @@ const dayKey = d => {
   return `${x.getFullYear()}-${String(x.getMonth()+1).padStart(2,'0')}-${String(x.getDate()).padStart(2,'0')}`;
 };
 const hhmm = iso => { try{ return new Date(iso).toLocaleTimeString(
-  S.lang==='th'?'th-TH':'en-GB', {hour:'2-digit',minute:'2-digit'}); }catch(e){ return ''; } };
+  S.lang==='th'?'th-TH':'en-GB',{hour:'2-digit',minute:'2-digit'}); }catch(e){ return ''; } };
+const H0 = 8, H1 = 18, HPX = 44;            // ตาราง 08:00–18:00 ช่องละ 44px
+const minsFrom8 = iso => { const d = new Date(iso); return (d.getHours()-H0)*60 + d.getMinutes(); };
 
 ROUTES.rooms = async (params = {}) => {
   setTitle(t('rmTitle'));
   const base = new Date(); const days = [];
-  for(let i = 0; i < 7; i++){ const d = new Date(base); d.setDate(base.getDate()+i); days.push(d); }
-  let sel = params.date || dayKey(base);
+  for(let i = 0; i < 14; i++){ const d = new Date(base); d.setDate(base.getDate()+i); days.push(d); }
+  const sel  = params.date || dayKey(base);
+  const mode = params.mode || 'day';        // day = ทุกห้องวันเดียว · week = ห้องเดียว 7 วัน
 
   $('#main').innerHTML = `<div class="view">
-    <div class="chips" id="dch" style="margin-bottom:12px">${days.map(d => `
-      <button class="chip ${dayKey(d)===sel?'on':''}" data-d="${dayKey(d)}">
-        ${d.toLocaleDateString(S.lang==='th'?'th-TH':'en-GB',{weekday:'short'})}
-        <span class="d">${d.getDate()}</span></button>`).join('')}</div>
+    <div class="seg2" id="sg">
+      <button class="${mode==='day'?'on':''}" data-m="day">${esc(t('rmDay'))}</button>
+      <button class="${mode==='week'?'on':''}" data-m="week">${esc(t('rmWeek'))}</button>
+    </div>
+    <div id="ctl"></div>
     <div id="rl">${skeleton(3)}</div>
+    <div class="section-title">${esc(t('rmPick'))}</div>
+    <div id="rooms"></div>
     <div class="sticky-cta"><button class="btn primary" id="bk">＋ ${esc(t('rmBook'))}</button></div>
   </div>`;
   $('#bk').onclick = () => go('room-new', { date:sel });
-  document.querySelectorAll('#dch .chip').forEach(c => c.onclick = () => go('rooms', { date:c.dataset.d }, true));
+  document.querySelectorAll('#sg button').forEach(b =>
+    b.onclick = () => go('rooms', { date:sel, mode:b.dataset.m }, true));
 
   let r = null;
-  try{ r = await apiRetry('getRoomDay', { date:sel }, 'GET'); }catch(e){}
+  try{ r = await apiRetry('getRoomDay',
+        { date: mode==='week' ? sel : sel, days: mode==='week' ? 7 : 1 }, 'GET'); }catch(e){}
   if(!r?.ok){ $('#rl').innerHTML = emptyState(IC.info, t('netErr'), ''); return; }
 
-  $('#rl').innerHTML = r.rooms.map(rm => {
-    const bs = r.bookings.filter(b => b.resource_id === rm.resource_id);
-    return `<div class="card" style="margin-bottom:11px">
-      <div style="display:flex;justify-content:space-between;align-items:center">
-        <div style="font-size:15px;font-weight:700">${esc(rm.name_th)}</div>
-        ${bs.length ? '' : `<span class="pill done">${esc(t('rmFree'))}</span>`}
-      </div>
-      ${bs.length ? bs.map(b => `
-        <div style="display:flex;gap:10px;margin-top:10px;padding-top:10px;border-top:1px solid var(--line)">
-          <div style="font-size:13px;font-weight:800;color:var(--primary);white-space:nowrap">
-            ${esc(hhmm(b.start_at))}<br><span style="color:var(--ink-3);font-weight:600">${esc(hhmm(b.end_at))}</span></div>
-          <div style="flex:1;min-width:0">
-            <div style="font-size:14px;font-weight:600">${esc(b.title)}</div>
-            <div style="font-size:11.5px;color:var(--ink-3)">${esc(b.who)}</div>
-          </div>
-          ${String(b.requester_id) === String(S.me?.kenan_user_id)
-            ? `<button class="mini" data-cancel="${esc(b.record_id)}"
-                 style="background:var(--bad-bg,#FEF2F2);color:var(--bad)">✕</button>` : ''}
-        </div>`).join('')
-        : `<div style="font-size:12.5px;color:var(--ink-3);margin-top:6px">${esc(t('rmNoBook'))}</div>`}
-    </div>`;
-  }).join('');
+  let room0 = params.room || r.rooms[0]?.resource_id;
 
-  document.querySelectorAll('[data-cancel]').forEach(b => b.onclick = async () => {
-    try{ await apiRetry('cancelRoomBooking', { record_id:b.dataset.cancel }, 'POST');
-         toast(t('rmCancelled'), 'ok'); go('rooms', { date:sel }, true); }
-    catch(e){ toast(t('netErr'), 'bad'); }
+  // ── แถบควบคุมด้านบน
+  $('#ctl').innerHTML = mode === 'day'
+    ? `<div class="chips" id="dch" style="margin-bottom:11px">${days.slice(0,10).map(d => `
+        <button class="chip ${dayKey(d)===sel?'on':''}" data-d="${dayKey(d)}">
+          ${d.toLocaleDateString(S.lang==='th'?'th-TH':'en-GB',{weekday:'short'})}
+          <span class="d">${d.getDate()}</span></button>`).join('')}</div>`
+    : `<div class="chips" id="rch" style="margin-bottom:11px">${r.rooms.map(rm => `
+        <button class="chip ${rm.resource_id===room0?'on':''}" data-r="${esc(rm.resource_id)}">
+          ${esc(rm.name_th.replace('ห้อง ',''))}</button>`).join('')}</div>`;
+  if($('#dch')) document.querySelectorAll('#dch .chip').forEach(c =>
+    c.onclick = () => go('rooms', { date:c.dataset.d, mode }, true));
+  if($('#rch')) document.querySelectorAll('#rch .chip').forEach(c =>
+    c.onclick = () => go('rooms', { date:sel, mode, room:c.dataset.r }, true));
+
+  // ── ตาราง
+  const cols = mode === 'day'
+    ? r.rooms.map(rm => ({ key:rm.resource_id, n:rm.name_th.replace('ห้อง ',''),
+                           c: rm.capacity ? t('rmSeats')(rm.capacity) : '' }))
+    : days.slice(0,7).map(d => ({ key:dayKey(d),
+        n:d.toLocaleDateString(S.lang==='th'?'th-TH':'en-GB',{weekday:'short'}), c:String(d.getDate()) }));
+
+  const evFor = col => r.bookings.filter(b =>
+    mode === 'day' ? b.resource_id === col.key
+                   : (b.resource_id === room0 && dayKey(b.start_at) === col.key));
+
+  const nowTop = (() => {
+    const n = new Date();
+    if(dayKey(n) !== sel && mode === 'day') return null;
+    const m = (n.getHours()-H0)*60 + n.getMinutes();
+    return (m < 0 || m > (H1-H0)*60) ? null : (m/60)*HPX;
+  })();
+
+  $('#rl').innerHTML = `<div class="gridwrap"><div class="gridscroll"><div style="min-width:${34+cols.length*84}px">
+    <div class="ghead"><div class="corner"></div>${cols.map(c => `
+      <div class="hcell"><div class="n">${esc(c.n)}</div><div class="c">${esc(c.c)}</div></div>`).join('')}</div>
+    <div class="gbody">
+      <div class="ghours">${Array.from({length:H1-H0+1},(_,i)=>`<span>${String(H0+i).padStart(2,'0')}</span>`).join('')}</div>
+      ${cols.map(c => `<div class="gcol" data-k="${esc(c.key)}">
+        ${Array.from({length:H1-H0},(_,i)=>`<div class="hr" data-h="${H0+i}"></div>`).join('')}
+        ${evFor(c).map(b => {
+          const top = Math.max(0,(minsFrom8(b.start_at)/60)*HPX);
+          const hgt = Math.max(20,((minsFrom8(b.end_at)-minsFrom8(b.start_at))/60)*HPX-2);
+          const mine = String(b.requester_id) === String(S.me?.kenan_user_id);
+          return `<button class="gev ${mine?'mine':''}" data-b="${esc(b.record_id)}"
+            style="top:${top}px;height:${hgt}px">
+            <div class="t">${esc(hhmm(b.start_at))}</div>
+            <div class="w">${esc(b.who)}</div></button>`;
+        }).join('')}
+      </div>`).join('')}
+      ${nowTop!==null?`<div class="gnow" style="top:${nowTop}px"></div>`:''}
+    </div>
+  </div></div></div>
+  <div style="font-size:11.5px;color:var(--ink-3);margin-top:8px;text-align:center">${esc(t('rmTapSlot'))}</div>`;
+
+  // แตะช่องว่าง = จองเลย · แตะรายการที่มีอยู่ = ดูว่าใครจอง (ขอสลับได้)
+  document.querySelectorAll('#rl .hr').forEach(cell => cell.onclick = () => {
+    const key = cell.closest('.gcol').dataset.k, hr = cell.dataset.h;
+    go('room-new', mode==='day' ? { date:sel, room:key, hour:hr }
+                                : { date:key, room:room0, hour:hr });
   });
+  document.querySelectorAll('#rl .gev').forEach(el => el.onclick = ev => {
+    ev.stopPropagation();
+    const b = r.bookings.find(x => x.record_id === el.dataset.b); if(!b) return;
+    const mine = String(b.requester_id) === String(S.me?.kenan_user_id);
+    const rm = r.rooms.find(x => x.resource_id === b.resource_id);
+    sheet(`<h3>${esc(b.title)}</h3>
+      <p class="sub">${esc(rm?.name_th || '')} · ${esc(fmtDate(b.start_at))} – ${esc(hhmm(b.end_at))}</p>
+      <div class="rows" style="margin-bottom:12px"><div class="row">
+        <span class="av">${esc(String(b.who||'?').trim().charAt(0))}</span>
+        <div class="body"><div class="t">${esc(b.who)}</div>
+          <div class="s">${esc(b.who_dept || '')}</div></div></div></div>
+      ${mine ? `<button class="btn danger" id="cx2" style="background:var(--bad);color:#fff">${esc(t('rmCancel'))}</button>`
+        : `<div class="note info">${IC.info}<div>${esc(t('rmSwapHint'))}</div></div>
+           ${b.who_phone?`<a class="btn primary" href="tel:${esc(b.who_phone)}" style="text-decoration:none;margin-top:10px">📞 ${esc(b.who_phone)}</a>`:''}
+           ${b.who_email?`<a class="btn ghost" href="mailto:${esc(b.who_email)}" style="text-decoration:none;word-break:break-all">✉ ${esc(b.who_email)}</a>`:''}`}
+      <button class="btn ghost" id="cl">${esc(t('close'))}</button>`);
+    $('#cl').onclick = closeSheet;
+    if($('#cx2')) $('#cx2').onclick = async () => {
+      closeSheet();
+      try{ await apiRetry('cancelRoomBooking', { record_id:b.record_id }, 'POST');
+           toast(t('rmCancelled'),'ok'); go('rooms', { date:sel, mode }, true); }
+      catch(e){ toast(t('netErr'),'bad'); }
+    };
+  });
+
+  // ── การ์ดห้อง: รูป + จำนวนที่นั่ง
+  $('#rooms').innerHTML = r.rooms.map(rm => `
+    <button class="rcard" data-r="${esc(rm.resource_id)}">
+      ${rm.thumb_id ? `<img class="rphoto" data-ph="${esc(rm.thumb_id)}" alt="">`
+                    : `<div class="rphoto">${IC.cal}</div>`}
+      <div style="flex:1;min-width:0">
+        <div style="font-size:14.5px;font-weight:700">${esc(rm.name_th)}</div>
+        <div style="font-size:11.5px;color:var(--ink-3)">${
+          esc([rm.capacity ? t('rmSeats')(rm.capacity) : '', rm.category, rm.note].filter(Boolean).join(' · '))}</div>
+      </div><span class="go">${IC.chev}</span>
+    </button>`).join('');
+  document.querySelectorAll('#rooms img[data-ph]').forEach(im => loadPhoto(im.dataset.ph, im));
+  document.querySelectorAll('#rooms .rcard').forEach(b =>
+    b.onclick = () => go('room-new', { date:sel, room:b.dataset.r }));
 };
 
-ROUTES['room-new'] = async ({ date } = {}) => {
+ROUTES['room-new'] = async ({ date, room:preRoom, hour } = {}) => {
   setTitle(t('rmBook'));
   const day = date || dayKey(new Date());
+  const h1  = hour ? String(hour).padStart(2,'0') + ':00' : '09:00';
+  const h2  = hour ? String(Math.min(Number(hour)+1,18)).padStart(2,'0') + ':00' : '10:00';
   let rooms = [];
   try{ const r = await apiRetry('getRoomDay', { date:day }, 'GET'); rooms = r?.rooms || []; }catch(e){}
 
@@ -2073,11 +2272,14 @@ ROUTES['room-new'] = async ({ date } = {}) => {
       <div style="font-size:13px;font-weight:600;margin-bottom:9px">${esc(t('rmPick'))}</div>
       <div id="rp">${rooms.map((rm, i) => `
         <button class="row" data-v="${esc(rm.resource_id)}" style="border:1.5px solid ${
-          i===0?'var(--primary)':'var(--line)'};border-radius:12px;margin-bottom:8px;
-          background:${i===0?'#EEF3FF':'#fff'}">
+          (preRoom?rm.resource_id===preRoom:i===0)?'var(--primary)':'var(--line)'};border-radius:12px;
+          margin-bottom:8px;background:${(preRoom?rm.resource_id===preRoom:i===0)?'#EEF3FF':'#fff'}">
+          ${rm.thumb_id ? `<img class="rphoto" style="width:52px;height:40px" data-ph="${esc(rm.thumb_id)}" alt="">`
+                        : `<div class="rphoto" style="width:52px;height:40px">${IC.cal}</div>`}
           <div class="body"><div class="t">${esc(rm.name_th)}</div>
-            <div class="s">${esc(rm.note || rm.name_en || '')}</div></div>
-          <span class="ck" style="color:var(--primary);font-weight:800;${i===0?'':'visibility:hidden'}">✓</span>
+            <div class="s">${esc([rm.capacity?t('rmSeats')(rm.capacity):'', rm.note].filter(Boolean).join(' · '))}</div></div>
+          <span class="ck" style="color:var(--primary);font-weight:800;${
+            (preRoom?rm.resource_id===preRoom:i===0)?'':'visibility:hidden'}">✓</span>
         </button>`).join('')}</div>
     </div>
     <div class="card">
@@ -2085,11 +2287,11 @@ ROUTES['room-new'] = async ({ date } = {}) => {
         <input type="date" id="dd" value="${day}"></div>
       <div class="times">
         <div class="tbox"><div class="k">${esc(t('rmFrom'))}</div>
-          <input type="time" id="t1" value="09:00" style="border:none;font-size:17px;font-weight:800;
+          <input type="time" id="t1" value="${h1}" style="border:none;font-size:17px;font-weight:800;
             text-align:center;width:100%;background:transparent"></div>
         <div class="arrow">→</div>
         <div class="tbox hl"><div class="k">${esc(t('rmTo'))}</div>
-          <input type="time" id="t2" value="10:00" style="border:none;font-size:17px;font-weight:800;
+          <input type="time" id="t2" value="${h2}" style="border:none;font-size:17px;font-weight:800;
             text-align:center;width:100%;background:transparent"></div>
       </div>
     </div>
@@ -2101,7 +2303,8 @@ ROUTES['room-new'] = async ({ date } = {}) => {
     <div class="sticky-cta"><button class="btn primary" id="go">${esc(t('rmGo'))}</button></div>
   </div>`;
 
-  let room = rooms[0]?.resource_id || '';
+  let room = preRoom || rooms[0]?.resource_id || '';
+  document.querySelectorAll('#rp img[data-ph]').forEach(im => loadPhoto(im.dataset.ph, im));
   document.querySelectorAll('#rp .row').forEach(b => b.onclick = () => {
     room = b.dataset.v;
     document.querySelectorAll('#rp .row').forEach(x => {
@@ -2144,30 +2347,94 @@ ROUTES.equipment = async () => {
   try{ const r = await apiRetry('getEquipment', {}, 'GET'); items = r?.items || []; }catch(e){}
   if(!items.length){ $('#el').innerHTML = emptyState(IC.laptop, t('eqEmpty'), t('eqEmptyBody')); return; }
 
-  const mine = items.filter(i => i.mine);
-  const row = i => `
-    <button class="row" data-id="${esc(i.resource_id)}" data-loan="${esc(i.loan_id || '')}">
-      <div class="thumb" style="background:${i.available ? 'var(--ok-bg)' : 'var(--warn-bg)'};
-        color:${i.available ? 'var(--ok)' : 'var(--warn)'}">${IC.laptop}</div>
-      <div class="body">
-        <div class="t">${esc(i.name_th)}</div>
-        <div class="s">${esc(i.available ? (i.storage_location || i.category || '') : t('eqBy')(i.holder))}</div>
+  const mine  = items.filter(i => i.mine);
+  const myRes = items.filter(i => i.reservations?.some(x => x.mine));
+  const card = i => `
+    <button class="rcard" data-id="${esc(i.resource_id)}">
+      ${i.thumb_id ? `<img class="rphoto" data-ph="${esc(i.thumb_id)}" alt="">`
+                   : `<div class="rphoto">${IC.laptop}</div>`}
+      <div style="flex:1;min-width:0">
+        <div style="font-size:14.5px;font-weight:700">${esc(i.name_th)}</div>
+        <div style="font-size:11.5px;color:var(--ink-3)">${
+          esc(i.available ? (i.storage_location || i.category || '') : t('eqBy')(i.holder))}</div>
+        ${i.reservations?.length ? `<div style="font-size:10.5px;color:var(--warn);font-weight:700;margin-top:2px">
+          ${esc(t('eqUpcoming'))}: ${esc(fmtDate(i.reservations[0].start_at))}${
+            i.reservations.length>1?` +${i.reservations.length-1}`:''}</div>` : ''}
       </div>
-      <span class="pill ${i.available ? 'done' : 'wait'}">${esc(i.available ? t('eqAvail') : t('eqOut'))}</span>
+      <span class="pill ${i.available?'done':'wait'}">${esc(i.available?t('eqAvail'):t('eqOut'))}</span>
     </button>`;
-  $('#el').innerHTML =
-    (mine.length ? `<div class="section-title">${esc(t('eqMine'))}</div>
-      <div class="rows">${mine.map(row).join('')}</div>` : '') +
-    `<div class="section-title">${esc(t('eqTitle'))}</div>
-     <div class="rows">${items.map(row).join('')}</div>`;
 
-  document.querySelectorAll('#el .row').forEach(b => b.onclick = () => {
-    const i = items.find(x => x.resource_id === b.dataset.id); if(!i) return;
-    if(i.available)   borrowSheet(i);
-    else if(i.mine)   returnSheet(i);
-    else toast(t('eqBy')(i.holder));
+  $('#el').innerHTML =
+    (mine.length  ? `<div class="section-title">${esc(t('eqMine'))}</div>${mine.map(card).join('')}` : '') +
+    (myRes.length ? `<div class="section-title">${esc(t('eqMyResv'))}</div>${myRes.map(card).join('')}` : '') +
+    `<div class="section-title">${esc(t('eqTitle'))}</div>${items.map(card).join('')}`;
+
+  document.querySelectorAll('#el img[data-ph]').forEach(im => loadPhoto(im.dataset.ph, im));
+  document.querySelectorAll('#el .rcard').forEach(b => b.onclick = () => {
+    const i = items.find(x => x.resource_id === b.dataset.id); if(i) itemSheet(i);
   });
 };
+
+/** การ์ดอุปกรณ์: เลือกได้ทั้งรับเลย และจองล่วงหน้า
+    จองล่วงหน้าจำเป็น เพราะคนต้องวางแผนงานล่วงหน้าว่าจะมีของใช้แน่ */
+function itemSheet(i){
+  sheet(`<h3>${esc(i.name_th)}</h3>
+    <p class="sub">${esc([i.category, i.storage_location ? t('eqShelfAt')(i.storage_location) : '',
+                          i.note].filter(Boolean).join(' · '))}</p>
+    ${i.photo_id || i.thumb_id ? `<img class="sheet-photo" id="isp" alt="">` : ''}
+    ${!i.available ? `<div class="note warn">📷<div><b>${esc(t('eqBy')(i.holder))}</b><br>
+      ${esc(t('eqSince')(fmtDate(i.since)))}</div></div>` : ''}
+    ${i.reservations?.length ? `<div class="section-title" style="margin-top:12px">${esc(t('eqUpcoming'))}</div>
+      <div class="rows">${i.reservations.map(x => `
+        <div class="row"><div class="body">
+          <div class="t">${esc(fmtDate(x.start_at))} – ${esc(hhmm(x.end_at))}</div>
+          <div class="s">${esc(x.who)}</div></div>
+          ${x.mine ? `<button class="mini" data-cr="${esc(x.record_id)}"
+            style="background:var(--bad-bg,#FEF2F2);color:var(--bad)">✕</button>` : ''}
+        </div>`).join('')}</div>` : ''}
+    <div style="height:12px"></div>
+    ${i.mine ? `<button class="btn g" id="ret" style="background:var(--ok);color:#fff">${esc(t('eqReturn'))}</button>`
+      : `${i.available ? `<button class="btn primary" id="now">${esc(t('eqBorrowNow'))}</button>` : ''}
+         <button class="btn soft" id="rsv">${esc(t('eqReserve'))}</button>`}
+    <button class="btn ghost" id="ix">${esc(t('close'))}</button>`);
+  if($('#isp')) loadPhoto(i.photo_id || i.thumb_id, $('#isp'));
+  $('#ix').onclick = closeSheet;
+  if($('#now')) $('#now').onclick = () => { closeSheet(); setTimeout(() => borrowSheet(i), 220); };
+  if($('#ret')) $('#ret').onclick = () => { closeSheet(); setTimeout(() => returnSheet(i), 220); };
+  if($('#rsv')) $('#rsv').onclick = () => { closeSheet(); setTimeout(() => reserveSheet(i), 220); };
+  document.querySelectorAll('[data-cr]').forEach(b => b.onclick = async () => {
+    closeSheet();
+    try{ await apiRetry('cancelReservation', { record_id:b.dataset.cr }, 'POST');
+         toast(t('rmCancelled'),'ok'); go('equipment', {}, true); }
+    catch(e){ toast(t('netErr'),'bad'); }
+  });
+}
+
+function reserveSheet(i){
+  const d0 = dayKey(new Date());
+  sheet(`<h3>${esc(t('eqReserve'))}</h3><p class="sub">${esc(i.name_th)}</p>
+    <div class="field"><label>${esc(t('rmFrom'))}</label>
+      <input type="date" id="rd1" value="${d0}"></div>
+    <div class="field"><label>${esc(t('eqDue'))}</label>
+      <input type="date" id="rd2" value="${d0}"></div>
+    <div class="field"><label>${esc(t('eqPurpose'))}</label>
+      <input id="rp2" placeholder="${esc(t('eqPurposePh'))}"></div>
+    <button class="btn primary" id="rgo2">${esc(t('eqReserve'))}</button>
+    <button class="btn ghost" id="rx2">${esc(t('cancel'))}</button>`);
+  $('#rx2').onclick = closeSheet;
+  $('#rgo2').onclick = async () => {
+    const a = $('#rd1').value, z = $('#rd2').value;
+    if(!a || !z || z < a){ toast(t('rmBadTime'),'bad'); return; }
+    const b = $('#rgo2'); b.disabled = true;
+    try{
+      const r = await apiRetry('reserveItem', { resource_id:i.resource_id,
+        start_at:`${a}T08:00:00+07:00`, end_at:`${z}T18:00:00+07:00`,
+        purpose:$('#rp2').value.trim() }, 'POST');
+      if(r?.error === 'CLASH'){ toast(`${t('eqClash')} · ${r.clash?.who||''}`,'bad'); b.disabled=false; return; }
+      closeSheet(); toast(t('eqResvOk'),'ok'); go('equipment', {}, true);
+    }catch(e){ toast(t('netErr'),'bad'); b.disabled = false; }
+  };
+}
 
 function photoField(id, label){
   return `<div class="field"><label>${esc(label)}<span class="req">*</span></label>
@@ -2317,6 +2584,90 @@ function declareSheet(){
     }catch(e){ toast(t('netErr'), 'bad'); b.disabled = false; b.textContent = t('emgConfirm'); }
   };
 }
+
+
+/* ── ผู้ดูแลเพิ่ม/แก้ห้องและอุปกรณ์เองได้ ไม่ต้องไปแก้ในชีท ─────── */
+ROUTES['admin-res'] = async () => {
+  setTitle(t('admRes'));
+  $('#main').innerHTML = `<div class="view">
+    <button class="btn primary" id="add">＋ ${esc(t('admResAdd'))}</button>
+    <div id="rs" style="margin-top:14px">${skeleton(3)}</div></div>`;
+  $('#add').onclick = () => resEdit(null);
+
+  let items = [];
+  try{ const r = await apiRetry('getResourcesAdmin', {}, 'GET');
+       if(!r?.ok){ $('#rs').innerHTML = emptyState(IC.info, t('adminNo'), t('adminNoBody')); return; }
+       items = r.items; }catch(e){}
+
+  const grp = { room:[], equipment:[], vehicle:[] };
+  items.forEach(i => (grp[i.kind] || (grp[i.kind] = [])).push(i));
+  const sec = (k, label) => grp[k]?.length ? `
+    <div class="section-title">${esc(label)}</div>
+    ${grp[k].map(i => `
+      <button class="rcard" data-id="${esc(i.resource_id)}" ${i.is_active?'':'style="opacity:.5"'}>
+        ${i.thumb_id ? `<img class="rphoto" data-ph="${esc(i.thumb_id)}" alt="">`
+                     : `<div class="rphoto">${k==='room'?IC.cal:IC.laptop}</div>`}
+        <div style="flex:1;min-width:0">
+          <div style="font-size:14.5px;font-weight:700">${esc(i.name_th)}</div>
+          <div style="font-size:11.5px;color:var(--ink-3)">${esc([
+            i.capacity ? t('rmSeats')(i.capacity) : '', i.category, i.storage_location
+          ].filter(Boolean).join(' · '))}</div>
+        </div>
+        ${i.is_active ? `<span class="go">${IC.chev}</span>`
+                      : `<span class="pill" style="background:var(--neutral);color:var(--ink-3)">${esc(t('admResInactive'))}</span>`}
+      </button>`).join('')}` : '';
+  $('#rs').innerHTML = sec('room', t('admResRoom')) + sec('equipment', t('admResEq')) + sec('vehicle','รถ');
+  document.querySelectorAll('#rs img[data-ph]').forEach(im => loadPhoto(im.dataset.ph, im));
+  document.querySelectorAll('#rs .rcard').forEach(b =>
+    b.onclick = () => resEdit(items.find(x => x.resource_id === b.dataset.id)));
+
+  function resEdit(it){
+    const isRoom = it ? it.kind === 'room' : false;
+    sheet(`<h3>${esc(it ? it.name_th : t('admResAdd'))}</h3>
+      ${it ? '' : `<div class="field"><label>${esc(t('admResKind'))}</label>
+        <select id="rk"><option value="equipment">${esc(t('admResEq'))}</option>
+          <option value="room">${esc(t('admResRoom'))}</option></select></div>`}
+      <div class="field"><label>${esc(t('admResName'))}<span class="req">*</span></label>
+        <input id="rn2" value="${esc(it?.name_th || '')}"></div>
+      <div class="field"><label>${esc(t('admResCat'))}</label>
+        <input id="rc" value="${esc(it?.category || '')}" placeholder="กล้อง · ไมค์ · จอภาพ"></div>
+      <div class="field" id="capF" ${it && !isRoom ? 'hidden' : ''}>
+        <label>${esc(t('admResCap'))}</label>
+        <input id="rcap" inputmode="numeric" value="${esc(it?.capacity || '')}"></div>
+      <div class="field" id="locF" ${isRoom ? 'hidden' : ''}>
+        <label>${esc(t('admResLoc'))}</label>
+        <input id="rloc" value="${esc(it?.storage_location || '')}" placeholder="ตู้ AV ชั้น 2 ช่อง 1"></div>
+      <div class="field"><label>${esc(t('admResNote'))}</label>
+        <input id="rnt" value="${esc(it?.note || '')}" placeholder="แบต 2 ก้อน · สายชาร์จ"></div>
+      ${photoField('rph', t('admResPhoto'))}
+      <button class="btn primary" id="rsv2">${esc(t('admResSave'))}</button>
+      ${it ? `<button class="btn ghost" id="rtog">${esc(it.is_active ? t('admResOff') : t('admResOn'))}</button>` : ''}
+      <button class="btn ghost" id="rx3">${esc(t('cancel'))}</button>`);
+    const img = { v:null }; wirePhoto('rph', img);
+    if($('#rk')) $('#rk').onchange = () => {
+      const room = $('#rk').value === 'room';
+      $('#capF').hidden = !room; $('#locF').hidden = room;
+    };
+    $('#rx3').onclick = closeSheet;
+    const save = extra => async () => {
+      const name = $('#rn2').value.trim();
+      if(!name){ toast(t('admNeedTitle'),'bad'); return; }
+      try{
+        await apiRetry('saveResource', Object.assign({
+          resource_id: it?.resource_id || '',
+          kind: it ? it.kind : ($('#rk')?.value || 'equipment'),
+          name_th:name, category:$('#rc').value.trim(),
+          capacity:$('#rcap')?.value.trim() || '', storage_location:$('#rloc')?.value.trim() || '',
+          note:$('#rnt').value.trim(),
+          photo:img.v?.full || '', thumb:img.v?.thumb || ''
+        }, extra || {}), 'POST');
+        closeSheet(); toast(t('admResSaved'),'ok'); go('admin-res', {}, true);
+      }catch(e){ toast(t('netErr'),'bad'); }
+    };
+    $('#rsv2').onclick = save(null);
+    if($('#rtog')) $('#rtog').onclick = save({ is_active: it.is_active ? 'false' : 'true' });
+  }
+};
 
 /** หน้าเดียวกับ consent แต่เปิดจากโปรไฟล์ — อ่านอย่างเดียว มีปุ่มย้อนกลับ */
 ROUTES.privacy = async () => { await ROUTES.consent({ readonly:true }); };
