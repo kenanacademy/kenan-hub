@@ -440,7 +440,7 @@ const START_AT = (function(){
     const g = new URLSearchParams(location.search).get('go');
     return ['home','parcel-in','my-parcels','unidentified','calltree','profile',
             'news','reservation','admin','directory','activity','issues',
-            'alert-board'].includes(g) ? g : null;
+            'alert-board','issue-new','issue-queue'].includes(g) ? g : null;
   }catch(e){ return null; }
 })();
 /* ?rec=PCL-xxx → เปิดพัสดุชิ้นนั้นให้เลย (ลิงก์ที่ส่งไปในข้อความ LINE) */
@@ -520,6 +520,23 @@ const T = {
     prPhone:'เบอร์ติดต่อ', prShowPhone:'เปิดเผยเบอร์ในทำเนียบบุคลากร',
     prShowPhoneSub:'ถ้าปิดไว้ เพื่อนร่วมงานจะเห็นแค่อีเมล',
     prSave:'บันทึก', prSaved:'บันทึกแล้ว',
+    dirCall:'โทร', dirMail:'ส่งอีเมล', dirCopy:'คัดลอกเบอร์', dirCopied:'คัดลอกแล้ว',
+    isuNew:'แจ้งเรื่องใหม่', isuMine:'เรื่องที่ฉันแจ้ง', isuQueue:'คิวที่ต้องจัดการ',
+    isuCat:'เรื่องอะไร', isuDetail:'รายละเอียด',
+    isuDetailPh:'เล่าให้ละเอียดหน่อยว่าเกิดอะไรขึ้น',
+    isuWhere:'อยู่ตรงไหน', isuWherePh:'เช่น ห้องประชุม Inspiration',
+    isuUrg:'ความเร่งด่วน', isuNormal:'ปกติ', isuUrgent:'เร่งด่วน',
+    isuUrgentSub:'กระทบการทำงานทันที หรือไม่ปลอดภัย',
+    isuPhoto:'แนบรูป (ถ้ามี)', isuSend:'ส่งเรื่อง', isuSent:'ส่งเรื่องแล้ว ทีมงานจะแจ้งความคืบหน้าให้',
+    isuNeed:'กรุณาเล่ารายละเอียด',
+    isuEmpty:'ยังไม่มีเรื่องที่แจ้ง', isuEmptyBody:'เมื่อคุณแจ้งเรื่อง จะติดตามสถานะได้ที่นี่',
+    isuQEmpty:'ไม่มีเรื่องค้าง', isuQEmptyBody:'จัดการครบทุกเรื่องแล้ว',
+    isuTake:'รับเรื่องนี้', isuNote:'หมายเหตุ (ถ้ามี)', isuUpdate:'อัปเดตสถานะ',
+    isuUpdated:'อัปเดตแล้ว แจ้งผู้แจ้งเรียบร้อย', isuBy:'แจ้งโดย', isuAssignee:'ผู้รับผิดชอบ',
+    isuNoAssignee:'ยังไม่มีผู้รับผิดชอบ', isuTimeline:'ความคืบหน้า',
+    catIT:'IT / คอมพิวเตอร์', catElec:'ไฟฟ้า / แสงสว่าง', catWater:'ประปา / ห้องน้ำ',
+    catAir:'แอร์ / อากาศ', catBuild:'อาคาร / เฟอร์นิเจอร์', catOther:'อื่นๆ',
+
 
     recGone:'ไม่พบพัสดุชิ้นนี้แล้ว อาจถูกกดรับไปแล้ว',
     admPostNews:'ลงประกาศ / ข่าวสาร',
@@ -679,6 +696,23 @@ const T = {
     prPhone:'Phone', prShowPhone:'Show my phone in the staff directory',
     prShowPhoneSub:'If off, colleagues see only your email',
     prSave:'Save', prSaved:'Saved',
+    dirCall:'Call', dirMail:'Email', dirCopy:'Copy number', dirCopied:'Copied',
+    isuNew:'Report an issue', isuMine:'My reports', isuQueue:'Queue',
+    isuCat:'What is it about', isuDetail:'Details',
+    isuDetailPh:'Tell us what happened, in as much detail as you can',
+    isuWhere:'Where is it', isuWherePh:'e.g. Inspiration meeting room',
+    isuUrg:'Urgency', isuNormal:'Normal', isuUrgent:'Urgent',
+    isuUrgentSub:'Blocking work right now, or unsafe',
+    isuPhoto:'Attach a photo (optional)', isuSend:'Send report',
+    isuSent:'Sent — we will keep you posted', isuNeed:'Please describe the issue',
+    isuEmpty:'No reports yet', isuEmptyBody:'Once you report something you can track it here.',
+    isuQEmpty:'Nothing pending', isuQEmptyBody:'Everything has been handled.',
+    isuTake:'Take this', isuNote:'Note (optional)', isuUpdate:'Update status',
+    isuUpdated:'Updated — reporter notified', isuBy:'Reported by', isuAssignee:'Owner',
+    isuNoAssignee:'Unassigned', isuTimeline:'Progress',
+    catIT:'IT / computer', catElec:'Electrical / lighting', catWater:'Plumbing / toilet',
+    catAir:'Air-con', catBuild:'Building / furniture', catOther:'Other',
+
 
     recGone:'That parcel is no longer listed — it may already be picked up',
     admPostNews:'Post news',
@@ -998,7 +1032,7 @@ ROUTES.home = async () => {
     { ic:IC.clock, th:t('mAct'),    en:t('mActEn'),    go:'activity' },
     { ic:IC.bellBig, th:t('news'),  en:t('newsEn'),    go:'news' },
     { ic:IC.car,   th:t('mResv'),   en:'Reservation',  go:'reservation', soon:true },
-    { ic:IC.tool,  th:t('mIssue'),  en:t('mIssueEn'),  go:'issues', soon:true },
+    { ic:IC.tool,  th:t('mIssue'),  en:t('mIssueEn'),  go:'issues' },
     { ic:IC.chat,  th:t('mFaq'),    en:t('mFaqEn'),    soon:true }
   ];
   $('#main').innerHTML = `<div class="view">
@@ -1640,15 +1674,30 @@ ROUTES.directory = async () => {
     $('#dl').innerHTML = Object.keys(groups).map(d => `
       <div class="section-title">${esc(d)}</div>
       <div class="rows">${groups[d].map(p => `
-        <div class="row">
+        <button class="row" data-id="${esc(p.kenan_user_id)}">
           <span class="av">${esc(String(p.nickname || p.name_th || '?').trim().charAt(0))}</span>
           <div class="body">
             <div class="t">${esc(p.name_th || p.name_en)}${p.nickname ? ' · ' + esc(p.nickname) : ''}</div>
-            <div class="s">${esc(p.phone || p.email || '')}</div>
-          </div>
-          ${p.phone ? `<a class="mini call" href="tel:${esc(p.phone)}">📞</a>` : ''}
-          ${p.email ? `<a class="mini line" href="mailto:${esc(p.email)}">✉</a>` : ''}
-        </div>`).join('')}</div>`).join('');
+            <div class="s">${esc(p.phone || p.email || t('dirNoPhone'))}</div>
+          </div><span class="go">${IC.chev}</span>
+        </button>`).join('')}</div>`).join('');
+    // ปุ่มวงกลมเล็กๆ สองอันชิดกันกดพลาดง่ายบนมือถือ → เปิดการ์ดที่มีปุ่มเต็มความกว้างแทน
+    document.querySelectorAll('#dl .row[data-id]').forEach(b => b.onclick = () => {
+      const p = people.find(x => x.kenan_user_id === b.dataset.id); if(!p) return;
+      sheet(`<h3>${esc(p.name_th || p.name_en)}${p.nickname ? ' · ' + esc(p.nickname) : ''}</h3>
+        <p class="sub">${esc([p.department, p.office].filter(Boolean).join(' · '))}</p>
+        ${p.phone ? `<a class="btn primary" href="tel:${esc(p.phone)}"
+            style="text-decoration:none">📞 ${esc(t('dirCall'))} ${esc(p.phone)}</a>` : ''}
+        ${p.email ? `<a class="btn ghost" href="mailto:${esc(p.email)}"
+            style="text-decoration:none;word-break:break-all">✉ ${esc(p.email)}</a>` : ''}
+        ${p.phone ? `<button class="btn ghost" id="cp">${esc(t('dirCopy'))}</button>` : ''}
+        <button class="btn ghost" id="cx">${esc(t('close'))}</button>`);
+      $('#cx').onclick = closeSheet;
+      if($('#cp')) $('#cp').onclick = async () => {
+        try{ await navigator.clipboard.writeText(p.phone); toast(t('dirCopied'), 'ok'); }
+        catch(e){ toast(p.phone); }
+      };
+    });
   };
   paint('');
   $('#dq').oninput = e => paint(e.target.value);
@@ -1679,14 +1728,198 @@ ROUTES.activity = async () => {
       <div class="rows">${done.slice(0,30).map(row).join('')}</div>` : '');
 };
 
-/* ── แจ้งเหตุ (โครงรอไว้) ───────────────────────────────────── */
-ROUTES.issues = async () => {
+/* ── แจ้งเหตุ ────────────────────────────────────────────────── */
+const ISSUE_CATS = () => [
+  { v:'IT',    l:t('catIT')    }, { v:'ไฟฟ้า',  l:t('catElec')  },
+  { v:'ประปา', l:t('catWater') }, { v:'แอร์',   l:t('catAir')   },
+  { v:'อาคาร', l:t('catBuild') }, { v:'อื่นๆ',  l:t('catOther') }
+];
+const issuePill = i => `<span class="pill ${
+  i.status === 'closed' || i.status === 'resolved' ? 'done'
+  : i.status === 'sent_to_building' ? 'new' : 'wait'}">${esc(i.status_label)}</span>`;
+
+ROUTES.issues = async (params = {}) => {
   setTitle(t('mIssue'));
   $('#main').innerHTML = `<div class="view">
-    <div class="note info">${IC.info}<div>${esc(t('issueSoon'))}</div></div>
-    <div style="margin-top:14px"><button class="btn ghost" id="bk">${esc(t('backHome'))}</button></div>
+    <button class="btn primary" id="new" style="padding:17px">${esc(t('isuNew'))}</button>
+    ${S.isOfficer ? `<div style="height:9px"></div>
+      <button class="btn soft" id="q">${esc(t('isuQueue'))}</button>` : ''}
+    <div class="section-title">${esc(t('isuMine'))}</div>
+    <div id="il">${skeleton(2)}</div></div>`;
+  $('#new').onclick = () => go('issue-new');
+  if($('#q')) $('#q').onclick = () => go('issue-queue');
+
+  let items = [];
+  try{ const r = await apiRetry('getMyIssues', {}, 'GET'); items = r?.items || []; }catch(e){}
+  if(!items.length){ $('#il').innerHTML = emptyState(IC.tool, t('isuEmpty'), t('isuEmptyBody')); return; }
+  $('#il').innerHTML = `<div class="rows">${items.map(i => `
+    <button class="row" data-id="${esc(i.record_id)}">
+      <div class="thumb" style="background:#EEF3FF;color:var(--primary)">${IC.tool}</div>
+      <div class="body">
+        <div class="t">${esc(i.category)} · ${esc(String(i.detail).slice(0, 40))}</div>
+        <div class="s">${esc(fmtDate(i.created_at))}</div>
+      </div>${issuePill(i)}
+    </button>`).join('')}</div>`;
+  document.querySelectorAll('#il .row').forEach(b =>
+    b.onclick = () => go('issue-detail', { id:b.dataset.id }));
+  if(params.rec) go('issue-detail', { id:params.rec });
+};
+
+ROUTES['issue-new'] = async () => {
+  setTitle(t('isuNew'));
+  $('#main').innerHTML = `<div class="view">
+    <div class="card">
+      <div class="lbl" style="font-size:13px;font-weight:600;margin-bottom:8px">${esc(t('isuCat'))}</div>
+      <div class="tiles" id="cats">${ISSUE_CATS().map((c, i) => `
+        <button class="tile ${i === 0 ? 'on' : ''}" data-v="${esc(c.v)}"
+          style="min-height:62px;padding:11px;${i === 0 ? 'border-color:var(--primary);background:#EEF3FF' : ''}">
+          <div class="nm" style="font-size:13px">${esc(c.l)}</div>
+        </button>`).join('')}</div>
+    </div>
+    <div class="card">
+      <div class="field"><label>${esc(t('isuDetail'))}<span class="req">*</span></label>
+        <textarea id="dt" rows="4" placeholder="${esc(t('isuDetailPh'))}"></textarea></div>
+      <div class="field"><label>${esc(t('isuWhere'))}</label>
+        <input id="lo" placeholder="${esc(t('isuWherePh'))}"></div>
+      <label class="check" style="margin:0">
+        <input type="checkbox" id="ug">
+        <span><b>${esc(t('isuUrgent'))}</b><br>
+        <span style="color:var(--ink-3);font-size:12px">${esc(t('isuUrgentSub'))}</span></span>
+      </label>
+    </div>
+    <div class="card">
+      <div class="field" style="margin:0"><label>${esc(t('isuPhoto'))}</label>
+        <label class="shot" id="sh" style="aspect-ratio:16/9">
+          <input type="file" accept="image/*" capture="environment" id="fl" hidden>
+          <div class="ph">${IC.cam}<p>${esc(t('inShoot'))}</p></div>
+        </label></div>
+    </div>
+    <div class="sticky-cta"><button class="btn primary" id="go">${esc(t('isuSend'))}</button></div>
   </div>`;
-  $('#bk').onclick = () => { S.stack = []; go('home'); };
+
+  let cat = ISSUE_CATS()[0].v, img = null;
+  document.querySelectorAll('#cats .tile').forEach(b => b.onclick = () => {
+    cat = b.dataset.v;
+    document.querySelectorAll('#cats .tile').forEach(x => {
+      const on = x === b;
+      x.style.borderColor = on ? 'var(--primary)' : 'var(--line)';
+      x.style.background  = on ? '#EEF3FF' : '#fff';
+    });
+  });
+  const fl = $('#fl');
+  $('#sh').onclick = e => { if(e.target.tagName !== 'INPUT') fl.click(); };
+  fl.onchange = async () => {
+    const f = fl.files[0]; if(!f) return;
+    img = await shrink2(f);
+    $('#sh').innerHTML = `<img src="${img.full}" alt=""><span class="retake">${esc(t('inRetake'))}</span>`;
+    $('#sh').onclick = () => fl.click();
+  };
+  $('#go').onclick = async () => {
+    const detail = $('#dt').value.trim();
+    if(!detail){ toast(t('isuNeed'), 'bad'); return; }
+    const b = $('#go'); b.disabled = true;
+    try{
+      await apiRetry('createIssue', {
+        category:cat, detail, location:$('#lo').value.trim(),
+        urgency:$('#ug').checked ? 'urgent' : 'normal',
+        photo:img?.full || '', thumb:img?.thumb || ''
+      }, 'POST');
+      toast(t('isuSent'), 'ok');
+      S.stack = [{ name:'home', params:{} }]; go('issues');
+    }catch(e){ toast(t('netErr'), 'bad'); b.disabled = false; }
+  };
+};
+
+ROUTES['issue-queue'] = async () => {
+  setTitle(t('isuQueue'));
+  $('#main').innerHTML = `<div class="view"><div id="ql">${skeleton(3)}</div></div>`;
+  let r = null;
+  try{ r = await apiRetry('getIssueQueue', {}, 'GET'); }catch(e){}
+  if(!r?.ok){ $('#ql').innerHTML = emptyState(IC.info, t('adminNo'), t('adminNoBody')); return; }
+  const open = r.items.filter(i => i.is_open), done = r.items.filter(i => !i.is_open);
+  if(!r.items.length){ $('#ql').innerHTML = emptyState(IC.tool, t('isuQEmpty'), t('isuQEmptyBody')); return; }
+  const row = i => `
+    <button class="row" data-id="${esc(i.record_id)}">
+      <div class="thumb" style="background:${i.urgency === 'urgent' ? 'var(--bad-bg,#FEF2F2)' : '#EEF3FF'};
+        color:${i.urgency === 'urgent' ? 'var(--bad)' : 'var(--primary)'}">${IC.tool}</div>
+      <div class="body">
+        <div class="t">${i.urgency === 'urgent' ? '⚠️ ' : ''}${esc(i.category)} · ${esc(String(i.detail).slice(0, 34))}</div>
+        <div class="s">${esc(i.requester_name)} · ${esc(i.assignee_name || t('isuNoAssignee'))}</div>
+      </div>${issuePill(i)}
+    </button>`;
+  $('#ql').innerHTML =
+    (open.length ? `<div class="section-title">${esc(t('actOpen'))} (${open.length})</div>
+      <div class="rows">${open.map(row).join('')}</div>` : '') +
+    (done.length ? `<div class="section-title">${esc(t('actDone'))}</div>
+      <div class="rows">${done.slice(0, 20).map(row).join('')}</div>` : '');
+  document.querySelectorAll('#ql .row').forEach(b =>
+    b.onclick = () => go('issue-detail', { id:b.dataset.id }));
+};
+
+ROUTES['issue-detail'] = async ({ id } = {}) => {
+  setTitle(t('mIssue'));
+  $('#main').innerHTML = `<div class="view"><div id="dv">${skeleton(3)}</div></div>`;
+  let d = null;
+  try{ d = await apiRetry('getIssueDetail', { record_id:id }, 'GET'); }catch(e){}
+  if(!d?.ok){ $('#dv').innerHTML = emptyState(IC.info, t('netErr'), ''); return; }
+  const i = d.issue;
+
+  $('#dv').innerHTML = `
+    <div class="card">
+      <div style="display:flex;justify-content:space-between;gap:10px;align-items:flex-start">
+        <div><div style="font-size:11px;color:var(--ink-3);font-weight:700">${esc(i.category)}${
+          i.urgency === 'urgent' ? ' · ⚠️ ' + esc(t('isuUrgent')) : ''}</div>
+          <div style="font-size:15px;font-weight:600;margin-top:4px;white-space:pre-wrap">${esc(i.detail)}</div>
+        </div>${issuePill(i)}
+      </div>
+      ${i.location ? `<div style="font-size:12.5px;color:var(--ink-2);margin-top:8px">📍 ${esc(i.location)}</div>` : ''}
+      <div style="font-size:11.5px;color:var(--ink-3);margin-top:8px">
+        ${esc(t('isuBy'))} ${esc(i.requester_name)} · ${esc(fmtDate(i.created_at))}<br>
+        ${esc(t('isuAssignee'))}: ${esc(i.assignee_name || t('isuNoAssignee'))}</div>
+      ${i.thumb_id ? `<img class="sheet-photo" id="ip" alt="" style="margin-top:11px">` : ''}
+    </div>
+    <div class="section-title">${esc(t('isuTimeline'))}</div>
+    <div class="rows">${d.timeline.map(e => `
+      <div class="row"><div class="body">
+        <div class="t">${esc(e.label)}</div>
+        <div class="s">${esc(fmtDate(e.at))}${e.actor ? ' · ' + esc(e.actor) : ''}${
+          e.note ? '<br>' + esc(e.note) : ''}</div>
+      </div></div>`).join('')}</div>
+    ${d.canManage && d.next.length ? `<div style="margin-top:16px">
+      ${!i.assignee_id ? `<button class="btn soft" id="take">${esc(t('isuTake'))}</button>
+        <div style="height:9px"></div>` : ''}
+      <button class="btn primary" id="upd">${esc(t('isuUpdate'))}</button></div>` : ''}`;
+
+  if($('#ip')){
+    loadPhoto(i.photo_id || i.thumb_id, $('#ip'));
+    $('#ip').onclick = () => openPhoto(i.photo_id || i.thumb_id, i.category);
+  }
+  if($('#take')) $('#take').onclick = async () => {
+    try{ await apiRetry('updateIssue',
+          { record_id:id, status:i.status === 'reported' ? 'triaged' : i.status, take:'true' }, 'POST');
+         toast(t('isuUpdated'), 'ok'); go('issue-detail', { id }, true); }
+    catch(e){ toast(t('netErr'), 'bad'); }
+  };
+  if($('#upd')) $('#upd').onclick = () => {
+    sheet(`<h3>${esc(t('isuUpdate'))}</h3>
+      ${d.next.map(s => `<button class="row" data-s="${esc(s)}"
+        style="border:1.5px solid var(--line);border-radius:12px;margin-bottom:8px">
+        <div class="body"><div class="t">${esc(({
+          triaged:t('isuTake'), in_progress:'กำลังดำเนินการ', sent_to_building:'ส่งต่อนิติบุคคลอาคาร',
+          resolved:'แก้ไขเสร็จแล้ว', closed:'ปิดเรื่อง'
+        })[s] || s)}</div></div></button>`).join('')}
+      <div class="field" style="margin-top:6px"><label>${esc(t('isuNote'))}</label>
+        <input id="nt" placeholder="—"></div>
+      <button class="btn ghost" id="cx">${esc(t('cancel'))}</button>`);
+    $('#cx').onclick = closeSheet;
+    document.querySelectorAll('#sheetBody .row[data-s]').forEach(b => b.onclick = async () => {
+      const note = $('#nt').value.trim(); closeSheet();
+      try{ await apiRetry('updateIssue',
+            { record_id:id, status:b.dataset.s, note }, 'POST');
+           toast(t('isuUpdated'), 'ok'); go('issue-detail', { id }, true); }
+      catch(e){ toast(t('netErr'), 'bad'); }
+    });
+  };
 };
 
 /* ── กระดานสถานะฉุกเฉิน ─────────────────────────────────────
