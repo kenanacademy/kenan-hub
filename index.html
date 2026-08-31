@@ -492,7 +492,8 @@ const CFG = {
   LIFF_ID : '2010937586-Ko0ID2zY',                   // LIFF "Kenan Connect" (Full)
   GAS_URL : 'https://script.google.com/macros/s/AKfycbyOjh4BAAbzY5QfZNG_oGuxbmvZwHjEAKazRMuMxrDeoNknE_rqEoAFdkuJldOPP_q_eg/exec',
   LIFF_TIMEOUT_MS : 3500,
-  CONSENT_VERSION : '2026-09-01'
+  CONSENT_VERSION : '2026-09-01',
+  BUILD : '2026-08-31c'      // ต้องตรงกับ BUILD ใน Code.gs ที่ Deploy ไว้
 };
 
 /* เก็บ ?go=... ไว้ตั้งแต่ต้น เพราะเดี๋ยวจะล้าง query string ทิ้งหลัง LIFF ล็อกอิน
@@ -594,6 +595,8 @@ const T = {
     admUnidentified:'ไม่ทราบผู้รับ', admUsers:'ผู้ใช้ที่ลงทะเบียน',
     admQuota:'โควตา LINE เดือนนี้',
     admQuotaOk:'ยังเหลือพอ ระบบแจ้งเตือนทาง LINE ได้ตามปกติ',
+    admQuotaUnknown:'ยังไม่ได้นับของเดือนนี้ — การนับต้องอ่านตารางแจ้งเตือนทั้งตาราง เลยไม่นับให้อัตโนมัติทุกครั้ง',
+    admQuotaCount:'นับตอนนี้',
     admQuotaWarn:'ใกล้หมดแล้ว เมื่อครบระบบจะสลับไปแจ้งทางอีเมลแทนโดยอัตโนมัติ',
     admOpenSheet:'เปิดฐานข้อมูลใน Google Sheet',
     dirTitle:'ทำเนียบบุคลากร', dirTitleEn:'Staff Directory',
@@ -626,6 +629,9 @@ const T = {
     prShowPhoneSub:'ถ้าปิดไว้ เพื่อนร่วมงานจะเห็นแค่อีเมล',
     prSave:'บันทึก', prSaved:'บันทึกแล้ว',
     spdTest:'ทดสอบความเร็วการเชื่อมต่อ', spdFirst:'ครั้งแรก (ปลุกเครื่อง)', spdSecond:'ครั้งที่สอง (เครื่องตื่นแล้ว)',
+    spdBuildOk:'โค้ดหลังบ้านตรงกับเว็บแล้ว',
+    spdBuildBad:'โค้ดหลังบ้านยังเป็นรุ่นเก่า! ไป Apps Script → Deploy → Manage deployments → ✎ → Version: New version',
+    spdBuildApp:'เว็บ', spdBuildSrv:'หลังบ้าน', spdBuildOld:'(เก่ากว่าที่มีตัวบอกรุ่น)',
     rmGrid:'ตาราง', rmList:'รายการ', rmWeek:'รายสัปดาห์', rmDay:'รายวัน',
     rmSeats:n=>`${n} ที่นั่ง`, rmTapSlot:'แตะช่องว่างเพื่อจอง',
     rmSwap:'ติดต่อผู้จอง', rmSwapHint:'ถ้าจำเป็นต้องใช้ห้องนี้จริงๆ ลองติดต่อขอสลับกันดูครับ',
@@ -868,6 +874,8 @@ const T = {
     admUnidentified:'Unidentified', admUsers:'Registered users',
     admQuota:'LINE quota this month',
     admQuotaOk:'Plenty left — LINE notifications working normally',
+    admQuotaUnknown:'Not counted for this month yet — counting reads the whole notification log, so it is not done on every visit.',
+    admQuotaCount:'Count now',
     admQuotaWarn:'Running low — the system will switch to email automatically when it runs out',
     admOpenSheet:'Open the database in Google Sheets',
     dirTitle:'Staff Directory', dirTitleEn:'ทำเนียบบุคลากร',
@@ -900,6 +908,9 @@ const T = {
     prShowPhoneSub:'If off, colleagues see only your email',
     prSave:'Save', prSaved:'Saved',
     spdTest:'Test connection speed', spdFirst:'First call (waking up)', spdSecond:'Second call (already warm)',
+    spdBuildOk:'Backend matches this app',
+    spdBuildBad:'The backend is still an OLD version! Go to Apps Script → Deploy → Manage deployments → ✎ → Version: New version',
+    spdBuildApp:'app', spdBuildSrv:'backend', spdBuildOld:'(older than version tracking)',
     rmGrid:'Grid', rmList:'List', rmWeek:'Week', rmDay:'Day',
     rmSeats:n=>`${n} seats`, rmTapSlot:'Tap an empty slot to book',
     rmSwap:'Contact the person', rmSwapHint:'If you really need this room, try asking them to swap.',
@@ -1883,12 +1894,19 @@ ROUTES.profile = async () => {
      net สูงแต่ srv ต่ำ แปลว่าเสียเวลาไปกับการปลุกเครื่อง ไม่ใช่โค้ดช้า */
   $('#spd').onclick = async () => {
     const box = $('#spdOut'); box.hidden = false; box.textContent = t('loading');
-    const t1 = performance.now(); await apiRetry('ping', {}, 'GET');
+    const t1 = performance.now(); const p1 = await apiRetry('ping', {}, 'GET');
     const cold = Math.round(performance.now() - t1);
     const t2 = performance.now(); await apiRetry('ping', {}, 'GET');
     const warm = Math.round(performance.now() - t2);
-    box.textContent = t('spdFirst') + ': ' + cold + ' ms\n' +
-                      t('spdSecond') + ': ' + warm + ' ms\n\n' +
+    // ถ้ารุ่นไม่ตรง ตัวเลขที่วัดได้จะเป็นของโค้ดเก่า ต้องบอกก่อนเป็นอย่างแรก
+    const okBuild = p1?.build === CFG.BUILD;
+    box.textContent =
+      (okBuild ? '✅ ' + t('spdBuildOk') + ' (' + CFG.BUILD + ')'
+               : '⚠️ ' + t('spdBuildBad') + '\n   ' + t('spdBuildApp') + ': ' + CFG.BUILD +
+                 '\n   ' + t('spdBuildSrv') + ': ' + (p1?.build || t('spdBuildOld'))) + '\n\n' +
+      t('spdFirst') + ': ' + cold + ' ms\n' +
+      t('spdSecond') + ': ' + warm + ' ms\n\n' +
+      'action  net / srv / db (ms)\n' +
       S.timings.map(x => x.a + '  ' + x.net + ' / ' + (x.srv ?? '-') + ' / ' + (x.db ?? '-')).join('\n');
   };
 };
@@ -1972,9 +1990,11 @@ ROUTES.admin = async () => {
   let s = null;
   try{ s = await apiRetry('getAdminSummary', {}, 'GET'); }catch(e){}
   if(!s?.ok){ $x('#sum').innerHTML = ''; return; }
+  // ตัวนับโควตาอาจยังไม่มี (ต้นเดือน) — ไม่ไปไล่นับให้ทุกคนรอ แต่ให้กดนับเองได้
+  const known = s.lineKnown !== false && s.lineUsed !== null && s.lineUsed !== undefined;
   const used = Number(s.lineUsed) || 0, quota = Number(s.lineQuota) || 300;
   const pct = Math.round(used / quota * 100);
-  const warn = pct >= 80;
+  const warn = known && pct >= 80;
   $x('#sum').innerHTML = `
     <div class="tiles">
       <div class="tile" style="min-height:82px"><div class="nm" style="font-size:23px">${Number(s.parcelsToday) || 0}</div>
@@ -1987,11 +2007,20 @@ ROUTES.admin = async () => {
         <div class="en">${esc(t('admUsers'))}</div></div>
     </div>
     <div class="note ${warn ? '' : 'info'}" style="margin-top:12px">${IC.info}<div>
-      <b>${esc(t('admQuota'))} ${used}/${quota}</b> (${pct}%)<br>
-      ${esc(warn ? t('admQuotaWarn') : t('admQuotaOk'))}</div></div>
+      ${known
+        ? `<b>${esc(t('admQuota'))} ${used}/${quota}</b> (${pct}%)<br>${esc(warn ? t('admQuotaWarn') : t('admQuotaOk'))}`
+        : `<b>${esc(t('admQuota'))}</b><br>${esc(t('admQuotaUnknown'))}
+           <button class="mini" id="rc" style="margin-top:7px">${esc(t('admQuotaCount'))}</button>`}
+      </div></div>
     ${S.isAdmin ? `<div style="margin-top:12px">
       <a class="btn ghost" href="${esc(s.sheetUrl || '#')}" target="_blank"
          style="display:flex;text-decoration:none">${esc(t('admOpenSheet'))}</a></div>` : ''}`;
+
+  if($('#rc')) $('#rc').onclick = async () => {
+    const b = $('#rc'); b.disabled = true; b.textContent = t('loading');
+    try{ await apiRetry('recountPush', {}, 'POST'); go('admin', {}, true); }
+    catch(e){ toast(t('netErr'),'bad'); b.disabled = false; b.textContent = t('admQuotaCount'); }
+  };
 };
 
 ROUTES['admin-news'] = async () => {
