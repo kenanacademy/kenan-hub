@@ -504,7 +504,7 @@ const START_AT = (function(){
             'news','reservation','admin','directory','activity','issues',
             'alert-board','issue-queue',
             'rooms','room-new','equipment','admin-res',
-            'cars','car-new','driver'].includes(g) ? g : null;
+            'cars','car-new','driver','admin-proj'].includes(g) ? g : null;
   }catch(e){ return null; }
 })();
 /* ?rec=PCL-xxx → เปิดพัสดุชิ้นนั้นให้เลย (ลิงก์ที่ส่งไปในข้อความ LINE) */
@@ -641,6 +641,20 @@ const T = {
     admResCap:'จำนวนที่นั่ง', admResLoc:'ที่เก็บ', admResNote:'หมายเหตุ / อุปกรณ์ประกอบ',
     admResPhoto:'รูป', admResSave:'บันทึก', admResSaved:'บันทึกแล้ว',
     admResOff:'ปิดใช้งาน', admResOn:'เปิดใช้งาน', admResInactive:'ปิดอยู่',
+    admResCar:'รถ', admResSeatsCar:'จำนวนที่นั่ง (รวมคนขับ)',
+    admResDriver:'คนขับประจำรถคันนี้', admResNoDriver:'ยังไม่ได้ระบุคนขับ',
+    admResDriverHint:'ระบบจะกันเวลาให้ทั้งรถและคนขับพร้อมกัน คนขับคนเดียวรับสองเที่ยวซ้อนกันไม่ได้',
+    admResNoDriverYet:'ยังไม่มีใครมีสิทธิ์ "คนขับ" — ไปตั้งได้ที่ เมนูผู้ดูแล → จัดการสิทธิ์',
+    admProj:'จัดการรหัสโครงการ', admProjAdd:'เพิ่มโครงการ', admProjCode:'รหัสโครงการ',
+    admProjCodePh:'เช่น WING2026', admProjName:'ชื่อโครงการ',
+    admProjNamePh:'เช่น WING — Women in Green Growth',
+    admProjType:'ประเภท', admProjTypePh:'เช่น Donor-funded / Core',
+    admProjTrips:n=>`ใช้รถไปแล้ว ${n} เที่ยว`, admProjSaved:'บันทึกแล้ว',
+    admProjNeedCode:'ต้องใส่รหัสโครงการ',
+    admProjLocked:'แก้รหัสของโครงการเดิมไม่ได้ เพราะเที่ยวรถที่บันทึกไว้อ้างรหัสนี้อยู่ — ถ้าเลิกใช้ให้กดปิดใช้งานแทน',
+    admProjEmpty:'ยังไม่มีรหัสโครงการ',
+    admProjEmptyBody:'ต้องมีอย่างน้อยหนึ่งโครงการ คนถึงจะจองรถได้ เพราะช่องโครงการเป็นช่องบังคับ',
+    admProjWhy:'รหัสนี้คือตัวที่ทำให้ค่าน้ำมันลงโครงการได้ถูกตัว แทนที่จะหารเฉลี่ยลงทุกโครงการเหมือนเดิม',
 
     rmTitle:'จองห้องประชุม', rmBook:'จองห้อง', rmFree:'ว่าง', rmToday:'วันนี้',
     rmNoBook:'ยังไม่มีใครจองห้องนี้', rmPick:'เลือกห้อง', rmWhen:'วันและเวลา',
@@ -901,6 +915,20 @@ const T = {
     admResCap:'Seats', admResLoc:'Stored at', admResNote:'Notes / accessories',
     admResPhoto:'Photo', admResSave:'Save', admResSaved:'Saved',
     admResOff:'Disable', admResOn:'Enable', admResInactive:'Disabled',
+    admResCar:'Vehicles', admResSeatsCar:'Seats (including driver)',
+    admResDriver:'Assigned driver', admResNoDriver:'No driver assigned',
+    admResDriverHint:'Both the vehicle and the driver are held for the booked time — one driver cannot take two overlapping trips.',
+    admResNoDriverYet:'Nobody has the "driver" role yet — set it under Admin → Roles.',
+    admProj:'Project codes', admProjAdd:'Add a project', admProjCode:'Project code',
+    admProjCodePh:'e.g. WING2026', admProjName:'Project name',
+    admProjNamePh:'e.g. WING — Women in Green Growth',
+    admProjType:'Type', admProjTypePh:'e.g. Donor-funded / Core',
+    admProjTrips:n=>`${n} trips charged`, admProjSaved:'Saved',
+    admProjNeedCode:'A project code is required',
+    admProjLocked:'You cannot change an existing code — recorded trips point at it. Disable it instead.',
+    admProjEmpty:'No project codes yet',
+    admProjEmptyBody:'At least one project is needed before anyone can book a vehicle — the project field is required.',
+    admProjWhy:'This code is what puts fuel cost on the right project instead of splitting it evenly across all of them.',
 
     rmTitle:'Book a room', rmBook:'Book', rmFree:'Free', rmToday:'Today',
     rmNoBook:'No bookings for this room', rmPick:'Choose a room', rmWhen:'Date and time',
@@ -1115,7 +1143,10 @@ const MOCK = {
     { resource_id:'EQ-1', kind:'equipment', name_th:'กล้อง Canon R6', category:'กล้อง',
       storage_location:'ตู้ AV ชั้น 2', is_active:true },
     { resource_id:'VEH-1', kind:'vehicle', name_th:'Toyota Commuter (ฮค-1234)', capacity:12, is_active:true }] },
-  saveResource:{ ok:true },
+  saveResource:{ ok:true }, saveProject:{ ok:true },
+  getProjectsAdmin:{ ok:true, items:[
+    { project_code:'BACKOFFICE', name_th:'งานสำนักงาน', type:'Core', trips:4, is_active:true },
+    { project_code:'NONBILL', name_th:'ไม่ผูกโครงการ', type:'Core', trips:1, is_active:true }] },
   getAdminSummary:{ ok:true, parcelsToday:3, unclaimed:5, unidentified:2, users:41,
     lineUsed:64, lineQuota:300, sheetUrl:'https://docs.google.com/spreadsheets' },
   getRoomDay:(function(){
@@ -1925,6 +1956,8 @@ ROUTES.admin = async () => {
       <button class="btn ghost" id="toNews">${esc(t('admPostNews'))}</button>
       <div style="height:9px"></div>
       <button class="btn ghost" id="toRes">${esc(t('admRes'))}</button>
+      <div style="height:9px"></div>
+      <button class="btn ghost" id="toProj">${esc(t('admProj'))}</button>
       ${S.isSuper ? `<div style="height:9px"></div>
         <button class="btn ghost" id="toRoles">${esc(t('admRoles'))}</button>` : ''}` : ''}
   </div>`;
@@ -1933,6 +1966,7 @@ ROUTES.admin = async () => {
   if($('#toQ'))     $('#toQ').onclick     = () => go('issue-queue');
   if($('#toNews'))  $('#toNews').onclick  = () => go('admin-news');
   if($('#toRes'))   $('#toRes').onclick   = () => go('admin-res');
+  if($('#toProj'))  $('#toProj').onclick  = () => go('admin-proj');
   if($('#toRoles')) $('#toRoles').onclick = () => go('admin-roles');
 
   let s = null;
@@ -2906,6 +2940,75 @@ function declareSheet(){
 }
 
 
+
+/* ── รหัสโครงการ ────────────────────────────────────────────────
+   ช่องโครงการตอนจองรถเป็นช่องบังคับ ถ้ารายชื่อนี้ว่าง = จองรถไม่ได้เลย
+   จึงต้องแก้ได้ในแอป ไม่ใช่ต้องรอคนเปิดชีทให้ทุกครั้งที่มีโครงการใหม่ */
+ROUTES['admin-proj'] = async () => {
+  setTitle(t('admProj'));
+  $x('#main').innerHTML = `<div class="view">
+    <div class="note info">${IC.info}<div>${esc(t('admProjWhy'))}</div></div>
+    <button class="btn primary" id="add" style="margin-top:12px">＋ ${esc(t('admProjAdd'))}</button>
+    <div id="pl" style="margin-top:14px">${skeleton(3)}</div></div>`;
+  $('#add').onclick = () => projEdit(null);
+
+  let items = [];
+  try{
+    const r = await apiRetry('getProjectsAdmin', {}, 'GET');
+    if(!r?.ok){ $x('#pl').innerHTML = emptyState(IC.info, t('adminNo'), t('adminNoBody')); return; }
+    items = r.items || [];
+  }catch(e){ $x('#pl').innerHTML = emptyState(IC.info, t('netErr'), ''); return; }
+
+  $x('#pl').innerHTML = items.length ? `<div class="rows">${items.map(p => `
+    <button class="row" data-c="${esc(p.project_code)}" ${p.is_active ? '' : 'style="opacity:.5"'}>
+      <div class="body">
+        <div class="t">${esc(p.project_code)}</div>
+        <div class="s">${esc([p.name_th || p.name_en, p.type].filter(Boolean).join(' · '))}</div>
+        ${p.trips ? `<div style="font-size:10.5px;color:var(--ink-3);margin-top:2px">${
+          esc(t('admProjTrips')(p.trips))}</div>` : ''}
+      </div>
+      ${p.is_active ? `<span class="go">${IC.chev}</span>`
+        : `<span class="pill" style="background:var(--neutral);color:var(--ink-3)">${esc(t('admResInactive'))}</span>`}
+    </button>`).join('')}</div>`
+    : emptyState(IC.info, t('admProjEmpty'), t('admProjEmptyBody'));
+
+  document.querySelectorAll('#pl .row').forEach(b =>
+    b.onclick = () => projEdit(items.find(x => x.project_code === b.dataset.c)));
+
+  function projEdit(it){
+    sheet(`<h3>${esc(it ? it.project_code : t('admProjAdd'))}</h3>
+      <div class="field"><label>${esc(t('admProjCode'))}<span class="req">*</span></label>
+        <input id="pc" value="${esc(it?.project_code || '')}" placeholder="${esc(t('admProjCodePh'))}"
+          ${it ? 'readonly style="background:var(--neutral);color:var(--ink-3)"' : ''}></div>
+      ${it ? `<div style="font-size:11px;color:var(--ink-3);margin:-6px 0 12px">${esc(t('admProjLocked'))}</div>` : ''}
+      <div class="field"><label>${esc(t('admProjName'))}</label>
+        <input id="pn" value="${esc(it?.name_th || '')}" placeholder="${esc(t('admProjNamePh'))}"></div>
+      <div class="field"><label>${esc(t('admProjType'))}</label>
+        <input id="pt" value="${esc(it?.type || '')}" placeholder="${esc(t('admProjTypePh'))}"></div>
+      <button class="btn primary" id="psv">${esc(t('admResSave'))}</button>
+      ${it ? `<button class="btn ghost" id="ptog">${esc(it.is_active ? t('admResOff') : t('admResOn'))}</button>` : ''}
+      <button class="btn ghost" id="pcx">${esc(t('cancel'))}</button>`);
+    $('#pcx').onclick = closeSheet;
+    const save = extra => async () => {
+      const code = $('#pc').value.trim();
+      if(!code){ toast(t('admProjNeedCode'),'bad'); return; }
+      const b = $('#psv'); b.disabled = true;
+      try{
+        const r = await apiRetry('saveProject', Object.assign({
+          project_code:code, orig:it?.project_code || '',
+          name_th:$('#pn').value.trim(), type:$('#pt').value.trim(),
+          is_active: it ? it.is_active : true
+        }, extra || {}), 'POST');
+        if(r?.error === 'CODE_LOCKED'){ toast(t('admProjLocked'),'bad'); b.disabled = false; return; }
+        if(r?.ok === false) throw 0;
+        closeSheet(); toast(t('admProjSaved'),'ok'); go('admin-proj', {}, true);
+      }catch(e){ toast(t('netErr'),'bad'); b.disabled = false; }
+    };
+    $('#psv').onclick = save(null);
+    if($('#ptog')) $('#ptog').onclick = save({ is_active: it.is_active ? 'false' : 'true' });
+  }
+};
+
 /* ── ผู้ดูแลเพิ่ม/แก้ห้องและอุปกรณ์เองได้ ไม่ต้องไปแก้ในชีท ─────── */
 ROUTES['admin-res'] = async () => {
   setTitle(t('admRes'));
@@ -2914,10 +3017,10 @@ ROUTES['admin-res'] = async () => {
     <div id="rs" style="margin-top:14px">${skeleton(3)}</div></div>`;
   $('#add').onclick = () => resEdit(null);
 
-  let items = [];
+  let items = [], drivers = [];
   try{ const r = await apiRetry('getResourcesAdmin', {}, 'GET');
        if(!r?.ok){ $x('#rs').innerHTML = emptyState(IC.info, t('adminNo'), t('adminNoBody')); return; }
-       items = r.items; }catch(e){}
+       items = r.items; drivers = r.drivers || []; }catch(e){}
 
   const grp = { room:[], equipment:[], vehicle:[] };
   items.forEach(i => (grp[i.kind] || (grp[i.kind] = [])).push(i));
@@ -2925,37 +3028,51 @@ ROUTES['admin-res'] = async () => {
     <div class="section-title">${esc(label)}</div>
     ${grp[k].map(i => `
       <button class="rcard" data-id="${esc(i.resource_id)}" ${i.is_active?'':'style="opacity:.5"'}>
-        ${phImg(i,'rphoto') || `<div class="rphoto">${k==='room'?IC.cal:IC.laptop}</div>`}
+        ${phImg(i,'rphoto') || `<div class="rphoto">${
+          k==='room'?IC.cal:(k==='vehicle'?IC.car:IC.laptop)}</div>`}
         <div style="flex:1;min-width:0">
           <div style="font-size:14.5px;font-weight:700">${esc(i.name_th)}</div>
           <div style="font-size:11.5px;color:var(--ink-3)">${esc([
             i.capacity ? t('rmSeats')(i.capacity) : '', i.category, i.storage_location
           ].filter(Boolean).join(' · '))}</div>
+          ${k==='vehicle' ? `<div style="font-size:10.5px;font-weight:700;color:${
+            i.default_driver ? 'var(--ok)' : 'var(--warn)'};margin-top:2px">${
+            esc(i.default_driver ? t('carDriver') + ' ' + i.driver_name : t('admResNoDriver'))}</div>` : ''}
         </div>
         ${i.is_active ? `<span class="go">${IC.chev}</span>`
                       : `<span class="pill" style="background:var(--neutral);color:var(--ink-3)">${esc(t('admResInactive'))}</span>`}
       </button>`).join('')}` : '';
-  $x('#rs').innerHTML = sec('room', t('admResRoom')) + sec('equipment', t('admResEq')) + sec('vehicle','รถ');
+  $x('#rs').innerHTML = sec('room', t('admResRoom')) + sec('equipment', t('admResEq')) + sec('vehicle', t('admResCar'));
   paintPhotos($('#rs'));
   document.querySelectorAll('#rs .rcard').forEach(b =>
     b.onclick = () => resEdit(items.find(x => x.resource_id === b.dataset.id)));
 
   function resEdit(it){
-    const isRoom = it ? it.kind === 'room' : false;
+    const kind0  = it ? it.kind : 'equipment';
+    const isRoom = kind0 === 'room';
+    const isCar  = kind0 === 'vehicle';
     sheet(`<h3>${esc(it ? it.name_th : t('admResAdd'))}</h3>
       ${it ? '' : `<div class="field"><label>${esc(t('admResKind'))}</label>
         <select id="rk"><option value="equipment">${esc(t('admResEq'))}</option>
-          <option value="room">${esc(t('admResRoom'))}</option></select></div>`}
+          <option value="room">${esc(t('admResRoom'))}</option>
+          <option value="vehicle">${esc(t('admResCar'))}</option></select></div>`}
       <div class="field"><label>${esc(t('admResName'))}<span class="req">*</span></label>
         <input id="rn2" value="${esc(it?.name_th || '')}"></div>
       <div class="field"><label>${esc(t('admResCat'))}</label>
         <input id="rc" value="${esc(it?.category || '')}" placeholder="กล้อง · ไมค์ · จอภาพ"></div>
-      <div class="field" id="capF" ${it && !isRoom ? 'hidden' : ''}>
-        <label>${esc(t('admResCap'))}</label>
+      <div class="field" id="capF" ${(isRoom || isCar) ? '' : 'hidden'}>
+        <label>${esc(isCar ? t('admResSeatsCar') : t('admResCap'))}</label>
         <input id="rcap" inputmode="numeric" value="${esc(it?.capacity || '')}"></div>
-      <div class="field" id="locF" ${isRoom ? 'hidden' : ''}>
+      <div class="field" id="locF" ${(isRoom || isCar) ? 'hidden' : ''}>
         <label>${esc(t('admResLoc'))}</label>
         <input id="rloc" value="${esc(it?.storage_location || '')}" placeholder="ตู้ AV ชั้น 2 ช่อง 1"></div>
+      <div class="field" id="drvF" ${isCar ? '' : 'hidden'}>
+        <label>${esc(t('admResDriver'))}</label>
+        <select id="rdrv"><option value="">${esc(t('admResNoDriver'))}</option>${
+          drivers.map(d => `<option value="${esc(d.id)}" ${
+            d.id === it?.default_driver ? 'selected' : ''}>${esc(d.name)}</option>`).join('')}</select>
+        <div style="font-size:11px;color:var(--ink-3);margin-top:4px">${esc(
+          drivers.length ? t('admResDriverHint') : t('admResNoDriverYet'))}</div></div>
       <div class="field"><label>${esc(t('admResNote'))}</label>
         <input id="rnt" value="${esc(it?.note || '')}" placeholder="แบต 2 ก้อน · สายชาร์จ"></div>
       ${photoField('rph', t('admResPhoto'))}
@@ -2964,8 +3081,12 @@ ROUTES['admin-res'] = async () => {
       <button class="btn ghost" id="rx3">${esc(t('cancel'))}</button>`);
     const img = { v:null }; wirePhoto('rph', img);
     if($('#rk')) $('#rk').onchange = () => {
-      const room = $('#rk').value === 'room';
-      $('#capF').hidden = !room; $('#locF').hidden = room;
+      const k = $('#rk').value;
+      $('#capF').hidden = (k === 'equipment');
+      $('#locF').hidden = (k !== 'equipment');
+      $('#drvF').hidden = (k !== 'vehicle');
+      $x('#capF').querySelector('label').textContent =
+        k === 'vehicle' ? t('admResSeatsCar') : t('admResCap');
     };
     $('#rx3').onclick = closeSheet;
     const save = extra => async () => {
@@ -2977,7 +3098,7 @@ ROUTES['admin-res'] = async () => {
           kind: it ? it.kind : ($('#rk')?.value || 'equipment'),
           name_th:name, category:$('#rc').value.trim(),
           capacity:$('#rcap')?.value.trim() || '', storage_location:$('#rloc')?.value.trim() || '',
-          note:$('#rnt').value.trim(),
+          note:$('#rnt').value.trim(), default_driver:$('#rdrv')?.value ?? '',
           photo:img.v?.full || '', thumb:img.v?.thumb || '', card:img.v?.card || ''
         }, extra || {}), 'POST');
         closeSheet(); clearCache(); toast(t('admResSaved'),'ok'); go('admin-res', {}, true);
