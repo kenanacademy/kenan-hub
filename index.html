@@ -31,6 +31,11 @@
   --warn-bg:#FFFBEB;
   --danger:#DC2626;
   --danger-bg:#FEF2F2;
+  /* ชื่อย่อที่โค้ดเรียกใช้อยู่หลายที่ ถ้าไม่ประกาศไว้ สีแดงจะหายไปเงียบๆ
+     (หน้าฉุกเฉิน เส้นเวลาปัจจุบัน ปุ่มยกเลิก เรื่องด่วน) */
+  --bad:#DC2626;
+  --bad-bg:#FEF2F2;
+  --bad-line:#FECACA;
 
   --r-sm:8px; --r:12px; --r-lg:16px; --r-xl:20px;
   --shadow:0 1px 2px rgba(15,23,42,.06),0 4px 16px rgba(15,23,42,.06);
@@ -339,6 +344,30 @@ main{flex:1 1 auto;padding:16px 16px calc(var(--nav-h) + var(--safe-b) + 24px)}
 .gev{position:absolute;left:2px;right:2px;border-radius:7px;padding:4px 5px;
   background:var(--primary);color:#fff;overflow:hidden;text-align:left}
 .gev.mine{background:var(--ok)}
+.gev.unb{background:var(--bad)}
+/* แถบเลือกวัน/คัน — เดิมเรียกคลาสนี้อยู่แต่ไม่เคยประกาศ เลยออกมาเป็นข้อความเปล่าๆ */
+.chips{display:flex;gap:7px;overflow-x:auto;-webkit-overflow-scrolling:touch;padding:1px 0 3px}
+.chips::-webkit-scrollbar{display:none}
+.chip{flex:0 0 auto;padding:7px 12px;border-radius:11px;border:1px solid var(--line);
+  background:var(--surface);font-size:12px;font-weight:700;color:var(--ink-2);
+  white-space:nowrap;line-height:1.25;text-align:center}
+.chip.on{background:var(--primary);border-color:var(--primary);color:#fff}
+.chip .d{display:block;font-size:14.5px;font-weight:800;line-height:1.15}
+.mini{padding:6px 10px;border-radius:9px;border:1px solid var(--line);background:var(--surface);
+  font-size:11.5px;font-weight:700;color:var(--ink-2)}
+.mini.call{border-color:var(--primary);color:var(--primary)}
+.times{display:flex;align-items:center;gap:8px;margin-top:4px}
+.tbox{flex:1;min-width:0;border:1.5px solid var(--line);border-radius:12px;padding:9px 6px;
+  background:#fff;text-align:center}
+.tbox.hl{border-color:var(--primary);background:#F5F8FF}
+.tbox .k{font-size:10.5px;font-weight:700;color:var(--ink-3);margin-bottom:3px;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.arrow{flex:0 0 auto;color:var(--ink-3);font-size:15px;font-weight:800}
+.carleg{display:flex;gap:14px;justify-content:center;flex-wrap:wrap;margin-top:9px;
+  font-size:11px;color:var(--ink-2);font-weight:600}
+.carleg i{display:inline-block;width:9px;height:9px;border-radius:3px;margin-right:5px;vertical-align:-1px}
+.gev.live{background:var(--warn)}
+.gev .p{font-size:8.5px;opacity:.85;line-height:1.2}
 .gev .t{font-size:9.5px;font-weight:800;line-height:1.2}
 .gev .w{font-size:9px;opacity:.9;line-height:1.25;margin-top:1px}
 .gnow{position:absolute;left:34px;right:0;height:2px;background:var(--bad);z-index:3}
@@ -432,7 +461,7 @@ main{flex:1 1 auto;padding:16px 16px calc(var(--nav-h) + var(--safe-b) + 24px)}
 
   <button class="fab" id="fab" hidden>
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 01-2 2H3a2 2 0 01-2-2V8a2 2 0 012-2h4l2-3h6l2 3h4a2 2 0 012 2z"/><circle cx="12" cy="13" r="4"/></svg>
-    <span>บันทึกพัสดุ</span>
+    <span data-nav="navLog">บันทึกพัสดุ</span>
   </button>
 </div>
 
@@ -474,7 +503,8 @@ const START_AT = (function(){
     return ['home','parcel-in','my-parcels','unidentified','calltree','profile',
             'news','reservation','admin','directory','activity','issues',
             'alert-board','issue-queue',
-            'rooms','room-new','equipment','admin-res'].includes(g) ? g : null;
+            'rooms','room-new','equipment','admin-res',
+            'cars','car-new','driver'].includes(g) ? g : null;
   }catch(e){ return null; }
 })();
 /* ?rec=PCL-xxx → เปิดพัสดุชิ้นนั้นให้เลย (ลิงก์ที่ส่งไปในข้อความ LINE) */
@@ -507,7 +537,7 @@ const clearCache = k => { if(k) delete S.cache[k]; else S.cache = {}; };
 const T = {
   th:{
     appName:'Kenan Connect',
-    navHome:'หน้าแรก', navParcel:'พัสดุ', navSos:'ฉุกเฉิน', navMe:'ฉัน',
+    navHome:'หน้าแรก', navParcel:'พัสดุ', navSos:'ฉุกเฉิน', navMe:'ฉัน', navLog:'บันทึกพัสดุ',
     greet:n=>`สวัสดีครับ ${n}`, greetSub:'วันนี้มีอะไรให้ช่วยไหม',
     loading:'กำลังโหลด…', retry:'ลองอีกครั้ง', cancel:'ยกเลิก', save:'บันทึก',
     back:'ย้อนกลับ', close:'ปิด', confirm:'ยืนยัน', soon:'เร็วๆ นี้',
@@ -564,6 +594,7 @@ const T = {
     emgSentTo:n=>`ส่งถึง ${n} คนแล้ว`,
     assignTo:'ระบุผู้รับให้พัสดุนี้', assigned:'ระบุผู้รับและแจ้งเตือนแล้ว',
     issueSoon:'หมวดแจ้งเหตุกำลังพัฒนา ตอนนี้แจ้ง IT หรือ Admin ตามช่องทางเดิมไปก่อนครับ',
+    prPosition:'ตำแหน่งงาน', prPositionPh:'เช่น Program Officer',
     prPhone:'เบอร์ติดต่อ', prShowPhone:'เปิดเผยเบอร์ในทำเนียบบุคลากร',
     prShowPhoneSub:'ถ้าปิดไว้ เพื่อนร่วมงานจะเห็นแค่อีเมล',
     prSave:'บันทึก', prSaved:'บันทึกแล้ว',
@@ -600,6 +631,47 @@ const T = {
     eqBusy:'ของชิ้นนี้ถูกยืมไปแล้ว', eqEmpty:'ยังไม่มีอุปกรณ์ในระบบ',
     eqEmptyBody:'ผู้ดูแลเพิ่มรายการได้ในแท็บ resources ของ Google Sheet',
     eqSince:d=>`ยืมตั้งแต่ ${d}`, eqWhy:'ถ่ายรูปทุกครั้งเพื่อไม่ให้เถียงกันภายหลังว่าของเสียตอนไหน',
+    carTitle:'จองรถ', carBook:'จองรถ', carMy:'เที่ยวของฉัน',
+    carPickVeh:'เลือกรถ', carVehFree:'ว่างช่วงนี้', carVehBusy:'ไม่ว่างช่วงนี้',
+    carDriver:'คนขับ', carNoDriver:'ยังไม่ระบุคนขับ', carDriverAuto:'ระบบจัดคนขับให้ตามรถที่เลือก',
+    carOut:'ออกจากออฟฟิศ', carBack:'กลับถึงออฟฟิศ',
+    carTimeHint:'จองให้ครอบคลุมทั้งไปและกลับ เวลาสิ้นสุดคือเวลาที่รถกลับถึงออฟฟิศ ไม่ใช่เวลาเลิกประชุม',
+    carPurpose:'ไปทำอะไร', carPurposePh:'เช่น ตรวจสถานที่จัดอบรม',
+    carProject:'โครงการที่ลงค่าใช้จ่าย', carProjectPh:'— เลือกโครงการ —',
+    carNeedProject:'ต้องเลือกโครงการก่อน เพื่อให้ค่าน้ำมันลงถูกโครงการ',
+    carProjWhy:'ที่ผ่านมาค่ารถถูกหารเฉลี่ยลงทุกโครงการเท่ากัน ทั้งที่บางโครงการไม่ได้ใช้รถเลย',
+    carStops:'จุดที่แวะ', carAddStop:'＋ เพิ่มจุดแวะ', carStopN:n=>`จุดที่ ${n}`,
+    carStopPh:'เช่น โรงแรม A ถนนสุขุมวิท',
+    carStopsHint:'ไปหลายที่ในวันเดียวใส่ให้ครบ ถ้าแต่ละจุดคนละโครงการ ระบบจะหารค่าใช้จ่ายให้ตามจำนวนจุด',
+    carSplit:'ค่าใช้จ่ายจะถูกหาร', carSplitOne:'ลงโครงการเดียวทั้งเที่ยว',
+    carSplitN:(n,l)=>`หารเท่ากัน ${n} โครงการ · ${l}`,
+    carPax:'ผู้โดยสารอื่น (ถ้ามี)', carPaxPh:'เช่น พี่นก และทีม M&E อีก 2 คน',
+    carGo:'ยืนยันการจอง', carOk:'จองรถเรียบร้อย',
+    carClash:'ช่วงเวลานี้รถไม่ว่าง', carClashDriver:'คนขับติดเที่ยวอื่นในช่วงเวลานี้',
+    carClashBy:(w,x)=>`${w} จองไว้ ${x}`,
+    carNoFree:'ไม่มีรถว่างในช่วงเวลานี้',
+    carGrab:'บันทึกว่าไม่มีรถ แล้วไปใช้ Grab แทน',
+    carGrabHint:'บันทึกไว้เป็นข้อมูลเฉยๆ ไม่ได้แจ้งใคร ไว้ใช้ตอนขออนุมัติเพิ่มรถหรือเบิกค่าเดินทาง',
+    carGrabOk:'บันทึกไว้แล้ว ขอบคุณครับ',
+    carCancel:'ยกเลิกการจอง', carCancelled:'ยกเลิกแล้ว',
+    carTapSlot:'แตะช่องว่างในตารางเพื่อจองรถคันนั้น',
+    carUnbooked:'ไม่ได้จองล่วงหน้า', carLegMine:'ของฉัน', carBookedTime:'เวลาที่จอง', carActualTime:'เวลาจริง',
+    carSt:{ requested:'รอจัดคนขับ', assigned:'พร้อมออก', in_use:'กำลังเดินทาง', returned:'กลับถึงแล้ว' },
+    carEmpty:'ยังไม่มีรถในระบบ',
+    carEmptyBody:'ผู้ดูแลเพิ่มรถได้ที่ เมนูผู้ดูแล → จัดการห้อง / อุปกรณ์ (เลือกประเภท "รถ")',
+    carProjNone:'ยังไม่มีรายชื่อโครงการ',
+    carProjNoneBody:'ผู้ดูแลต้องใส่รหัสโครงการในแท็บ projects ของ Google Sheet ก่อน ถึงจะจองรถได้',
+    drvTitle:'งานขับรถ', drvToday:'งานวันนี้', drvNone:'วันนี้ยังไม่มีงานขับรถ',
+    drvJobs:n=>`วันนี้มีงานขับรถ ${n} เที่ยว`,
+    drvOpen:'เปิดหน้างานขับรถ',
+    drvDepart:'ล้อออกจากออฟฟิศ', drvReturn:'กลับถึงออฟฟิศแล้ว',
+    drvOdo:'เลขไมล์ (ถ้าดูทัน)', drvOdoPh:'เช่น 84210',
+    drvUnbooked:'บันทึกเที่ยวที่ไม่ได้จองล่วงหน้า',
+    drvUnbookedHint:'ใช้ตอนมีคนขอใช้รถหน้างานโดยไม่ได้จองในระบบ บันทึกไว้ให้ครบเฉยๆ ไม่ได้เป็นการร้องเรียนใคร',
+    drvWho:'ใครนั่งไป', drvPick:'เลือกผู้โดยสาร', drvPickNone:'ยังไม่ได้เลือก',
+    drvDeparted:'บันทึกเวลาออกแล้ว', drvReturned:'บันทึกเวลากลับแล้ว',
+    drvSave:'บันทึกเที่ยวนี้', drvSaved:'บันทึกแล้ว',
+    drvNoVeh:'เลือกรถที่ใช้',
     resvRoom:'ห้องประชุม', resvEq:'ยืมอุปกรณ์', resvCar:'จองรถ',
 
     dirCall:'โทร', dirMail:'ส่งอีเมล', dirCopy:'คัดลอกเบอร์', dirCopied:'คัดลอกแล้ว',
@@ -724,7 +796,7 @@ const T = {
   },
   en:{
     appName:'Kenan Connect',
-    navHome:'Home', navParcel:'Parcels', navSos:'Emergency', navMe:'Me',
+    navHome:'Home', navParcel:'Parcels', navSos:'Emergency', navMe:'Me', navLog:'Log parcel',
     greet:n=>`Hello, ${n}`, greetSub:'What can we help with today?',
     loading:'Loading…', retry:'Try again', cancel:'Cancel', save:'Save',
     back:'Back', close:'Close', confirm:'Confirm', soon:'Coming soon',
@@ -781,6 +853,7 @@ const T = {
     emgSentTo:n=>`Sent to ${n} people`,
     assignTo:'Assign a recipient', assigned:'Recipient set and notified',
     issueSoon:'This section is being built. For now please contact IT or Admin as usual.',
+    prPosition:'Job title', prPositionPh:'e.g. Program Officer',
     prPhone:'Phone', prShowPhone:'Show my phone in the staff directory',
     prShowPhoneSub:'If off, colleagues see only your email',
     prSave:'Save', prSaved:'Saved',
@@ -817,6 +890,47 @@ const T = {
     eqBusy:'Someone already has this item', eqEmpty:'No equipment listed yet',
     eqEmptyBody:'An admin can add items in the resources tab of the Google Sheet.',
     eqSince:d=>`Borrowed ${d}`, eqWhy:'Photos every time, so nobody has to argue later about when it broke',
+    carTitle:'Vehicles', carBook:'Book a vehicle', carMy:'My trips',
+    carPickVeh:'Choose a vehicle', carVehFree:'Free at this time', carVehBusy:'Busy at this time',
+    carDriver:'Driver', carNoDriver:'No driver assigned yet', carDriverAuto:'A driver is assigned with the vehicle',
+    carOut:'Leaves office', carBack:'Back at office',
+    carTimeHint:'Book the whole round trip. The end time is when the vehicle is back at the office, not when your meeting ends.',
+    carPurpose:'Purpose', carPurposePh:'e.g. training venue inspection',
+    carProject:'Charge to project', carProjectPh:'— choose a project —',
+    carNeedProject:'Please choose a project so fuel costs land in the right place',
+    carProjWhy:'Until now vehicle costs were split evenly across every project, even ones that never used a car.',
+    carStops:'Stops', carAddStop:'＋ Add a stop', carStopN:n=>`Stop ${n}`,
+    carStopPh:'e.g. Hotel A, Sukhumvit Rd',
+    carStopsHint:'List every stop if you visit several places in one day. If stops belong to different projects, the cost is split between them.',
+    carSplit:'Cost will be split', carSplitOne:'One project for the whole trip',
+    carSplitN:(n,l)=>`Split evenly across ${n} projects · ${l}`,
+    carPax:'Other passengers (optional)', carPaxPh:'e.g. Nok and 2 from the M&E team',
+    carGo:'Confirm booking', carOk:'Vehicle booked',
+    carClash:'The vehicle is taken at that time', carClashDriver:'The driver is on another trip at that time',
+    carClashBy:(w,x)=>`${w} booked it ${x}`,
+    carNoFree:'No vehicle is free at that time',
+    carGrab:'Log "no vehicle" and take a Grab instead',
+    carGrabHint:'Recorded as data only — nobody is notified. Useful when asking for another vehicle or claiming travel costs.',
+    carGrabOk:'Recorded — thank you',
+    carCancel:'Cancel booking', carCancelled:'Cancelled',
+    carTapSlot:'Tap an empty slot to book that vehicle',
+    carUnbooked:'Not booked in advance', carLegMine:'Mine', carBookedTime:'Booked', carActualTime:'Actual',
+    carSt:{ requested:'Awaiting driver', assigned:'Ready', in_use:'On the road', returned:'Back' },
+    carEmpty:'No vehicles listed yet',
+    carEmptyBody:'An admin can add them under Admin → Rooms & equipment (type "vehicle").',
+    carProjNone:'No projects listed yet',
+    carProjNoneBody:'An admin needs to add project codes in the projects tab of the Google Sheet first.',
+    drvTitle:'Driving jobs', drvToday:'Today', drvNone:'No driving jobs today',
+    drvJobs:n=>`${n} driving job(s) today`,
+    drvOpen:'Open driving jobs',
+    drvDepart:'Leaving the office', drvReturn:'Back at the office',
+    drvOdo:'Odometer (if you can see it)', drvOdoPh:'e.g. 84210',
+    drvUnbooked:'Log a trip that was not booked',
+    drvUnbookedHint:'For when someone asks for the car on the spot without booking. It just keeps the record complete — it is not a complaint.',
+    drvWho:'Who travelled', drvPick:'Choose passenger', drvPickNone:'Not chosen',
+    drvDeparted:'Departure time recorded', drvReturned:'Return time recorded',
+    drvSave:'Save this trip', drvSaved:'Saved',
+    drvNoVeh:'Choose the vehicle used',
     resvRoom:'Meeting rooms', resvEq:'Equipment', resvCar:'Vehicles',
 
     dirCall:'Call', dirMail:'Email', dirCopy:'Copy number', dirCopied:'Copied',
@@ -966,6 +1080,60 @@ const MOCK = {
   getUnidentifiedParcels:{ items:[
     { record_id:'PCL-260830-007', tracking_no:'TH99887766554', created_at:'2026-08-30T03:20:00Z' },
     { record_id:'PCL-260830-008', tracking_no:'',              created_at:'2026-08-30T03:22:00Z' }]},
+  getRoomDay:(function(){
+    const d = new Date(), k = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+    return { ok:true, date:k,
+      rooms:[{ resource_id:'RM-1', name_th:'ห้อง Inspiration', capacity:14, category:'ประชุมใหญ่', note:'จอ + Polycom' },
+             { resource_id:'RM-2', name_th:'ห้อง Collaboration', capacity:8, category:'ประชุมย่อย', note:'ทีวี 55"' },
+             { resource_id:'RM-3', name_th:'ห้อง Focus', capacity:4, category:'ห้องเล็ก', note:'' }],
+      bookings:[
+        { record_id:'RB-1', resource_id:'RM-1', title:'ประชุมทีม WING ประจำสัปดาห์',
+          start_at:k+'T09:00:00+07:00', end_at:k+'T11:00:00+07:00',
+          requester_id:'K-1180', who:'สมชาย ก.', who_dept:'Education', who_email:'somchai@kenan-asia.org' },
+        { record_id:'RB-2', resource_id:'RM-2', title:'สัมภาษณ์ผู้สมัคร',
+          start_at:k+'T13:30:00+07:00', end_at:k+'T15:00:00+07:00',
+          requester_id:'K-4920', who:'พิพัฒน์ ส.', who_dept:'Social Impact and Innovation' }] };
+  })(),
+  createRoomBooking:{ ok:true }, cancelRoomBooking:{ ok:true },
+  getEquipment:{ ok:true, items:[
+    { resource_id:'EQ-1', name_th:'กล้อง Canon R6', category:'กล้อง', storage_location:'ตู้ AV ชั้น 2',
+      note:'แบต 2 ก้อน · สายชาร์จ', status:'available', reservations:[] },
+    { resource_id:'EQ-2', name_th:'ไมค์ลอย Shure 2 ตัว', category:'เสียง', storage_location:'ตู้ AV ชั้น 2',
+      status:'out', holder:'วราภรณ์ ท.', since:'2026-08-28T02:00:00Z', reservations:[] },
+    { resource_id:'EQ-3', name_th:'โปรเจกเตอร์ Epson', category:'ภาพ', storage_location:'ห้องเก็บของ ชั้น 1',
+      status:'available', reservations:[] }] },
+  getCarDay:(function(){
+    const d = new Date(), k = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+    return { ok:true, date:k, isDriver:true, isOfficer:true,
+      vehicles:[
+        { resource_id:'VEH-1', name_th:'Toyota Commuter (ฮค-1234)', capacity:12,
+          note:'รถตู้', default_driver:'K-9001', driver_name:'สมพงษ์ ขับดี' },
+        { resource_id:'VEH-2', name_th:'Toyota Altis (2กท-5678)', capacity:4,
+          note:'รถเก๋ง', default_driver:'K-9002', driver_name:'ประยูร ทางไกล' }],
+      projects:[{ code:'BACKOFFICE', name:'งานสำนักงาน' }, { code:'NONBILL', name:'ไม่ผูกโครงการ' }],
+      drivers:[{ id:'K-9001', name:'สมพงษ์ ขับดี' }, { id:'K-9002', name:'ประยูร ทางไกล' }],
+      trips:[
+        { record_id:'CAR-1', resource_id:'VEH-1', status:'in_use',
+          start_at:k+'T09:00:00+07:00', end_at:k+'T15:00:00+07:00',
+          started_at:k+'T09:12:00+07:00', finished_at:'',
+          requester_id:'K-2260', who:'วราภรณ์ ท.', driver_id:'K-9001', driver:'สมพงษ์ ขับดี',
+          project_code:'BACKOFFICE', title:'ตรวจสถานที่จัดอบรม',
+          stops:[{ place:'โรงแรม A สุขุมวิท', project_code:'BACKOFFICE' },
+                 { place:'โรงแรม B พระราม 9', project_code:'NONBILL' }],
+          passengers:'ทีม M&E 2 คน', unbooked:false },
+        { record_id:'CAR-2', resource_id:'VEH-2', status:'assigned',
+          start_at:k+'T13:00:00+07:00', end_at:k+'T16:30:00+07:00',
+          started_at:'', finished_at:'',
+          requester_id:'K-4920', who:'พิพัฒน์ ส.', driver_id:'K-9002', driver:'ประยูร ทางไกล',
+          project_code:'NONBILL', title:'ประชุมผู้บริจาค', stops:[], passengers:'', unbooked:false },
+        { record_id:'CAR-3', resource_id:'VEH-2', status:'in_use',
+          start_at:k+'T10:00:00+07:00', end_at:k+'T11:00:00+07:00',
+          started_at:k+'T10:00:00+07:00', finished_at:'',
+          requester_id:'', who:'', driver_id:'K-9002', driver:'ประยูร ทางไกล',
+          project_code:'', title:'เที่ยวที่ไม่ได้จองล่วงหน้า', stops:[], passengers:'', unbooked:true }] };
+  })(),
+  createCarBooking:{ ok:true, record_id:'CAR-9' }, cancelCarBooking:{ ok:true },
+  driverAction:{ ok:true }, logUnbookedTrip:{ ok:true, record_id:'CAR-8' }, logNoCar:{ ok:true },
   requestOtp:{ ok:true }, getPhoto:{ ok:false },
   getContacts:{ items:[
     { group:'external', name_th:'เหตุฉุกเฉินแห่งชาติ', name_en:'National Emergency', phone:'191' },
@@ -1037,6 +1205,15 @@ async function apiRetry(action, payload, method, tries = 3){
 
 /* ── 5. UI helpers ────────────────────────────────────────────── */
 const $  = s => document.querySelector(s);
+/* ระหว่างที่รอเซิร์ฟเวอร์ ผู้ใช้อาจกดเปลี่ยนหน้าไปแล้ว
+   พอข้อมูลกลับมาแล้วเขียนลง element ที่ถูกลบไปแล้ว = TypeError
+   ตัวนี้ทำให้เขียนลง element ที่หายไปแล้วเป็นการไม่ทำอะไร แทนที่จะพังทั้งหน้า */
+const NULL_EL = { innerHTML:'', textContent:'', value:'', hidden:true, disabled:false, style:{},
+                  dataset:{}, classList:{ add(){}, remove(){}, toggle(){}, contains(){ return false; } },
+                  querySelector(){ return null; }, querySelectorAll(){ return []; },
+                  addEventListener(){}, focus(){}, click(){}, scrollIntoView(){},
+                  insertAdjacentHTML(){}, closest(){ return null; }, removeAttribute(){} };
+const $x = s => document.querySelector(s) || NULL_EL;
 const el = (h) => { const d = document.createElement('div'); d.innerHTML = h.trim(); return d.firstElementChild; };
 const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 
@@ -1048,7 +1225,7 @@ function toast(msg, kind = ''){
   toastTimer = setTimeout(() => n.className = kind, 2600);
 }
 function sheet(html){
-  $('#sheetBody').innerHTML = html;
+  $x('#sheetBody').innerHTML = html;
   $('#sheet').classList.add('on'); $('#scrim').classList.add('on');
 }
 function closeSheet(){ $('#sheet').classList.remove('on'); $('#scrim').classList.remove('on'); }
@@ -1132,14 +1309,17 @@ function chrome(name){
   document.querySelectorAll('.nav button').forEach(b =>
     b.classList.toggle('on', b.dataset.go === name || (name === 'parcel-in' && b.dataset.go === 'my-parcels')));
 }
+let RENDER_SEQ = 0;
 async function render(name, params){
+  const seq = ++RENDER_SEQ;
   chrome(name);
   const fn = ROUTES[name] || ROUTES.home;
-  $('#main').innerHTML = `<div class="view">${skeleton(2)}</div>`;
+  $x('#main').innerHTML = `<div class="view">${skeleton(2)}</div>`;
   try{ await fn(params); }
   catch(e){
+    if(seq !== RENDER_SEQ) return;   // ผู้ใช้เปลี่ยนหน้าไปแล้ว ไม่ต้องขึ้น error ของหน้าเก่า
     if(e.message === 'NO_CONFIG'){
-      $('#main').innerHTML = `<div class="view"><div class="note">${IC.info}<div><b>${t('noConfig')}</b><br>${t('noConfigBody')}</div></div></div>`;
+      $x('#main').innerHTML = `<div class="view"><div class="note">${IC.info}<div><b>${t('noConfig')}</b><br>${t('noConfigBody')}</div></div></div>`;
     }else{
       errorScreen(e, () => render(name, params));
     }
@@ -1149,7 +1329,7 @@ async function render(name, params){
 /** หน้าจอเวลาเชื่อมต่อไม่ได้ — ลองใหม่ได้ตรงนี้โดยไม่ต้องรีโหลดทั้งแอป
     และมีปุ่มทดสอบการเชื่อมต่อ เอาไว้ส่งข้อความ error ให้คนแก้ดู */
 function errorScreen(e, retryFn){
-  $('#main').innerHTML = `<div class="view">
+  $x('#main').innerHTML = `<div class="view">
     <div class="empty">${IC.info}<h3>${esc(t('netErr'))}</h3><p>${esc(t('netErrHint'))}</p></div>
     <button class="btn primary" id="rt">${esc(t('retry'))}</button>
     <div style="height:9px"></div>
@@ -1194,8 +1374,10 @@ ROUTES.home = async () => {
     { ic:IC.chat,  th:t('mFaq'),    en:t('mFaqEn'),    soon:true }
   ];
   // ผู้ดูแลต้องกลับเข้าเมนูตัวเองได้จากในแอป ไม่ใช่ต้องออกไปกด Rich Menu ทุกครั้ง
+  // คนขับรถต้องเจอหน้างานของตัวเองตั้งแต่หน้าแรก ไม่ต้องไล่หาในเมนูจอง
+  if(isDriverNow()) mods.push({ ic:IC.car, th:t('drvTitle'), en:'Driving jobs', go:'driver' });
   if(S.isOfficer) mods.push({ ic:IC.user, th:t('adminTitle'), en:'Admin', go:'admin' });
-  $('#main').innerHTML = `<div class="view">
+  $x('#main').innerHTML = `<div class="view">
     <div class="greet"><h2>${esc(t('greet')(name))}</h2><p>${esc(t('greetSub'))}</p></div>
     <div class="section-title">${esc(t('services'))}<span class="en">${esc(t('servicesEn'))}</span></div>
     <div class="tiles">${mods.map(m => `
@@ -1217,19 +1399,19 @@ ROUTES.home = async () => {
     const r = S.bootNews ? { items:S.bootNews } : await apiRetry('getAnnouncements', {}, 'GET');
     S.bootNews = null;
     const list = r?.items || [];
-    $('#newsBox').innerHTML = list.length
+    $x('#newsBox').innerHTML = list.length
       ? `<div class="rows">${list.slice(0,3).map(a => `
           <div class="row"><div class="body">
             <div class="t">${esc(a.title)}</div>
             <div class="s">${esc(fmtDate(a.at))}</div>
           </div></div>`).join('')}</div>`
       : emptyState(IC.bellBig, S.lang === 'th' ? 'ยังไม่มีประกาศ' : 'No announcements', '');
-  }catch(e){ $('#newsBox').innerHTML = ''; }
+  }catch(e){ $x('#newsBox').innerHTML = ''; }
 };
 
 ROUTES['my-parcels'] = async (params = {}) => {
   setTitle(t('pcTitle'));
-  $('#main').innerHTML = `<div class="view">
+  $x('#main').innerHTML = `<div class="view">
     ${S.isOfficer ? `<button class="btn soft" id="toUn" style="margin-bottom:14px">${esc(t('unTitle'))}</button>` : ''}
     <div id="list">${skeleton(3)}</div></div>`;
   if($('#toUn')) $('#toUn').onclick = () => go('unidentified');
@@ -1238,7 +1420,7 @@ ROUTES['my-parcels'] = async (params = {}) => {
   const waiting = items.filter(i => i.status === 'arrived' || i.status === 'notified');
   const done    = items.filter(i => i.status === 'claimed' || i.status === 'closed');
   if(!items.length){
-    $('#list').innerHTML = emptyState(IC.box, t('pcEmpty'), t('pcEmptyBody'));
+    $x('#list').innerHTML = emptyState(IC.box, t('pcEmpty'), t('pcEmptyBody'));
     return;
   }
   const rowHtml = (p, act) => `
@@ -1250,7 +1432,7 @@ ROUTES['my-parcels'] = async (params = {}) => {
       </div>
       ${act ? `<span class="pill wait">${esc(t('pcWaiting'))}</span>` : `<span class="pill done">${esc(t('pcClaim'))}</span>`}
     </button>`;
-  $('#list').innerHTML = `
+  $x('#list').innerHTML = `
     ${waiting.length ? `<div class="section-title">${esc(t('pcWaiting'))}</div>
       <div class="rows">${waiting.map(p => rowHtml(p, true)).join('')}</div>` : ''}
     ${done.length ? `<div class="section-title">${esc(t('pcHistory'))}</div>
@@ -1309,7 +1491,7 @@ function claimSheet(id, parcel){
 
 ROUTES['parcel-in'] = async () => {
   setTitle(t('inTitle'));
-  $('#main').innerHTML = `<div class="view">
+  $x('#main').innerHTML = `<div class="view">
     <label class="shot" id="shot">
       <input type="file" accept="image/*" capture="environment" id="file" hidden>
       <div class="ph">${IC.cam}<p>${esc(t('inShoot'))}</p>
@@ -1337,7 +1519,7 @@ ROUTES['parcel-in'] = async () => {
     const f = fileEl.files[0]; if(!f) return;
     const im = await shrink2(f);
     S.draft.photo = im.full; S.draft.thumb = im.thumb;
-    $('#shot').innerHTML = `<img src="${im.full}" alt=""><span class="retake">${esc(t('inRetake'))}</span>`;
+    $x('#shot').innerHTML = `<img src="${im.full}" alt=""><span class="retake">${esc(t('inRetake'))}</span>`;
     $('#shot').onclick = () => fileEl.click();
     $('#afterShot').hidden = false;
   };
@@ -1414,13 +1596,13 @@ ROUTES['parcel-in'] = async () => {
 
 ROUTES.unidentified = async () => {
   setTitle(t('unTitle'));
-  $('#main').innerHTML = `<div class="view">
+  $x('#main').innerHTML = `<div class="view">
     <div class="note info">${IC.info}<div>${esc(t('unLead'))}</div></div>
     <div id="list" style="margin-top:14px">${skeleton(3)}</div></div>`;
   const r = await apiRetry('getUnidentifiedParcels', {}, 'GET');
   const items = r?.items || [];
-  if(!items.length){ $('#list').innerHTML = emptyState(IC.box, t('unEmpty'), t('unEmptyBody')); return; }
-  $('#list').innerHTML = `<div class="rows">${items.map(p => `
+  if(!items.length){ $x('#list').innerHTML = emptyState(IC.box, t('unEmpty'), t('unEmptyBody')); return; }
+  $x('#list').innerHTML = `<div class="rows">${items.map(p => `
     <button class="row" data-id="${esc(p.record_id)}">
       ${p.thumb_id ? `<img class="thumb" data-ph="${esc(p.thumb_id)}" alt="">` : `<div class="thumb">${IC.box}</div>`}
       <div class="body">
@@ -1474,14 +1656,14 @@ ROUTES.unidentified = async () => {
 
 ROUTES.calltree = async () => {
   setTitle(t('ctTitle'));
-  $('#main').innerHTML = `<div class="view"><div id="alertBox"></div><div id="list">${skeleton(4)}</div></div>`;
+  $x('#main').innerHTML = `<div class="view"><div id="alertBox"></div><div id="list">${skeleton(4)}</div></div>`;
 
   // มีเหตุอยู่ → ปุ่มยืนยันสถานะต้องมาก่อนทุกอย่าง ตัวใหญ่ ไม่มีอะไรให้เลือกผิด
   let A = null;
   try{ A = await apiRetry('getActiveAlert', {}, 'GET'); }catch(e){}
   if(A?.active){
     const done = !!A.myStatus;
-    $('#alertBox').innerHTML = `
+    $x('#alertBox').innerHTML = `
       <div class="alertbox" style="background:var(--bad);color:#fff;border-radius:18px;padding:17px;margin-bottom:14px">
         <div style="font-size:11px;font-weight:800;opacity:.9;letter-spacing:.06em">${esc(fmtDate(A.alert.at))}</div>
         <h3 style="margin:5px 0 6px;font-size:18px;font-weight:800;line-height:1.35">${esc(A.alert.title)}</h3>
@@ -1519,7 +1701,7 @@ ROUTES.calltree = async () => {
     };
     if($('#bBoard')) $('#bBoard').onclick = () => go('alert-board');
   }else if(A?.canDeclare){
-    $('#alertBox').innerHTML =
+    $x('#alertBox').innerHTML =
       `<button class="btn ghost" id="dec" style="margin-bottom:14px">${esc(t('emgDeclare'))}</button>`;
     $('#dec').onclick = declareSheet;
   }
@@ -1538,7 +1720,7 @@ ROUTES.calltree = async () => {
     { k:'internal', label:t('ctInternal') },
     { k:'lead',     label:t('ctLead') }
   ];
-  $('#list').innerHTML = groups.map(g => {
+  $x('#list').innerHTML = groups.map(g => {
     const rows = items.filter(i => (i.group || 'internal') === g.k);
     if(!rows.length) return '';
     return `<div class="contact-group"><h3>${esc(g.label)}</h3><div class="rows">${rows.map(c => `
@@ -1555,7 +1737,7 @@ ROUTES.calltree = async () => {
 ROUTES.profile = async () => {
   setTitle(t('prTitle'));
   const m = S.me || {};
-  $('#main').innerHTML = `<div class="view">
+  $x('#main').innerHTML = `<div class="view">
     <div class="card" style="text-align:center">
       ${S.profile?.pictureUrl ? `<img src="${esc(S.profile.pictureUrl)}" style="width:76px;height:76px;border-radius:50%;object-fit:cover">` : ''}
       <h2 style="margin:10px 0 2px;font-size:18px">${esc(m.name_th || S.profile?.displayName || '')}</h2>
@@ -1576,6 +1758,8 @@ ROUTES.profile = async () => {
       </div>
     </div>
     <div class="card" style="margin-top:12px">
+      <div class="field"><label>${esc(t('prPosition'))}</label>
+        <input id="pPos" value="${esc(m.position || '')}" placeholder="${esc(t('prPositionPh'))}"></div>
       <div class="field"><label>${esc(t('prPhone'))}</label>
         <input id="pPhone" inputmode="tel" value="${esc(m.phone || '')}" placeholder="08x-xxx-xxxx"></div>
       <label class="check" style="margin:0">
@@ -1595,8 +1779,10 @@ ROUTES.profile = async () => {
     const b = $('#pSave'); b.disabled = true;
     try{
       await apiRetry('updateMyProfile',
-        { phone:$('#pPhone').value.trim(), show_phone:$('#pShow').checked ? 'true' : 'false' }, 'POST');
-      S.me = S.me || {}; S.me.phone = $('#pPhone').value.trim(); S.me.show_phone = $('#pShow').checked;
+        { phone:$('#pPhone').value.trim(), position:$('#pPos').value.trim(),
+          show_phone:$('#pShow').checked ? 'true' : 'false' }, 'POST');
+      S.me = S.me || {}; S.me.phone = $('#pPhone').value.trim();
+      S.me.position = $('#pPos').value.trim(); S.me.show_phone = $('#pShow').checked;
       clearCache('dir'); clearCache('emp');
       toast(t('prSaved'), 'ok');
     }catch(e){ toast(t('netErr'), 'bad'); }
@@ -1612,14 +1798,14 @@ ROUTES.profile = async () => {
 
 ROUTES.news = async () => {
   setTitle(t('news'));
-  $('#main').innerHTML = `<div class="view"><div id="list">${skeleton(3)}</div></div>`;
+  $x('#main').innerHTML = `<div class="view"><div id="list">${skeleton(3)}</div></div>`;
   let items = [];
   try{ const r = await apiRetry('getAnnouncements', {}, 'GET'); items = r?.items || []; }catch(e){}
   if(!items.length){
-    $('#list').innerHTML = emptyState(IC.bellBig, t('newsEmpty'), t('newsEmptyBody'));
+    $x('#list').innerHTML = emptyState(IC.bellBig, t('newsEmpty'), t('newsEmptyBody'));
     return;
   }
-  $('#list').innerHTML = items.map(a => `
+  $x('#list').innerHTML = items.map(a => `
     <div class="card">
       <div style="font-size:11px;color:var(--ink-3);font-weight:700">${esc(fmtDate(a.at))}</div>
       <h3 style="margin:5px 0 6px;font-size:16px;font-weight:700">
@@ -1634,9 +1820,9 @@ ROUTES.reservation = async () => {
   const rows = [
     { ic:IC.cal,    th:t('resvRoom'), en:'Meeting rooms', go:'rooms' },
     { ic:IC.laptop, th:t('resvEq'),   en:'Equipment',     go:'equipment' },
-    { ic:IC.car,    th:t('resvCar'),  en:'Vehicles',      soon:true }
+    { ic:IC.car,    th:t('resvCar'),  en:'Vehicles',      go:'cars' }
   ];
-  $('#main').innerHTML = `<div class="view"><div class="rows">${rows.map(r => `
+  $x('#main').innerHTML = `<div class="view"><div class="rows">${rows.map(r => `
       <button class="row" ${r.soon ? '' : `data-go="${r.go}"`} ${r.soon ? 'style="opacity:.55"' : ''}>
         <div class="thumb" style="background:#EEF3FF;color:var(--primary)">${r.ic}</div>
         <div class="body"><div class="t">${esc(r.th)}</div><div class="s">${esc(r.en)}</div></div>
@@ -1650,12 +1836,12 @@ ROUTES.reservation = async () => {
 ROUTES.admin = async () => {
   setTitle(t('adminTitle'));
   if(!S.isOfficer && !S.isAdmin){
-    $('#main').innerHTML = `<div class="view" style="padding-top:36px">
+    $x('#main').innerHTML = `<div class="view" style="padding-top:36px">
       ${emptyState(IC.info, t('adminNo'), t('adminNoBody'))}</div>`;
     return;
   }
   // เรียงตามความถี่ที่ใช้จริง: งานประจำวันบนสุด · ตั้งค่าที่นานๆ แตะทีไว้ล่างสุด
-  $('#main').innerHTML = `<div class="view">
+  $x('#main').innerHTML = `<div class="view">
     <button class="btn primary" id="toCam" style="padding:18px;font-size:16px">
       ${IC.cam}<span>${esc(t('inTitle'))}</span></button>
     <div style="height:9px"></div>
@@ -1683,10 +1869,10 @@ ROUTES.admin = async () => {
 
   let s = null;
   try{ s = await apiRetry('getAdminSummary', {}, 'GET'); }catch(e){}
-  if(!s?.ok){ $('#sum').innerHTML = ''; return; }
+  if(!s?.ok){ $x('#sum').innerHTML = ''; return; }
   const pct = Math.round(s.lineUsed / s.lineQuota * 100);
   const warn = pct >= 80;
-  $('#sum').innerHTML = `
+  $x('#sum').innerHTML = `
     <div class="tiles">
       <div class="tile" style="min-height:82px"><div class="nm" style="font-size:23px">${s.parcelsToday}</div>
         <div class="en">${esc(t('admParcelsToday'))}</div></div>
@@ -1707,7 +1893,7 @@ ROUTES.admin = async () => {
 
 ROUTES['admin-news'] = async () => {
   setTitle(t('admPostNews'));
-  $('#main').innerHTML = `<div class="view">
+  $x('#main').innerHTML = `<div class="view">
     <div class="note info">${IC.info}<div>${esc(t('admImportHint'))}</div></div>
     <button class="btn soft" id="imp" style="margin:12px 0 4px">${esc(t('admImport'))}</button>
 
@@ -1750,7 +1936,7 @@ ROUTES['admin-news'] = async () => {
    แก้ในชีทไม่ได้ — กันคนตั้งสิทธิ์ให้ตัวเอง */
 ROUTES['admin-roles'] = async () => {
   setTitle(t('admRoles'));
-  $('#main').innerHTML = `<div class="view">
+  $x('#main').innerHTML = `<div class="view">
     <input id="rq" class="inp" placeholder="${esc(t('pkSearch'))}"
       style="width:100%;padding:13px 14px;border:1.5px solid var(--line);
              border-radius:12px;font-size:16px;margin-bottom:12px">
@@ -1772,7 +1958,7 @@ ROUTES['admin-roles'] = async () => {
       String(u.name_th).toLowerCase().includes(k) ||
       String(u.nickname).toLowerCase().includes(k) ||
       String(u.email).toLowerCase().includes(k));
-    $('#ulist').innerHTML = `<div class="rows">${hits.map(u => `
+    $x('#ulist').innerHTML = `<div class="rows">${hits.map(u => `
       <button class="row" data-id="${esc(u.kenan_user_id)}" ${u.is_super ? 'disabled style="opacity:.6"' : ''}>
         <span class="av">${esc(String(u.nickname || u.name_th || '?').trim().charAt(0))}</span>
         <div class="body">
@@ -1818,7 +2004,7 @@ ROUTES['admin-roles'] = async () => {
 /* ── ทำเนียบบุคลากร ─────────────────────────────────────────── */
 ROUTES.directory = async () => {
   setTitle(t('dirTitle'));
-  $('#main').innerHTML = `<div class="view">
+  $x('#main').innerHTML = `<div class="view">
     <input id="dq" placeholder="${esc(t('pkSearch'))}"
       style="width:100%;padding:13px 14px;border:1.5px solid var(--line);
              border-radius:12px;font-size:16px;margin-bottom:12px">
@@ -1826,7 +2012,7 @@ ROUTES.directory = async () => {
   let people = [];
   try{ const r = await cached('dir', 3e5, () => apiRetry('getDirectory', {}, 'GET'));
        people = r?.items || []; }catch(e){}
-  if(!people.length){ $('#dl').innerHTML = emptyState(IC.info, t('dirEmpty'), t('dirEmptyBody')); return; }
+  if(!people.length){ $x('#dl').innerHTML = emptyState(IC.info, t('dirEmpty'), t('dirEmptyBody')); return; }
 
   const norm = s => String(s || '').toLowerCase().replace(/\s|\./g, '');
   const paint = kw => {
@@ -1834,25 +2020,25 @@ ROUTES.directory = async () => {
     const hits = !k ? people : people.filter(p =>
       norm(p.name_th).includes(k) || norm(p.name_en).includes(k) ||
       norm(p.nickname).includes(k) || norm(p.department).includes(k));
-    if(!hits.length){ $('#dl').innerHTML = `<div class="pk-empty">${esc(t('pkNone'))}</div>`; return; }
+    if(!hits.length){ $x('#dl').innerHTML = `<div class="pk-empty">${esc(t('pkNone'))}</div>`; return; }
     // จัดกลุ่มตามแผนก — หาคนง่ายกว่าเรียงชื่อยาวๆ 40 คนรวด
     const groups = {};
     hits.forEach(p => { (groups[p.department || '—'] ||= []).push(p); });
-    $('#dl').innerHTML = Object.keys(groups).map(d => `
+    $x('#dl').innerHTML = Object.keys(groups).map(d => `
       <div class="section-title">${esc(d)}</div>
       <div class="rows">${groups[d].map(p => `
         <button class="row" data-id="${esc(p.kenan_user_id)}">
           <span class="av">${esc(String(p.nickname || p.name_th || '?').trim().charAt(0))}</span>
           <div class="body">
             <div class="t">${esc(p.name_th || p.name_en)}${p.nickname ? ' · ' + esc(p.nickname) : ''}</div>
-            <div class="s">${esc(p.phone || p.email || t('dirNoPhone'))}</div>
+            <div class="s">${esc(p.position || p.phone || p.email || t('dirNoPhone'))}</div>
           </div><span class="go">${IC.chev}</span>
         </button>`).join('')}</div>`).join('');
     // ปุ่มวงกลมเล็กๆ สองอันชิดกันกดพลาดง่ายบนมือถือ → เปิดการ์ดที่มีปุ่มเต็มความกว้างแทน
     document.querySelectorAll('#dl .row[data-id]').forEach(b => b.onclick = () => {
       const p = people.find(x => x.kenan_user_id === b.dataset.id); if(!p) return;
       sheet(`<h3>${esc(p.name_th || p.name_en)}${p.nickname ? ' · ' + esc(p.nickname) : ''}</h3>
-        <p class="sub">${esc([p.department, p.office].filter(Boolean).join(' · '))}</p>
+        <p class="sub">${esc([p.position, p.department, p.office].filter(Boolean).join(' · '))}</p>
         ${p.phone ? `<a class="btn primary" href="tel:${esc(p.phone)}"
             style="text-decoration:none">📞 ${esc(t('dirCall'))} ${esc(p.phone)}</a>` : ''}
         ${p.email ? `<a class="btn ghost" href="mailto:${esc(p.email)}"
@@ -1873,10 +2059,10 @@ ROUTES.directory = async () => {
 /* ── ประวัติของฉัน ──────────────────────────────────────────── */
 ROUTES.activity = async () => {
   setTitle(t('actTitle'));
-  $('#main').innerHTML = `<div class="view"><div id="al">${skeleton(3)}</div></div>`;
+  $x('#main').innerHTML = `<div class="view"><div id="al">${skeleton(3)}</div></div>`;
   let items = [];
   try{ const r = await apiRetry('getMyActivity', {}, 'GET'); items = r?.items || []; }catch(e){}
-  if(!items.length){ $('#al').innerHTML = emptyState(IC.box, t('actEmpty'), t('actEmptyBody')); return; }
+  if(!items.length){ $x('#al').innerHTML = emptyState(IC.box, t('actEmpty'), t('actEmptyBody')); return; }
   const label = ty => ({ parcel:t('tParcel'), borrow:t('tBorrow'), car:t('tCar'), ticket:t('tIssue') }[ty] || ty);
   const row = r => `
     <div class="row">
@@ -1888,7 +2074,7 @@ ROUTES.activity = async () => {
       <span class="pill ${r.is_open ? 'wait' : 'done'}">${esc(r.is_open ? t('actOpen') : t('actDone'))}</span>
     </div>`;
   const open = items.filter(r => r.is_open), done = items.filter(r => !r.is_open);
-  $('#al').innerHTML =
+  $x('#al').innerHTML =
     (open.length ? `<div class="section-title">${esc(t('actOpen'))}</div>
       <div class="rows">${open.map(row).join('')}</div>` : '') +
     (done.length ? `<div class="section-title">${esc(t('actDone'))}</div>
@@ -1914,7 +2100,7 @@ const issuePill = i => `<span class="pill ${
 ROUTES.issues = async (params = {}) => {
   setTitle(t('mIssue'));
   // ฟอร์มอยู่บนสุดเลย ไม่ต้องกดปุ่มเข้าอีกหน้า — เข้ามาก็แจ้งได้ทันที
-  $('#main').innerHTML = `<div class="view">
+  $x('#main').innerHTML = `<div class="view">
     <div class="card">
       <div style="font-size:16px;font-weight:800;letter-spacing:-.01em">${esc(t('isuNew'))}</div>
       <div style="font-size:12px;color:var(--ink-3);margin:2px 0 13px">${esc(t('isuDept'))}</div>
@@ -1973,7 +2159,7 @@ ROUTES.issues = async (params = {}) => {
 
   let items = [];
   try{ const r = await apiRetry('getMyIssues', {}, 'GET'); items = r?.items || []; }catch(e){}
-  $('#il').innerHTML = items.length
+  $x('#il').innerHTML = items.length
     ? `<div class="rows">${items.map(i => `
         <button class="row" data-id="${esc(i.record_id)}">
           <div class="thumb" style="background:#EEF3FF;color:var(--primary)">${IC.tool}</div>
@@ -1990,7 +2176,7 @@ ROUTES.issues = async (params = {}) => {
 
 ROUTES['issue-new'] = async () => {
   setTitle(t('isuNew'));
-  $('#main').innerHTML = `<div class="view">
+  $x('#main').innerHTML = `<div class="view">
     <div class="card">
       <div style="font-size:13px;font-weight:600;margin-bottom:9px">${esc(t('isuDept'))}</div>
       <div id="cats">${ISSUE_DEPTS().map((c, i) => `
@@ -2037,7 +2223,7 @@ ROUTES['issue-new'] = async () => {
   fl.onchange = async () => {
     const f = fl.files[0]; if(!f) return;
     img = await shrink2(f);
-    $('#sh').innerHTML = `<img src="${img.full}" alt=""><span class="retake">${esc(t('inRetake'))}</span>`;
+    $x('#sh').innerHTML = `<img src="${img.full}" alt=""><span class="retake">${esc(t('inRetake'))}</span>`;
     $('#sh').onclick = () => fl.click();
   };
   $('#go').onclick = async () => {
@@ -2058,12 +2244,12 @@ ROUTES['issue-new'] = async () => {
 
 ROUTES['issue-queue'] = async () => {
   setTitle(t('isuQueue'));
-  $('#main').innerHTML = `<div class="view"><div id="ql">${skeleton(3)}</div></div>`;
+  $x('#main').innerHTML = `<div class="view"><div id="ql">${skeleton(3)}</div></div>`;
   let r = null;
   try{ r = await apiRetry('getIssueQueue', {}, 'GET'); }catch(e){}
-  if(!r?.ok){ $('#ql').innerHTML = emptyState(IC.info, t('adminNo'), t('adminNoBody')); return; }
+  if(!r?.ok){ $x('#ql').innerHTML = emptyState(IC.info, t('adminNo'), t('adminNoBody')); return; }
   const open = r.items.filter(i => i.is_open), done = r.items.filter(i => !i.is_open);
-  if(!r.items.length){ $('#ql').innerHTML = emptyState(IC.tool, t('isuQEmpty'), t('isuQEmptyBody')); return; }
+  if(!r.items.length){ $x('#ql').innerHTML = emptyState(IC.tool, t('isuQEmpty'), t('isuQEmptyBody')); return; }
   const row = i => `
     <button class="row" data-id="${esc(i.record_id)}">
       <div class="thumb" style="background:${i.urgency === 'urgent' ? 'var(--bad-bg,#FEF2F2)' : '#EEF3FF'};
@@ -2073,7 +2259,7 @@ ROUTES['issue-queue'] = async () => {
         <div class="s">${esc(i.requester_name)} · ${esc(i.assignee_name || t('isuNoAssignee'))}</div>
       </div>${issuePill(i)}
     </button>`;
-  $('#ql').innerHTML =
+  $x('#ql').innerHTML =
     (open.length ? `<div class="section-title">${esc(t('actOpen'))} (${open.length})</div>
       <div class="rows">${open.map(row).join('')}</div>` : '') +
     (done.length ? `<div class="section-title">${esc(t('actDone'))}</div>
@@ -2084,13 +2270,13 @@ ROUTES['issue-queue'] = async () => {
 
 ROUTES['issue-detail'] = async ({ id } = {}) => {
   setTitle(t('mIssue'));
-  $('#main').innerHTML = `<div class="view"><div id="dv">${skeleton(3)}</div></div>`;
+  $x('#main').innerHTML = `<div class="view"><div id="dv">${skeleton(3)}</div></div>`;
   let d = null;
   try{ d = await apiRetry('getIssueDetail', { record_id:id }, 'GET'); }catch(e){}
-  if(!d?.ok){ $('#dv').innerHTML = emptyState(IC.info, t('netErr'), ''); return; }
+  if(!d?.ok){ $x('#dv').innerHTML = emptyState(IC.info, t('netErr'), ''); return; }
   const i = d.issue;
 
-  $('#dv').innerHTML = `
+  $x('#dv').innerHTML = `
     <div class="card">
       <div style="display:flex;justify-content:space-between;gap:10px;align-items:flex-start">
         <div><div style="font-size:11px;color:var(--ink-3);font-weight:700">${esc(i.category)}${
@@ -2196,7 +2382,7 @@ ROUTES.rooms = async (params = {}) => {
   const sel  = params.date || dayKey(base);
   const mode = params.mode || 'day';        // day = ทุกห้องวันเดียว · week = ห้องเดียว 7 วัน
 
-  $('#main').innerHTML = `<div class="view">
+  $x('#main').innerHTML = `<div class="view">
     <div class="seg2" id="sg">
       <button class="${mode==='day'?'on':''}" data-m="day">${esc(t('rmDay'))}</button>
       <button class="${mode==='week'?'on':''}" data-m="week">${esc(t('rmWeek'))}</button>
@@ -2214,12 +2400,12 @@ ROUTES.rooms = async (params = {}) => {
   let r = null;
   try{ r = await apiRetry('getRoomDay',
         { date: mode==='week' ? sel : sel, days: mode==='week' ? 7 : 1 }, 'GET'); }catch(e){}
-  if(!r?.ok){ $('#rl').innerHTML = emptyState(IC.info, t('netErr'), ''); return; }
+  if(!r?.ok){ $x('#rl').innerHTML = emptyState(IC.info, t('netErr'), ''); return; }
 
   let room0 = params.room || r.rooms[0]?.resource_id;
 
   // ── แถบควบคุมด้านบน
-  $('#ctl').innerHTML = mode === 'day'
+  $x('#ctl').innerHTML = mode === 'day'
     ? `<div class="chips" id="dch" style="margin-bottom:11px">${days.slice(0,10).map(d => `
         <button class="chip ${dayKey(d)===sel?'on':''}" data-d="${dayKey(d)}">
           ${d.toLocaleDateString(S.lang==='th'?'th-TH':'en-GB',{weekday:'short'})}
@@ -2250,7 +2436,7 @@ ROUTES.rooms = async (params = {}) => {
     return (m < 0 || m > (H1-H0)*60) ? null : (m/60)*HPX;
   })();
 
-  $('#rl').innerHTML = `<div class="gridwrap"><div class="gridscroll"><div style="min-width:${34+cols.length*84}px">
+  $x('#rl').innerHTML = `<div class="gridwrap"><div class="gridscroll"><div style="min-width:${34+cols.length*84}px">
     <div class="ghead"><div class="corner"></div>${cols.map(c => `
       <div class="hcell"><div class="n">${esc(c.n)}</div><div class="c">${esc(c.c)}</div></div>`).join('')}</div>
     <div class="gbody">
@@ -2304,7 +2490,7 @@ ROUTES.rooms = async (params = {}) => {
   });
 
   // ── การ์ดห้อง: รูป + จำนวนที่นั่ง
-  $('#rooms').innerHTML = r.rooms.map(rm => `
+  $x('#rooms').innerHTML = r.rooms.map(rm => `
     <button class="rcard" data-r="${esc(rm.resource_id)}">
       ${rm.thumb_id ? `<img class="rphoto" data-ph="${esc(rm.thumb_id)}" alt="">`
                     : `<div class="rphoto">${IC.cal}</div>`}
@@ -2327,7 +2513,7 @@ ROUTES['room-new'] = async ({ date, room:preRoom, hour } = {}) => {
   let rooms = [];
   try{ const r = await apiRetry('getRoomDay', { date:day }, 'GET'); rooms = r?.rooms || []; }catch(e){}
 
-  $('#main').innerHTML = `<div class="view">
+  $x('#main').innerHTML = `<div class="view">
     <div class="card">
       <div style="font-size:13px;font-weight:600;margin-bottom:9px">${esc(t('rmPick'))}</div>
       <div id="rp">${rooms.map((rm, i) => `
@@ -2400,12 +2586,12 @@ ROUTES['room-new'] = async ({ date, room:preRoom, hour } = {}) => {
 /* ── ยืม-คืนอุปกรณ์ ─────────────────────────────────────────── */
 ROUTES.equipment = async () => {
   setTitle(t('eqTitle'));
-  $('#main').innerHTML = `<div class="view">
+  $x('#main').innerHTML = `<div class="view">
     <div class="note info">${IC.info}<div>${esc(t('eqWhy'))}</div></div>
     <div id="el" style="margin-top:12px">${skeleton(3)}</div></div>`;
   let items = [];
   try{ const r = await apiRetry('getEquipment', {}, 'GET'); items = r?.items || []; }catch(e){}
-  if(!items.length){ $('#el').innerHTML = emptyState(IC.laptop, t('eqEmpty'), t('eqEmptyBody')); return; }
+  if(!items.length){ $x('#el').innerHTML = emptyState(IC.laptop, t('eqEmpty'), t('eqEmptyBody')); return; }
 
   const mine  = items.filter(i => i.mine);
   const myRes = items.filter(i => i.reservations?.some(x => x.mine));
@@ -2424,7 +2610,7 @@ ROUTES.equipment = async () => {
       <span class="pill ${i.available?'done':'wait'}">${esc(i.available?t('eqAvail'):t('eqOut'))}</span>
     </button>`;
 
-  $('#el').innerHTML =
+  $x('#el').innerHTML =
     (mine.length  ? `<div class="section-title">${esc(t('eqMine'))}</div>${mine.map(card).join('')}` : '') +
     (myRes.length ? `<div class="section-title">${esc(t('eqMyResv'))}</div>${myRes.map(card).join('')}` : '') +
     `<div class="section-title">${esc(t('eqTitle'))}</div>${items.map(card).join('')}`;
@@ -2569,11 +2755,11 @@ function returnSheet(i){
    เพราะคนปลอดภัยไม่ต้องทำอะไรต่อ แต่คนที่เงียบต้องตามทุกคน */
 ROUTES['alert-board'] = async () => {
   setTitle(t('emgBoard'));
-  $('#main').innerHTML = `<div class="view"><div id="bd">${skeleton(3)}</div></div>`;
+  $x('#main').innerHTML = `<div class="view"><div id="bd">${skeleton(3)}</div></div>`;
   let b = null;
   try{ b = await apiRetry('getAlertBoard', {}, 'GET'); }catch(e){}
-  if(!b?.ok){ $('#bd').innerHTML = emptyState(IC.info, t('adminNo'), t('adminNoBody')); return; }
-  if(!b.active){ $('#bd').innerHTML = emptyState(IC.bellBig, t('emgClosed'), ''); return; }
+  if(!b?.ok){ $x('#bd').innerHTML = emptyState(IC.info, t('adminNo'), t('adminNoBody')); return; }
+  if(!b.active){ $x('#bd').innerHTML = emptyState(IC.bellBig, t('emgClosed'), ''); return; }
 
   const answered = b.safe.length + b.help.length;
   const list = (rows, cls) => rows.length ? `<div class="rows" ${cls ? 'style="border-color:var(--bad-line,#FECACA)"' : ''}>${
@@ -2586,7 +2772,7 @@ ROUTES['alert-board'] = async () => {
       ${r.phone ? `<a class="mini call" href="tel:${esc(r.phone)}">📞</a>` : ''}
     </div>`).join('')}</div>` : '';
 
-  $('#bd').innerHTML = `
+  $x('#bd').innerHTML = `
     <div class="card" style="border-color:var(--bad,#DC2626)">
       <div style="font-size:11px;font-weight:800;color:var(--bad,#DC2626)">${esc(fmtDate(b.alert.at))}</div>
       <h3 style="margin:5px 0 0;font-size:17px">${esc(b.alert.title)}</h3>
@@ -2649,14 +2835,14 @@ function declareSheet(){
 /* ── ผู้ดูแลเพิ่ม/แก้ห้องและอุปกรณ์เองได้ ไม่ต้องไปแก้ในชีท ─────── */
 ROUTES['admin-res'] = async () => {
   setTitle(t('admRes'));
-  $('#main').innerHTML = `<div class="view">
+  $x('#main').innerHTML = `<div class="view">
     <button class="btn primary" id="add">＋ ${esc(t('admResAdd'))}</button>
     <div id="rs" style="margin-top:14px">${skeleton(3)}</div></div>`;
   $('#add').onclick = () => resEdit(null);
 
   let items = [];
   try{ const r = await apiRetry('getResourcesAdmin', {}, 'GET');
-       if(!r?.ok){ $('#rs').innerHTML = emptyState(IC.info, t('adminNo'), t('adminNoBody')); return; }
+       if(!r?.ok){ $x('#rs').innerHTML = emptyState(IC.info, t('adminNo'), t('adminNoBody')); return; }
        items = r.items; }catch(e){}
 
   const grp = { room:[], equipment:[], vehicle:[] };
@@ -2676,7 +2862,7 @@ ROUTES['admin-res'] = async () => {
         ${i.is_active ? `<span class="go">${IC.chev}</span>`
                       : `<span class="pill" style="background:var(--neutral);color:var(--ink-3)">${esc(t('admResInactive'))}</span>`}
       </button>`).join('')}` : '';
-  $('#rs').innerHTML = sec('room', t('admResRoom')) + sec('equipment', t('admResEq')) + sec('vehicle','รถ');
+  $x('#rs').innerHTML = sec('room', t('admResRoom')) + sec('equipment', t('admResEq')) + sec('vehicle','รถ');
   paintPhotos($('#rs'));
   document.querySelectorAll('#rs .rcard').forEach(b =>
     b.onclick = () => resEdit(items.find(x => x.resource_id === b.dataset.id)));
@@ -2729,13 +2915,511 @@ ROUTES['admin-res'] = async () => {
   }
 };
 
+
+/* ── จองรถ ──────────────────────────────────────────────────────
+   หลักคิด 3 ข้อที่ต่างจากจองห้อง
+   1) เวลาที่จอง = ออกจากออฟฟิศ → กลับถึงออฟฟิศ ไม่ใช่เวลาประชุม
+   2) ต้องผูกโครงการเสมอ ไม่งั้นค่าน้ำมันถูกหารเฉลี่ยลงทุกโครงการเหมือนเดิม
+   3) คนขับเป็นคนกดออก-กลับ เพราะทุกเที่ยวมีคนขับอยู่ด้วยเสมอ
+      เที่ยวที่ไม่ได้จองจึงถูกบันทึกได้โดยไม่ต้องมีใครไปฟ้องใคร               */
+
+const isDriverNow = () => /(^|,)\s*driver\s*(,|$)/.test(String(S.me?.roles || ''));
+const carStName   = k => (t('carSt') || {})[k] || k;
+const stopsOf     = tr => { try{ return Array.isArray(tr.stops) ? tr.stops : []; }catch(e){ return []; } };
+
+ROUTES.cars = async (params = {}) => {
+  setTitle(t('carTitle'));
+  const today = new Date();
+  const sel   = params.date || dayKey(today);
+  const mode  = params.mode || 'day';
+  const dchips = Array.from({length:14}, (_,i) => { const d = new Date(today); d.setDate(today.getDate()+i); return d; });
+  const wdays  = Array.from({length:7},  (_,i) => { const d = new Date(sel + 'T00:00:00'); d.setDate(d.getDate()+i); return d; });
+
+  $x('#main').innerHTML = `<div class="view">
+    <div id="dbn"></div>
+    <div class="seg2" id="sg">
+      <button class="${mode==='day'?'on':''}" data-m="day">${esc(t('rmDay'))}</button>
+      <button class="${mode==='week'?'on':''}" data-m="week">${esc(t('rmWeek'))}</button>
+    </div>
+    <div id="ctl"></div>
+    <div id="gr">${skeleton(3)}</div>
+    <div class="section-title">${esc(t('carPickVeh'))}</div>
+    <div id="vl"></div>
+    <div class="sticky-cta"><button class="btn primary" id="bk">＋ ${esc(t('carBook'))}</button></div>
+  </div>`;
+  $('#bk').onclick = () => go('car-new', { date:sel });
+  document.querySelectorAll('#sg button').forEach(b =>
+    b.onclick = () => go('cars', { date:sel, mode:b.dataset.m }, true));
+
+  let r = null;
+  try{ r = await apiRetry('getCarDay', { date:sel, days: mode==='week' ? 7 : 1 }, 'GET'); }catch(e){}
+  if(!r?.ok){ $x('#gr').innerHTML = emptyState(IC.info, t('netErr'), ''); return; }
+
+  if(!r.vehicles.length){
+    $x('#gr').innerHTML = emptyState(IC.car, t('carEmpty'), t('carEmptyBody'));
+    $x('#vl').innerHTML = ''; return;
+  }
+
+  const me   = String(S.me?.kenan_user_id || '');
+  let   veh0 = params.veh || r.vehicles[0]?.resource_id;
+
+  /* คนขับเห็นทางเข้างานของตัวเองก่อนอย่างอื่น ไม่ต้องไปหาในเมนู */
+  if(r.isDriver){
+    const mine = r.trips.filter(x => String(x.driver_id) === me &&
+                                     ['assigned','requested','in_use'].includes(x.status));
+    $x('#dbn').innerHTML = `<button class="row" id="dgo" style="border:1.5px solid var(--primary);
+        border-radius:14px;background:#EEF3FF;margin-bottom:12px;width:100%">
+        <div class="thumb" style="background:#fff;color:var(--primary)">${IC.car}</div>
+        <div class="body"><div class="t">${esc(t('drvOpen'))}</div>
+          <div class="s">${esc(mine.length ? t('drvJobs')(mine.length) : t('drvNone'))}</div></div>
+        <span class="go">${IC.chev}</span></button>`;
+    $('#dgo').onclick = () => go('driver');
+  }
+
+  /* ── แถบเลือกวัน / เลือกคัน */
+  $x('#ctl').innerHTML = mode === 'day'
+    ? `<div class="chips" id="dch" style="margin-bottom:11px">${dchips.slice(0,10).map(d => `
+        <button class="chip ${dayKey(d)===sel?'on':''}" data-d="${dayKey(d)}">
+          ${d.toLocaleDateString(S.lang==='th'?'th-TH':'en-GB',{weekday:'short'})}
+          <span class="d">${d.getDate()}</span></button>`).join('')}</div>`
+    : `<div class="chips" id="vch" style="margin-bottom:11px">${r.vehicles.map(v => `
+        <button class="chip ${v.resource_id===veh0?'on':''}" data-v="${esc(v.resource_id)}">
+          ${esc(v.name_th)}</button>`).join('')}</div>`;
+  if($('#dch')) document.querySelectorAll('#dch .chip').forEach(c =>
+    c.onclick = () => go('cars', { date:c.dataset.d, mode }, true));
+  if($('#vch')) document.querySelectorAll('#vch .chip').forEach(c =>
+    c.onclick = () => go('cars', { date:sel, mode, veh:c.dataset.v }, true));
+
+  /* ── ตาราง 08:00–18:00 */
+  const cols = mode === 'day'
+    ? r.vehicles.map(v => ({ key:v.resource_id, n:v.name_th,
+        c: v.driver_name ? firstName(v.driver_name) : (v.capacity ? t('rmSeats')(v.capacity) : '') }))
+    : wdays.map(d => ({ key:dayKey(d),
+        n:d.toLocaleDateString(S.lang==='th'?'th-TH':'en-GB',{weekday:'short'}), c:String(d.getDate()) }));
+
+  const evFor = col => r.trips.filter(x => mode === 'day'
+    ? x.resource_id === col.key
+    : (x.resource_id === veh0 && dayKey(x.start_at) === col.key));
+
+  const nowTop = (() => {
+    const n = new Date();
+    if(mode === 'day' && dayKey(n) !== sel) return null;
+    const m = (n.getHours()-H0)*60 + n.getMinutes();
+    return (m < 0 || m > (H1-H0)*60) ? null : (m/60)*HPX;
+  })();
+
+  $x('#gr').innerHTML = `<div class="gridwrap"><div class="gridscroll"><div style="min-width:${34+cols.length*84}px">
+    <div class="ghead"><div class="corner"></div>${cols.map(c => `
+      <div class="hcell"><div class="n">${esc(c.n)}</div><div class="c">${esc(c.c)}</div></div>`).join('')}</div>
+    <div class="gbody">
+      <div class="ghours">${Array.from({length:H1-H0+1},(_,i)=>`<span>${String(H0+i).padStart(2,'0')}</span>`).join('')}</div>
+      ${cols.map(c => `<div class="gcol" data-k="${esc(c.key)}">
+        ${Array.from({length:H1-H0},(_,i)=>`<div class="hr" data-h="${H0+i}"></div>`).join('')}
+        ${evFor(c).map(x => {
+          const s = x.started_at || x.start_at, e = x.finished_at || x.end_at;
+          const top = Math.max(0,(minsFrom8(s)/60)*HPX);
+          const hgt = Math.max(20,((minsFrom8(e)-minsFrom8(s))/60)*HPX-2);
+          const cls = x.unbooked ? 'unb' : (x.status === 'in_use' ? 'live'
+                    : (String(x.requester_id) === me ? 'mine' : ''));
+          return `<button class="gev ${cls}" data-b="${esc(x.record_id)}" style="top:${top}px;height:${hgt}px">
+            <div class="t">${esc(durLabel(s, e))}</div>
+            <div class="w">${esc(firstName(x.who) || firstName(x.driver))}</div>
+            ${hgt > 40 && x.project_code ? `<div class="p">${esc(x.project_code)}</div>` : ''}</button>`;
+        }).join('')}
+      </div>`).join('')}
+      ${nowTop!==null?`<div class="gnow" style="top:${nowTop}px"></div>`:''}
+    </div>
+  </div></div></div>
+  <div class="carleg">
+    <span><i style="background:var(--ok)"></i>${esc(t('carLegMine'))}</span>
+    <span><i style="background:var(--warn)"></i>${esc(carStName('in_use'))}</span>
+    <span><i style="background:var(--bad)"></i>${esc(t('carUnbooked'))}</span>
+  </div>
+  <div style="font-size:11.5px;color:var(--ink-3);margin-top:6px;text-align:center">${esc(t('carTapSlot'))}</div>`;
+
+  document.querySelectorAll('#gr .hr').forEach(cell => cell.onclick = () => {
+    const key = cell.closest('.gcol').dataset.k, hr = cell.dataset.h;
+    go('car-new', mode==='day' ? { date:sel, veh:key, hour:hr } : { date:key, veh:veh0, hour:hr });
+  });
+  document.querySelectorAll('#gr .gev').forEach(el => el.onclick = ev => {
+    ev.stopPropagation();
+    const x = r.trips.find(y => y.record_id === el.dataset.b); if(!x) return;
+    tripSheet(x, r, () => go('cars', { date:sel, mode, veh:veh0 }, true));
+  });
+
+  /* ── การ์ดรถ: รูป · ที่นั่ง · คนขับประจำ · ใช้งานวันนี้กี่เที่ยว */
+  $x('#vl').innerHTML = r.vehicles.map(v => {
+    const n = r.trips.filter(x => x.resource_id === v.resource_id).length;
+    const live = r.trips.some(x => x.resource_id === v.resource_id && x.status === 'in_use');
+    return `<button class="rcard" data-v="${esc(v.resource_id)}">
+      ${v.thumb_id ? `<img class="rphoto" data-ph="${esc(v.thumb_id)}" alt="">`
+                   : `<div class="rphoto">${IC.car}</div>`}
+      <div style="flex:1;min-width:0">
+        <div style="font-size:14.5px;font-weight:700">${esc(v.name_th)}</div>
+        <div style="font-size:11.5px;color:var(--ink-3)">${esc([
+          v.capacity ? t('rmSeats')(v.capacity) : '',
+          v.driver_name ? t('carDriver') + ' ' + v.driver_name : t('carNoDriver'),
+          v.note ].filter(Boolean).join(' · '))}</div>
+        ${live ? `<div style="font-size:10.5px;font-weight:800;color:var(--warn);margin-top:2px">● ${esc(carStName('in_use'))}</div>`
+               : (n ? `<div style="font-size:10.5px;color:var(--ink-3);margin-top:2px">${n} ${S.lang==='th'?'เที่ยว':'trips'}</div>` : '')}
+      </div><span class="go">${IC.chev}</span></button>`;
+  }).join('');
+  paintPhotos($('#vl'));
+  document.querySelectorAll('#vl .rcard').forEach(b =>
+    b.onclick = () => go('car-new', { date:sel, veh:b.dataset.v }));
+};
+
+/** รายละเอียดเที่ยว — คนอื่นเห็นด้วยว่าใครจอง ไปไหน โครงการอะไร
+    ความโปร่งใสตรงนี้คือสิ่งที่ทำให้การกั๊กรถลดลงเอง โดยไม่ต้องมีกฎ */
+function tripSheet(x, r, refresh){
+  const me   = String(S.me?.kenan_user_id || '');
+  const mine = String(x.requester_id) === me;
+  const veh  = r.vehicles.find(v => v.resource_id === x.resource_id);
+  const stops = stopsOf(x);
+  sheet(`<h3>${esc(x.title || '-')}</h3>
+    <p class="sub">${esc(veh?.name_th || '')} · ${esc(fmtDate(x.start_at))}</p>
+    ${x.unbooked ? `<div class="note" style="border-color:var(--bad);color:var(--bad)">${IC.info}
+      <div>${esc(t('carUnbooked'))}</div></div>` : ''}
+    <div class="rows" style="margin:10px 0">
+      <div class="row"><div class="body">
+        <div class="s">${esc(t('carBookedTime'))}</div>
+        <div class="t">${esc(hhmm(x.start_at))} → ${esc(hhmm(x.end_at))}</div></div></div>
+      ${x.started_at ? `<div class="row"><div class="body">
+        <div class="s">${esc(t('carActualTime'))}</div>
+        <div class="t">${esc(hhmm(x.started_at))} → ${x.finished_at ? esc(hhmm(x.finished_at)) : '…'}</div>
+        </div></div>` : ''}
+      <div class="row"><div class="body">
+        <div class="s">${esc(t('rmBookedBy'))}</div>
+        <div class="t">${esc(x.who || '-')}</div></div></div>
+      ${x.driver ? `<div class="row"><div class="body">
+        <div class="s">${esc(t('carDriver'))}</div>
+        <div class="t">${esc(x.driver)}</div></div></div>` : ''}
+      ${x.project_code ? `<div class="row"><div class="body">
+        <div class="s">${esc(t('carProject'))}</div>
+        <div class="t">${esc(x.project_code)}</div></div></div>` : ''}
+      ${x.passengers ? `<div class="row"><div class="body">
+        <div class="s">${esc(t('carPax'))}</div>
+        <div class="t">${esc(x.passengers)}</div></div></div>` : ''}
+    </div>
+    ${stops.length ? `<div class="section-title" style="margin-top:4px">${esc(t('carStops'))}</div>
+      <div class="rows" style="margin-bottom:12px">${stops.map((sp,i) => `
+        <div class="row"><span class="av">${i+1}</span><div class="body">
+          <div class="t">${esc(sp.place || '-')}</div>
+          <div class="s">${esc(sp.project_code || '')}</div></div></div>`).join('')}</div>` : ''}
+    <span class="pill new" style="margin-bottom:10px;display:inline-block">${esc(carStName(x.status))}</span>
+    ${mine && x.status !== 'in_use'
+      ? `<button class="btn" id="cx" style="background:var(--bad);color:#fff">${esc(t('carCancel'))}</button>`
+      : (!mine ? `<div class="note info">${IC.info}<div>${esc(t('rmSwapHint'))}</div></div>` : '')}
+    <button class="btn ghost" id="cl3">${esc(t('close'))}</button>`);
+  $('#cl3').onclick = closeSheet;
+  if($('#cx')) $('#cx').onclick = async () => {
+    closeSheet();
+    try{ await apiRetry('cancelCarBooking', { record_id:x.record_id }, 'POST');
+         toast(t('carCancelled'),'ok'); refresh(); }
+    catch(e){ toast(t('netErr'),'bad'); }
+  };
+}
+
+ROUTES['car-new'] = async ({ date, veh:preVeh, hour } = {}) => {
+  setTitle(t('carBook'));
+  const day = date || dayKey(new Date());
+  const h1  = hour ? String(hour).padStart(2,'0') + ':00' : '09:00';
+  const h2  = hour ? String(Math.min(Number(hour)+3,18)).padStart(2,'0') + ':00' : '12:00';
+
+  let r = null;
+  try{ r = await apiRetry('getCarDay', { date:day }, 'GET'); }catch(e){}
+  if(!r?.ok){ errorScreen(new Error('load'), () => render('car-new', { date, veh:preVeh, hour })); return; }
+  if(!r.vehicles.length){
+    $x('#main').innerHTML = `<div class="view">${emptyState(IC.car, t('carEmpty'), t('carEmptyBody'))}</div>`; return;
+  }
+  if(!r.projects.length){
+    $x('#main').innerHTML = `<div class="view">${emptyState(IC.info, t('carProjNone'), t('carProjNoneBody'))}</div>`; return;
+  }
+
+  const projOpts = ph => `<option value="">${esc(ph)}</option>` + r.projects.map(p =>
+    `<option value="${esc(p.code)}">${esc(p.code)} · ${esc(p.name || '')}</option>`).join('');
+
+  $x('#main').innerHTML = `<div class="view">
+    <div class="card">
+      <div style="font-size:13px;font-weight:600;margin-bottom:9px">${esc(t('carPickVeh'))}</div>
+      <div id="vp"></div>
+      <div style="font-size:11px;color:var(--ink-3);margin-top:2px">${esc(t('carDriverAuto'))}</div>
+      <div id="noFree"></div>
+    </div>
+
+    <div class="card">
+      <div class="field"><label>${esc(t('rmWhen'))}</label><input type="date" id="dd" value="${day}"></div>
+      <div class="times">
+        <div class="tbox"><div class="k">${esc(t('carOut'))}</div>
+          <input type="time" id="t1" value="${h1}" style="border:none;font-size:17px;font-weight:800;
+            text-align:center;width:100%;background:transparent"></div>
+        <div class="arrow">→</div>
+        <div class="tbox hl"><div class="k">${esc(t('carBack'))}</div>
+          <input type="time" id="t2" value="${h2}" style="border:none;font-size:17px;font-weight:800;
+            text-align:center;width:100%;background:transparent"></div>
+      </div>
+      <div style="font-size:11px;color:var(--ink-3);margin-top:8px">${esc(t('carTimeHint'))}</div>
+    </div>
+
+    <div class="card">
+      <div class="field"><label>${esc(t('carPurpose'))}<span class="req">*</span></label>
+        <input id="pp" placeholder="${esc(t('carPurposePh'))}"></div>
+      <div class="field" style="margin:0"><label>${esc(t('carProject'))}<span class="req">*</span></label>
+        <select id="pj">${projOpts(t('carProjectPh'))}</select></div>
+      <div style="font-size:11px;color:var(--ink-3);margin-top:6px">${esc(t('carProjWhy'))}</div>
+    </div>
+
+    <div class="card">
+      <div style="font-size:13px;font-weight:600;margin-bottom:4px">${esc(t('carStops'))}</div>
+      <div style="font-size:11px;color:var(--ink-3);margin-bottom:9px">${esc(t('carStopsHint'))}</div>
+      <div id="st"></div>
+      <button class="btn ghost" id="addStop" style="margin-top:6px">${esc(t('carAddStop'))}</button>
+      <div id="split" style="font-size:11.5px;font-weight:700;color:var(--primary);margin-top:9px"></div>
+    </div>
+
+    <div class="card">
+      <div class="field" style="margin:0"><label>${esc(t('carPax'))}</label>
+        <input id="px" placeholder="${esc(t('carPaxPh'))}"></div>
+    </div>
+
+    <div class="sticky-cta"><button class="btn primary" id="goBk">${esc(t('carGo'))}</button></div>
+  </div>`;
+
+  /* ── รายการรถ + บอกว่าคันไหนว่างในช่วงเวลาที่เลือก */
+  let vehId = preVeh || r.vehicles[0].resource_id;
+  const overlap = (a1,a2,b1,b2) => Date.parse(a1) < Date.parse(b2) && Date.parse(b1) < Date.parse(a2);
+  const win = () => {
+    const d = $('#dd').value || day, a = $('#t1').value || h1, z = $('#t2').value || h2;
+    return [`${d}T${a}:00+07:00`, `${d}T${z}:00+07:00`];
+  };
+  function paintVeh(){
+    const [s,e] = win();
+    $x('#vp').innerHTML = r.vehicles.map(v => {
+      const busy = r.trips.some(x => x.resource_id === v.resource_id && overlap(s,e,x.start_at,x.end_at));
+      const on = v.resource_id === vehId;
+      return `<button class="row" data-v="${esc(v.resource_id)}" style="border:1.5px solid ${
+        on?'var(--primary)':'var(--line)'};border-radius:12px;margin-bottom:8px;
+        background:${on?'#EEF3FF':'#fff'}">
+        ${v.thumb_id ? `<img class="rphoto" style="width:52px;height:40px" data-ph="${esc(v.thumb_id)}" alt="">`
+                     : `<div class="rphoto" style="width:52px;height:40px">${IC.car}</div>`}
+        <div class="body"><div class="t">${esc(v.name_th)}</div>
+          <div class="s">${esc([v.capacity ? t('rmSeats')(v.capacity) : '',
+            v.driver_name ? t('carDriver') + ' ' + firstName(v.driver_name) : t('carNoDriver')
+            ].filter(Boolean).join(' · '))}</div>
+          <div style="font-size:10.5px;font-weight:800;color:${busy?'var(--bad)':'var(--ok)'}">
+            ${esc(busy ? t('carVehBusy') : t('carVehFree'))}</div></div>
+        <span class="ck" style="color:var(--primary);font-weight:800;${on?'':'visibility:hidden'}">✓</span>
+      </button>`;
+    }).join('');
+    paintPhotos($('#vp'));
+    document.querySelectorAll('#vp .row').forEach(b => b.onclick = () => { vehId = b.dataset.v; paintVeh(); });
+    const allBusy = r.vehicles.every(v => {
+      const [s2,e2] = win();
+      return r.trips.some(x => x.resource_id === v.resource_id && overlap(s2,e2,x.start_at,x.end_at));
+    });
+    $x('#noFree').innerHTML = allBusy ? `<div class="note" style="border-color:var(--bad);margin-top:8px">
+      ${IC.info}<div><b>${esc(t('carNoFree'))}</b><br>${esc(t('carGrabHint'))}</div></div>
+      <button class="btn ghost" id="grabBtn" style="margin-top:8px">${esc(t('carGrab'))}</button>` : '';
+    if($('#grabBtn')) $('#grabBtn').onclick = async () => {
+      const [s3,e3] = win();
+      try{ await apiRetry('logNoCar', { wanted:`${s3} → ${e3}`, alt_action:'grab',
+             project_code:$('#pj').value || '' }, 'POST');
+           toast(t('carGrabOk'),'ok'); back(); }
+      catch(e){ toast(t('netErr'),'bad'); }
+    };
+  }
+  paintVeh();
+  ['#dd','#t1','#t2'].forEach(sl => { const el = $(sl); if(el) el.onchange = paintVeh; });
+
+  /* ── จุดแวะ: แต่ละจุดผูกโครงการเองได้ แล้วโชว์ให้เห็นเลยว่าหารกันยังไง */
+  let stops = [];
+  function paintStops(){
+    $x('#st').innerHTML = stops.map((sp,i) => `
+      <div style="border:1px solid var(--line);border-radius:12px;padding:10px;margin-bottom:8px">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
+          <span style="font-size:11.5px;font-weight:800;color:var(--ink-3)">${esc(t('carStopN')(i+1))}</span>
+          <button data-x="${i}" style="font-size:11.5px;color:var(--bad);font-weight:700">${esc(t('cancel'))}</button>
+        </div>
+        <input data-p="${i}" value="${esc(sp.place || '')}" placeholder="${esc(t('carStopPh'))}"
+          style="margin-bottom:6px">
+        <select data-j="${i}">${projOpts(t('carProjectPh'))}</select>
+      </div>`).join('');
+    stops.forEach((sp,i) => { const s2 = document.querySelector(`#st [data-j="${i}"]`); if(s2) s2.value = sp.project_code || ''; });
+    document.querySelectorAll('#st [data-x]').forEach(b =>
+      b.onclick = () => { stops.splice(Number(b.dataset.x),1); paintStops(); });
+    document.querySelectorAll('#st [data-p]').forEach(el =>
+      el.oninput = () => { stops[Number(el.dataset.p)].place = el.value; });
+    document.querySelectorAll('#st [data-j]').forEach(el =>
+      el.onchange = () => { stops[Number(el.dataset.j)].project_code = el.value; paintSplit(); });
+    paintSplit();
+  }
+  function paintSplit(){
+    const codes = [...new Set([$('#pj').value, ...stops.map(s => s.project_code)].filter(Boolean))];
+    $x('#split').textContent = codes.length > 1
+      ? t('carSplitN')(codes.length, codes.join(' · '))
+      : (codes.length ? t('carSplit') + ': ' + t('carSplitOne') : '');
+  }
+  $('#addStop').onclick = () => { stops.push({ place:'', project_code:$('#pj').value || '' }); paintStops(); };
+  $('#pj').onchange = paintSplit;
+  paintStops();
+
+  /* ── ส่ง */
+  $('#goBk').onclick = async () => {
+    const purpose = $('#pp').value.trim();
+    const project = $('#pj').value;
+    const d = $('#dd').value, a = $('#t1').value, z = $('#t2').value;
+    if(!purpose){ toast(t('admNeedTitle'),'bad'); return; }
+    if(!project){ toast(t('carNeedProject'),'bad'); $('#pj').focus(); return; }
+    if(!d || !a || !z || z <= a){ toast(t('rmBadTime'),'bad'); return; }
+    const b = $('#goBk'); b.disabled = true;
+    try{
+      const res = await apiRetry('createCarBooking', {
+        resource_id:vehId, purpose, project_code:project,
+        passengers:$('#px').value.trim(),
+        stops: JSON.stringify(stops.filter(s => s.place.trim())),
+        start_at:`${d}T${a}:00+07:00`, end_at:`${d}T${z}:00+07:00`
+      }, 'POST');
+      if(res?.error === 'CLASH'){
+        const c = res.clash || {};
+        toast(`${c.sameCar ? t('carClash') : t('carClashDriver')} · ${
+          c.who ? t('carClashBy')(c.who, `${hhmm(c.start_at)}–${hhmm(c.end_at)}`) : ''}`, 'bad');
+        b.disabled = false; return;
+      }
+      if(res?.error === 'NO_PROJECT'){ toast(t('carNeedProject'),'bad'); b.disabled = false; return; }
+      if(res?.ok === false) throw 0;
+      toast(t('carOk'),'ok');
+      S.stack = [{ name:'home', params:{} }]; go('cars', { date:d });
+    }catch(e){ toast(t('netErr'),'bad'); b.disabled = false; }
+  };
+};
+
+/** หน้าคนขับ — ปุ่มเดียวใหญ่ๆ กดตอนล้อออกและตอนกลับถึง
+    ถ้าต้องกรอกอะไรมากกว่านี้ ในความจริงจะไม่มีใครกด */
+ROUTES.driver = async () => {
+  setTitle(t('drvTitle'));
+  const today = dayKey(new Date());
+  let r = null;
+  try{ r = await apiRetry('getCarDay', { date:today }, 'GET'); }catch(e){}
+  if(!r?.ok){ errorScreen(new Error('load'), () => render('driver', {})); return; }
+  if(!r.isDriver && !r.isOfficer){
+    $x('#main').innerHTML = `<div class="view">${emptyState(IC.info, t('drvTitle'),
+      S.lang==='th' ? 'หน้านี้สำหรับคนขับรถเท่านั้น' : 'This page is for drivers only')}</div>`;
+    return;
+  }
+  const me = String(S.me?.kenan_user_id || '');
+  const jobs = r.trips.filter(x => (String(x.driver_id) === me || r.isOfficer) &&
+                                   ['requested','assigned','in_use'].includes(x.status))
+                      .sort((a,b) => String(a.start_at).localeCompare(String(b.start_at)));
+
+  $x('#main').innerHTML = `<div class="view">
+    <div class="section-title">${esc(t('drvToday'))}</div>
+    <div id="jb">${jobs.length ? '' : emptyState(IC.car, t('drvNone'), '')}</div>
+    <div class="section-title" style="margin-top:18px">${esc(t('drvUnbooked'))}</div>
+    <div class="note info">${IC.info}<div>${esc(t('drvUnbookedHint'))}</div></div>
+    <button class="btn ghost" id="ub" style="margin-top:9px">${esc(t('drvUnbooked'))}</button>
+  </div>`;
+
+  $x('#jb').innerHTML = jobs.map(x => {
+    const veh = r.vehicles.find(v => v.resource_id === x.resource_id);
+    const live = x.status === 'in_use';
+    return `<div class="card" style="margin-bottom:11px">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px">
+        <div style="min-width:0">
+          <div style="font-size:15px;font-weight:800">${esc(x.title || '-')}</div>
+          <div style="font-size:12px;color:var(--ink-3);margin-top:2px">
+            ${esc(veh?.name_th || '')} · ${esc(hhmm(x.start_at))} → ${esc(hhmm(x.end_at))}</div>
+          <div style="font-size:12px;color:var(--ink-2);margin-top:3px">
+            ${esc(x.who || '')}${x.passengers ? ' · ' + esc(x.passengers) : ''}</div>
+          ${x.project_code ? `<div style="font-size:11px;color:var(--ink-3);margin-top:2px">${esc(x.project_code)}</div>` : ''}
+        </div>
+        <div style="flex:0 0 auto;text-align:right">
+          <span class="pill ${live?'new':''}" style="${live?'':'background:var(--neutral);color:var(--ink-3)'}">
+            ${esc(carStName(x.status))}</span>
+          ${x.unbooked ? `<div style="font-size:10px;font-weight:800;color:var(--bad);margin-top:4px">
+            ${esc(t('carUnbooked'))}</div>` : ''}
+        </div>
+      </div>
+      ${stopsOf(x).length ? `<div style="margin-top:9px;font-size:12px;color:var(--ink-2)">${
+        stopsOf(x).map((sp,i) => `<div style="padding:3px 0">${i+1}. ${esc(sp.place || '')}${
+          sp.project_code ? ` <span style="color:var(--ink-3)">· ${esc(sp.project_code)}</span>` : ''}</div>`).join('')
+      }</div>` : ''}
+      ${live && x.started_at ? `<div style="font-size:11.5px;color:var(--warn);font-weight:700;margin-top:8px">
+        ● ${esc(t('carActualTime'))} ${esc(hhmm(x.started_at))}</div>` : ''}
+      <button class="btn primary" data-act="${live?'return':'depart'}" data-r="${esc(x.record_id)}"
+        style="margin-top:11px;font-size:16px;padding:16px;${live?'background:var(--ok)':''}">
+        ${esc(live ? t('drvReturn') : t('drvDepart'))}</button>
+    </div>`;
+  }).join('');
+
+  document.querySelectorAll('#jb [data-act]').forEach(b => b.onclick = () => {
+    const act = b.dataset.act, rec = b.dataset.r;
+    sheet(`<h3>${esc(act === 'depart' ? t('drvDepart') : t('drvReturn'))}</h3>
+      <div class="field"><label>${esc(t('drvOdo'))}</label>
+        <input id="od" inputmode="numeric" placeholder="${esc(t('drvOdoPh'))}"></div>
+      <button class="btn primary" id="okd">${esc(t('confirm'))}</button>
+      <button class="btn ghost" id="cxd">${esc(t('cancel'))}</button>`);
+    $('#cxd').onclick = closeSheet;
+    $('#okd').onclick = async () => {
+      $('#okd').disabled = true;
+      try{
+        await apiRetry('driverAction', { record_id:rec, act, odo:$('#od').value.trim() }, 'POST');
+        closeSheet(); toast(act === 'depart' ? t('drvDeparted') : t('drvReturned'), 'ok');
+        go('driver', {}, true);
+      }catch(e){ toast(t('netErr'),'bad'); $('#okd').disabled = false; }
+    };
+  });
+
+  /* เที่ยวที่ไม่ได้จองล่วงหน้า — ถ้อยคำเป็นกลาง คนขับไม่ได้กำลังฟ้องใคร
+     เก็บค่าที่กรอกไว้ใน d แล้ววาดฟอร์มใหม่ทุกครั้ง เพราะระหว่างเลือกผู้โดยสาร
+     แผ่นล่างถูกใช้ซ้ำ ถ้าไม่เก็บไว้ ที่กรอกมาจะหายทั้งหมด */
+  const drf = { veh:r.vehicles[0]?.resource_id || '', pax:null, paxName:'',
+                purpose:'', project:'', odo:'' };
+  function unbookedSheet(){
+    sheet(`<h3>${esc(t('drvUnbooked'))}</h3>
+      <div class="field"><label>${esc(t('drvNoVeh'))}<span class="req">*</span></label>
+        <select id="uv">${r.vehicles.map(v =>
+          `<option value="${esc(v.resource_id)}" ${v.resource_id===drf.veh?'selected':''}>${esc(v.name_th)}</option>`).join('')}</select></div>
+      <div class="field"><label>${esc(t('drvWho'))}</label>
+        <button class="btn ghost" id="upk" style="text-align:left">${esc(drf.paxName || t('drvPickNone'))}</button></div>
+      <div class="field"><label>${esc(t('carPurpose'))}</label>
+        <input id="upp" value="${esc(drf.purpose)}" placeholder="${esc(t('carPurposePh'))}"></div>
+      <div class="field"><label>${esc(t('carProject'))}</label>
+        <select id="upj"><option value="">${esc(t('carProjectPh'))}</option>${r.projects.map(p =>
+          `<option value="${esc(p.code)}" ${p.code===drf.project?'selected':''}>${esc(p.code)} · ${esc(p.name || '')}</option>`).join('')}</select></div>
+      <div class="field"><label>${esc(t('drvOdo'))}</label>
+        <input id="uod" value="${esc(drf.odo)}" inputmode="numeric" placeholder="${esc(t('drvOdoPh'))}"></div>
+      <button class="btn primary" id="usv">${esc(t('drvSave'))}</button>
+      <button class="btn ghost" id="ucx">${esc(t('cancel'))}</button>`);
+    const grab = () => { drf.veh = $('#uv').value; drf.purpose = $('#upp').value;
+                         drf.project = $('#upj').value; drf.odo = $('#uod').value; };
+    $('#ucx').onclick = closeSheet;
+    $('#upk').onclick = async () => {
+      grab();
+      await ensureEmployees();
+      const pk = await pickPerson();
+      if(pk && !pk.unknown){ drf.pax = pk; drf.paxName = pk.name_th || pk.name_en; }
+      unbookedSheet();
+    };
+    $('#usv').onclick = async () => {
+      grab(); $('#usv').disabled = true;
+      try{
+        await apiRetry('logUnbookedTrip', {
+          resource_id:drf.veh, passenger_id:drf.pax?.kenan_user_id || '',
+          purpose:drf.purpose.trim(), project_code:drf.project, odo:drf.odo.trim() }, 'POST');
+        closeSheet(); toast(t('drvSaved'),'ok'); go('driver', {}, true);
+      }catch(e){ toast(t('netErr'),'bad'); if($('#usv')) $('#usv').disabled = false; }
+    };
+  }
+  $('#ub').onclick = unbookedSheet;
+};
+
 /** หน้าเดียวกับ consent แต่เปิดจากโปรไฟล์ — อ่านอย่างเดียว มีปุ่มย้อนกลับ */
 ROUTES.privacy = async () => { await ROUTES.consent({ readonly:true }); };
 
 /** โหลดข้อมูลตัวเองไม่สำเร็จตอนเปิดแอป — อย่าพาไปหน้าลงทะเบียน
     เพราะผู้ใช้จะกรอกฟอร์มแล้วส่งไม่ผ่าน เสียเวลาเปล่า */
 ROUTES.offline = async () => {
-  $('#main').innerHTML = `<div class="view" style="padding-top:44px">
+  $x('#main').innerHTML = `<div class="view" style="padding-top:44px">
     ${emptyState(IC.info, t('offlineTitle'), t('offlineBody'))}
     <button class="btn primary" id="rt">${esc(t('retry'))}</button></div>`;
   $('#rt').onclick = () => boot();
@@ -2743,10 +3427,10 @@ ROUTES.offline = async () => {
 
 ROUTES.notifications = async () => {
   setTitle(t('notifTitle'));
-  $('#main').innerHTML = `<div class="view"><div id="list">${skeleton(3)}</div></div>`;
+  $x('#main').innerHTML = `<div class="view"><div id="list">${skeleton(3)}</div></div>`;
   let items = [];
   try{ const r = await apiRetry('getNotifications', {}, 'GET'); items = r?.items || []; }catch(e){}
-  $('#list').innerHTML = items.length
+  $x('#list').innerHTML = items.length
     ? `<div class="rows">${items.map(n => `
         <button class="row" ${n.record_id ? `data-rec="${esc(n.record_id)}"` : ''}>
           <div class="body">
@@ -2765,11 +3449,11 @@ ROUTES.notifications = async () => {
 /* ── Registration ─────────────────────────────────────────────── */
 ROUTES.register = async () => {
   if(S.regStatus === 'pending'){
-    $('#main').innerHTML = `<div class="view" style="padding-top:40px">
+    $x('#main').innerHTML = `<div class="view" style="padding-top:40px">
       ${emptyState(IC.bellBig, t('regPending'), t('regPendingBody'))}</div>`;
     return;
   }
-  $('#main').innerHTML = `<div class="view">
+  $x('#main').innerHTML = `<div class="view">
     <div class="greet"><h2>${esc(t('regTitle'))}</h2><p>${esc(t('regLead'))}</p></div>
     <div class="card">
       <div class="field"><label>${esc(t('fName'))}<span class="req">*</span><span class="en">${esc(t('fNameEn'))}</span></label>
@@ -2828,7 +3512,7 @@ ROUTES.register = async () => {
 /* ── ยืนยันอีเมลด้วยรหัส 6 หลัก ─────────────────────────────── */
 ROUTES.otp = async () => {
   const d = S.regDraft || {};
-  $('#main').innerHTML = `<div class="view">
+  $x('#main').innerHTML = `<div class="view">
     <div class="greet"><h2>${esc(t('otpTitle'))}</h2><p>${esc(t('otpLead')(d.email || ''))}</p></div>
     <div class="card">
       <div class="field" style="margin-bottom:0">
@@ -2925,7 +3609,7 @@ ROUTES.consent = async ({ readonly } = {}) => {
     <h4>Your rights</h4>
     <p>You may request access, correction or deletion of your data at any time, and unlink your LINE account, by contacting the system administrator.</p>`;
 
-  $('#main').innerHTML = `<div class="view">
+  $x('#main').innerHTML = `<div class="view">
     <div class="greet"><h2>${esc(t('consentTitle'))}</h2><p>${esc(t('consentTitleEn'))}</p></div>
     <div class="legal">${body}</div>
     ${readonly ? '' : `
@@ -2945,7 +3629,7 @@ ROUTES.consent = async ({ readonly } = {}) => {
 
 /* ── Gate: ยังไม่ได้ล็อกอิน ───────────────────────────────────── */
 ROUTES.gate = async () => {
-  $('#main').innerHTML = `<div class="view" style="padding-top:48px">
+  $x('#main').innerHTML = `<div class="view" style="padding-top:48px">
     ${emptyState(IC.info, t('needLogin'), t('needLoginBody'))}
     <button class="btn primary" id="lg">${esc(t('loginLine'))}</button></div>`;
   $('#lg').onclick = () => { if(S.liffReady) liff.login(); else location.reload(); };
@@ -3067,6 +3751,11 @@ $('#lbFit').onclick = () => lbSet(lbZ > 1 ? 1 : 2.5);
 /* ── ตัวเลือกผู้รับแบบค้นหา ─────────────────────────────────────
    40+ คน เลื่อนหาใน dropdown ไม่ไหว → พิมพ์ 2-3 ตัวอักษรแล้วกรอง
    ค้นได้ทั้งชื่อไทย ชื่ออังกฤษ และชื่อเล่น เพราะฉลากพัสดุมักเขียนชื่อเล่น */
+/** รายชื่อพนักงานถูกโหลดแบบเรียกเมื่อใช้ ถ้าลืมเรียกก่อน ตัวเลือกจะว่างเปล่า */
+async function ensureEmployees(){
+  if(S.employees.length) return;
+  try{ const r = await apiRetry('getEmployees', {}, 'GET'); S.employees = r?.items || []; }catch(e){}
+}
 function pickPerson(){
   return new Promise(resolve => {
     sheet(`<h3>${esc(t('inRecipient'))}</h3>
@@ -3114,9 +3803,18 @@ function pickPerson(){
 }
 
 /* ── 9. BOOT — LIFF init ครั้งเดียวสำหรับทั้งแอป ───────────────── */
-// จับ error ที่หลุดออกมา ไม่ให้จอกลายเป็นสีขาวเปล่าจนผู้ใช้คิดว่าแอปตาย
-window.addEventListener('error', ev => { try{ errorScreen(ev.error || ev); }catch(e){} });
-window.addEventListener('unhandledrejection', ev => { try{ errorScreen(ev.reason); }catch(e){} });
+/* เดิมดัก error ทุกชนิดแล้วเปลี่ยนทั้งหน้าเป็น "Connection failed"
+   ทำให้ error เล็กๆ ที่ไม่เกี่ยวกับเน็ตเลย กลืนหน้าที่โหลดสำเร็จไปแล้วทิ้ง
+   ตอนนี้แค่บันทึกไว้ และเตือนเบาๆ เฉพาะตอนหน้ายังว่างจริงๆ */
+S.lastError = null;
+function softFail(e){
+  S.lastError = e;
+  try{ console.error('[KC]', e); }catch(_){}
+  const main = $('#main');
+  if(main && main.textContent.trim().length < 5) errorScreen(e);
+}
+window.addEventListener('error', ev => softFail(ev.error || ev));
+window.addEventListener('unhandledrejection', ev => softFail(ev.reason));
 
 async function boot(){
   try{ if(navigator.language?.startsWith('en')) S.lang = 'en'; }catch(e){}
