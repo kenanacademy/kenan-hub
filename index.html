@@ -103,7 +103,7 @@ main{flex:1 1 auto;padding:16px 16px calc(var(--nav-h) + var(--safe-b) + 24px)}
   position:fixed;left:0;right:0;bottom:0;z-index:40;
   height:calc(var(--nav-h) + var(--safe-b));
   padding-bottom:var(--safe-b);
-  display:grid;grid-template-columns:repeat(4,1fr);
+  display:grid;grid-template-columns:repeat(5,1fr);
   background:var(--surface);border-top:1px solid var(--line);
 }
 .nav button{
@@ -112,6 +112,10 @@ main{flex:1 1 auto;padding:16px 16px calc(var(--nav-h) + var(--safe-b) + 24px)}
 }
 .nav button.on{color:var(--primary)}
 .nav svg{width:23px;height:23px}
+.nav button{position:relative}
+.nav .ndot{position:absolute;top:6px;left:50%;margin-left:5px;min-width:16px;height:16px;
+  padding:0 4px;border-radius:9px;background:var(--bad);color:#fff;
+  font-size:9.5px;font-weight:800;line-height:16px;text-align:center}
 
 /* ── FAB: ปุ่มบันทึกพัสดุเข้า — เข้าถึงได้ 1 แตะจากทุกหน้า ──── */
 .fab{
@@ -323,6 +327,10 @@ main{flex:1 1 auto;padding:16px 16px calc(var(--nav-h) + var(--safe-b) + 24px)}
 .pk-row .t{font-size:14.5px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .pk-row .s{font-size:11.5px;color:var(--ink-3)}
 .pk-row.unknown .av{background:var(--warn-bg);color:var(--warn)}
+.pk-row.place{align-items:flex-start}
+.pk-row.place .t{white-space:normal;overflow:visible;font-size:13.5px;line-height:1.45;
+  display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.pk-row.place .pill{margin-top:2px}
 .pk-empty{text-align:center;padding:26px 10px;color:var(--ink-3);font-size:13px}
 
 
@@ -363,6 +371,17 @@ main{flex:1 1 auto;padding:16px 16px calc(var(--nav-h) + var(--safe-b) + 24px)}
 .tbox .k{font-size:10.5px;font-weight:700;color:var(--ink-3);margin-bottom:3px;
   white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .arrow{flex:0 0 auto;color:var(--ink-3);font-size:15px;font-weight:800}
+.ptrow{display:flex;gap:10px}
+.ptline{flex:0 0 26px;display:flex;flex-direction:column;align-items:center;padding-top:20px}
+.ptdot{width:22px;height:22px;border-radius:50%;background:var(--primary);color:#fff;
+  font-size:11px;font-weight:800;display:flex;align-items:center;justify-content:center;flex:0 0 auto}
+.ptdot.home{background:var(--ink-2)}
+.ptbar{flex:1;width:2px;background:var(--line);margin:3px 0}
+.ptbody{flex:1;min-width:0;padding-bottom:2px}
+.pthead{display:flex;justify-content:space-between;align-items:center;margin-bottom:4px}
+.ptTag{font-size:11px;font-weight:800;color:var(--ink-3)}
+.ptdel{font-size:11.5px;color:var(--bad);font-weight:700}
+.ptseg{font-size:11.5px;font-weight:800;color:var(--primary);padding:7px 2px 9px;text-align:center}
 .placebtn{text-align:left;justify-content:flex-start;line-height:1.4;white-space:normal;
   display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
 .carleg{display:flex;gap:14px;justify-content:center;flex-wrap:wrap;margin-top:9px;
@@ -434,10 +453,7 @@ main{flex:1 1 auto;padding:16px 16px calc(var(--nav-h) + var(--safe-b) + 24px)}
     </button>
     <div class="brand" id="brand"><div class="mark">K</div><div class="txt">Kenan Connect</div></div>
     <h1 id="title" hidden></h1>
-    <button class="icon-btn bell" id="bellBtn" aria-label="การแจ้งเตือน">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.7 21a2 2 0 01-3.4 0"/></svg>
-      <span class="dot" id="bellDot" hidden>0</span>
-    </button>
+    <span class="icon-btn" aria-hidden="true"></span>
   </header>
 
   <main id="main"></main>
@@ -450,6 +466,11 @@ main{flex:1 1 auto;padding:16px 16px calc(var(--nav-h) + var(--safe-b) + 24px)}
     <button data-go="my-parcels">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 16V8a2 2 0 00-1-1.73l-7-4a2 2 0 00-2 0l-7 4A2 2 0 003 8v8a2 2 0 001 1.73l7 4a2 2 0 002 0l7-4A2 2 0 0021 16z"/><path d="M3.3 7L12 12l8.7-5M12 22V12"/></svg>
       <span data-nav="navParcel">พัสดุ</span>
+    </button>
+    <button data-go="notifications">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.7 21a2 2 0 01-3.4 0"/></svg>
+      <span class="ndot" id="bellDot" hidden>0</span>
+      <span data-nav="navNotif">แจ้งเตือน</span>
     </button>
     <button data-go="calltree">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.9v3a2 2 0 01-2.2 2 19.8 19.8 0 01-8.6-3.1 19.5 19.5 0 01-6-6A19.8 19.8 0 012.1 4.2 2 2 0 014.1 2h3a2 2 0 012 1.7c.1 1 .4 1.9.7 2.8a2 2 0 01-.5 2.1L8.1 9.9a16 16 0 006 6l1.3-1.3a2 2 0 012.1-.4c.9.3 1.8.6 2.8.7a2 2 0 011.7 2z"/></svg>
@@ -495,7 +516,7 @@ const CFG = {
   GAS_URL : 'https://script.google.com/macros/s/AKfycbyOjh4BAAbzY5QfZNG_oGuxbmvZwHjEAKazRMuMxrDeoNknE_rqEoAFdkuJldOPP_q_eg/exec',
   LIFF_TIMEOUT_MS : 3500,
   CONSENT_VERSION : '2026-09-01',
-  BUILD : '2026-08-31d'      // ต้องตรงกับ BUILD ใน Code.gs ที่ Deploy ไว้
+  BUILD : '2026-08-31e'      // ต้องตรงกับ BUILD ใน Code.gs ที่ Deploy ไว้
 };
 
 /* เก็บ ?go=... ไว้ตั้งแต่ต้น เพราะเดี๋ยวจะล้าง query string ทิ้งหลัง LIFF ล็อกอิน
@@ -568,6 +589,7 @@ const T = {
   th:{
     appName:'Kenan Connect',
     navHome:'หน้าแรก', navParcel:'พัสดุ', navSos:'ฉุกเฉิน', navMe:'ฉัน', navLog:'บันทึกพัสดุ',
+    navNotif:'แจ้งเตือน',
     greet:n=>`สวัสดีครับ ${n}`, greetSub:'วันนี้มีอะไรให้ช่วยไหม',
     loading:'กำลังโหลด…', retry:'ลองอีกครั้ง', cancel:'ยกเลิก', save:'บันทึก',
     back:'ย้อนกลับ', close:'ปิด', confirm:'ยืนยัน', soon:'เร็วๆ นี้',
@@ -693,7 +715,7 @@ const T = {
     carProject:'โครงการที่ลงค่าใช้จ่าย', carProjectPh:'— เลือกโครงการ —',
     carNeedProject:'ต้องเลือกโครงการก่อน เพื่อให้ค่าน้ำมันลงถูกโครงการ',
     carProjWhy:'ที่ผ่านมาค่ารถถูกหารเฉลี่ยลงทุกโครงการเท่ากัน ทั้งที่บางโครงการไม่ได้ใช้รถเลย',
-    carStops:'จุดที่แวะ', carAddStop:'＋ เพิ่มจุดแวะ', carStopN:n=>`จุดที่ ${n}`,
+    carStops:'จุดที่แวะ', carAddStop:'＋ เพิ่มจุด', carStopN:n=>`จุดที่ ${n}`,
     carStopPh:'เช่น โรงแรม A ถนนสุขุมวิท',
     carStopsHint:'ไปหลายที่ในวันเดียวใส่ให้ครบ ถ้าแต่ละจุดคนละโครงการ ระบบจะหารค่าใช้จ่ายให้ตามจำนวนจุด',
     carSplit:'ค่าใช้จ่ายจะถูกหาร', carSplitOne:'ลงโครงการเดียวทั้งเที่ยว',
@@ -710,17 +732,20 @@ const T = {
     carTapSlot:'แตะช่องว่างในตารางเพื่อจองรถคันนั้น',
     carUnbooked:'ไม่ได้จองล่วงหน้า', carLegMine:'ของฉัน',
     carOffice:'ออฟฟิศคีนัน (ถนนวิทยุ)',
+    carStart:'จุดออก', carEnd:'กลับถึง', carStopN:n=>`จุดที่ ${n}`,
+    carPlaceUsed:'เคยไปแล้ว', carPick:'เลือก',
+
     carSeatsN:n=>`${n} ที่นั่ง`,
     carTripType:'งานประเภทไหน',
     carRoute:'เส้นทาง', carLegN:n=>`ช่วงที่ ${n}`,
-    carRouteHint:'ใส่ต้นทาง–ปลายทางของแต่ละช่วง ระบบจะดึงระยะทางและเวลาขับจาก Google Maps ให้',
+    carRouteHint:'ไล่จุดตามลำดับที่ไปจริง ตั้งแต่ออกจนกลับถึงออฟฟิศ ระบบคิดระยะทางรวมทั้งขากลับให้',
     carFrom:'ต้นทาง', carTo:'ปลายทาง', carSameProject:'ใช้โครงการเดียวกับด้านบน',
     carPlace:'ค้นหาสถานที่', carPlacePh:'พิมพ์ชื่อสถานที่หรือที่อยู่',
-    carPlaceHint:'พิมพ์แล้วกดค้นหา จะได้ที่อยู่เต็มจาก Google Maps · ถ้าค้นไม่เจอ กดใช้ข้อความที่พิมพ์ได้เลย',
+    carPlaceHint:'พิมพ์บางส่วนก็พอ รายการจะขึ้นเอง · ที่ที่เคยไปแล้วจะขึ้นก่อน · ถ้าไม่เจอ กดใช้ข้อความที่พิมพ์ได้เลย',
     carFind:'ค้นหา', carUseTyped:'ใช้ข้อความที่พิมพ์',
-    carPlaceShort:'พิมพ์อย่างน้อย 3 ตัวอักษร', carPlaceNone:'ไม่พบสถานที่นี้ — ลองพิมพ์สั้นลง หรือกดใช้ข้อความที่พิมพ์',
+    carPlaceShort:'พิมพ์อย่างน้อย 2 ตัวอักษร', carPlaceNone:'ไม่พบสถานที่นี้ — ลองพิมพ์สั้นลง หรือกดใช้ข้อความที่พิมพ์',
     carCalc:'คำนวณระยะทางและเวลา', carCalcing:'กำลังคำนวณ…',
-    carNeedRoute:'ต้องใส่ต้นทางและปลายทางอย่างน้อยหนึ่งช่วง',
+    carNeedRoute:'ต้องมีอย่างน้อย 2 จุดที่ใส่ชื่อแล้ว',
     carRouteSome:'บางช่วงคำนวณไม่ได้ ลองแก้ชื่อสถานที่ให้ชัดขึ้น',
     carKm:'กม.', carMin:'นาที', carDriveHr:'ชม. ขับรถ',
     carProjSearch:'พิมพ์รหัสหรือชื่อโครงการ',
@@ -872,6 +897,7 @@ const T = {
   en:{
     appName:'Kenan Connect',
     navHome:'Home', navParcel:'Parcels', navSos:'Emergency', navMe:'Me', navLog:'Log parcel',
+    navNotif:'Alerts',
     greet:n=>`Hello, ${n}`, greetSub:'What can we help with today?',
     loading:'Loading…', retry:'Try again', cancel:'Cancel', save:'Save',
     back:'Back', close:'Close', confirm:'Confirm', soon:'Coming soon',
@@ -997,7 +1023,7 @@ const T = {
     carProject:'Charge to project', carProjectPh:'— choose a project —',
     carNeedProject:'Please choose a project so fuel costs land in the right place',
     carProjWhy:'Until now vehicle costs were split evenly across every project, even ones that never used a car.',
-    carStops:'Stops', carAddStop:'＋ Add a stop', carStopN:n=>`Stop ${n}`,
+    carStops:'Stops', carAddStop:'＋ Add a point', carStopN:n=>`Stop ${n}`,
     carStopPh:'e.g. Hotel A, Sukhumvit Rd',
     carStopsHint:'List every stop if you visit several places in one day. If stops belong to different projects, the cost is split between them.',
     carSplit:'Cost will be split', carSplitOne:'One project for the whole trip',
@@ -1014,17 +1040,20 @@ const T = {
     carTapSlot:'Tap an empty slot to book that vehicle',
     carUnbooked:'Not booked in advance', carLegMine:'Mine',
     carOffice:'Kenan office (Wireless Rd)',
+    carStart:'Start', carEnd:'Back at', carStopN:n=>`Stop ${n}`,
+    carPlaceUsed:'used before', carPick:'Pick',
+
     carSeatsN:n=>`${n} seats`,
     carTripType:'What kind of trip',
     carRoute:'Route', carLegN:n=>`Leg ${n}`,
-    carRouteHint:'Give the start and end of each leg — distance and driving time come from Google Maps.',
+    carRouteHint:'List the points in the order you actually travel, from leaving to arriving back. The return trip is included.',
     carFrom:'From', carTo:'To', carSameProject:'Same project as above',
     carPlace:'Find a place', carPlacePh:'Type a place name or address',
-    carPlaceHint:'Type then tap Search for the full address from Google Maps. If it is not found, you can use what you typed.',
+    carPlaceHint:'Type part of a name — results appear as you type. Places used before come first. If nothing matches, use what you typed.',
     carFind:'Search', carUseTyped:'Use what I typed',
-    carPlaceShort:'Type at least 3 characters', carPlaceNone:'Not found — try something shorter, or use what you typed',
+    carPlaceShort:'Type at least 2 characters', carPlaceNone:'Not found — try something shorter, or use what you typed',
     carCalc:'Calculate distance and time', carCalcing:'Calculating…',
-    carNeedRoute:'At least one leg needs a start and an end',
+    carNeedRoute:'At least 2 points need a place',
     carRouteSome:'Some legs could not be calculated — try clearer place names',
     carKm:'km', carMin:'min', carDriveHr:'hrs driving',
     carProjSearch:'Type a project code or name',
@@ -1208,11 +1237,12 @@ const MOCK = {
     { resource_id:'VEH-1', kind:'vehicle', name_th:'Toyota Commuter (ฮค-1234)', capacity:12, is_active:true }] },
   saveResource:{ ok:true }, saveProject:{ ok:true },
   geoSuggest:{ ok:true, items:[
-    { name:'โรงแรมเอเชีย ราชเทวี ถนนพญาไท แขวงถนนเพชรบุรี เขตราชเทวี กรุงเทพมหานคร 10400' },
-    { name:'โรงแรมแมนดาริน สามย่าน ถนนพระราม 4 กรุงเทพมหานคร 10500' },
-    { name:'โรงแรมปทุมวัน ปริ๊นเซส ถนนพญาไท กรุงเทพมหานคร 10330' }] },
-  routeLegs:{ ok:true, failed:0, total_km:23.4, total_mins:52,
-    legs:[{ km:8.2, mins:19 }, { km:15.2, mins:33 }] },
+    { name:'โรงแรมเอเชีย ราชเทวี ถนนพญาไท กรุงเทพมหานคร 10400', saved:true, uses:6 },
+    { name:'โรงแรมแมนดาริน สามย่าน ถนนพระราม 4 กรุงเทพมหานคร 10500', saved:true, uses:2 },
+    { name:'โรงแรมปทุมวัน ปริ๊นเซส ถนนพญาไท กรุงเทพมหานคร 10330' },
+    { name:'โรงแรมสยามเคมปินสกี้ ถนนพระราม 1 กรุงเทพมหานคร 10330' }] },
+  routeLegs:{ ok:true, failed:0, total_km:31.6, total_mins:74,
+    legs:[{ km:8.2, mins:19 }, { km:15.2, mins:33 }, { km:8.2, mins:22 }] },
   getProjectsAdmin:{ ok:true, items:[
     { project_code:'BACKOFFICE', name_th:'งานสำนักงาน', type:'Core', trips:4, is_active:true },
     { project_code:'NONBILL', name_th:'ไม่ผูกโครงการ', type:'Core', trips:1, is_active:true }] },
@@ -1256,6 +1286,7 @@ const MOCK = {
         { code:'DEEPSOUTH', name:'Deep South Education' },
         { code:'HEALTHWB', name:'Health and Wellbeing' }],
       drivers:[{ id:'K-9001', name:'สมพงษ์ ขับดี' }, { id:'K-9002', name:'ประยูร ทางไกล' }],
+      office:'มูลนิธิคีนันแห่งเอเซีย ถนนวิทยุ กรุงเทพมหานคร',
       trips:[
         { record_id:'CAR-1', resource_id:'VEH-1', status:'in_use',
           start_at:k+'T09:00:00+07:00', end_at:k+'T15:00:00+07:00',
@@ -1405,6 +1436,7 @@ const IC = {
   chat:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.4 8.4 0 01-.9 3.8 8.5 8.5 0 01-7.6 4.7 8.4 8.4 0 01-3.8-.9L3 21l1.9-5.7a8.4 8.4 0 01-.9-3.8 8.5 8.5 0 014.7-7.6 8.4 8.4 0 013.8-.9h.5a8.5 8.5 0 018 8z"/></svg>',
   laptop:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="12" rx="2"/><path d="M2 20h20"/></svg>',
   sos:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M10.3 3.9L1.8 18a2 2 0 001.7 3h17a2 2 0 001.7-3L13.7 3.9a2 2 0 00-3.4 0z"/><path d="M12 9v4M12 17h.01"/></svg>',
+  news:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5h11a1 1 0 011 1v13H5a1 1 0 01-1-1z"/><path d="M16 8h3a1 1 0 011 1v8a2 2 0 01-2 2h-2"/><path d="M7 8h5M7 11h5M7 14h5"/></svg>',
   bellBig:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.7 21a2 2 0 01-3.4 0"/></svg>',
   user:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>',
   clock:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>',
@@ -1455,7 +1487,6 @@ function chrome(name){
   $('#brand').hidden   = !isHome;
   $('#title').hidden   = isHome;
   $('#nav').hidden     = isFull;
-  $('#bellBtn').hidden = isFull;
   // ปุ่มลอยโผล่เฉพาะหน้าที่เกี่ยวกับพัสดุและเมนูผู้ดูแลเท่านั้น
   // หน้าอื่น (โดยเฉพาะหน้าฉุกเฉิน) ห้ามมีอะไรมาบัง
   $('#fab').hidden = !S.isOfficer ||
@@ -1514,7 +1545,6 @@ function errorScreen(e, retryFn){
 function setTitle(s){ $('#title').textContent = s; }
 document.querySelectorAll('.nav button').forEach(b => b.onclick = () => { S.stack = []; go(b.dataset.go); });
 $('#fab').onclick = () => go('parcel-in');
-$('#bellBtn').onclick = () => go('notifications');
 
 /* ── 7. VIEWS ─────────────────────────────────────────────────── */
 
@@ -1526,7 +1556,7 @@ ROUTES.home = async () => {
     { ic:IC.sos,   th:t('mCall'),   en:t('mCallEn'),   go:'calltree', sos:true },
     { ic:IC.user,  th:t('mDir'),    en:t('mDirEn'),    go:'directory' },
     { ic:IC.clock, th:t('mAct'),    en:t('mActEn'),    go:'activity' },
-    { ic:IC.bellBig, th:t('news'),  en:t('newsEn'),    go:'news' },
+    { ic:IC.news,   th:t('news'),  en:t('newsEn'),    go:'news' },
     { ic:IC.cal,   th:t('mResv'),   en:'Reservation',  go:'reservation' },
     { ic:IC.tool,  th:t('mIssue'),  en:t('mIssueEn'),  go:'issues' },
     { ic:IC.chat,  th:t('mFaq'),    en:t('mFaqEn'),    soon:true }
@@ -1563,7 +1593,7 @@ ROUTES.home = async () => {
             <div class="t">${esc(a.title)}</div>
             <div class="s">${esc(fmtDate(a.at))}</div>
           </div></div>`).join('')}</div>`
-      : emptyState(IC.bellBig, S.lang === 'th' ? 'ยังไม่มีประกาศ' : 'No announcements', '');
+      : emptyState(IC.news, S.lang === 'th' ? 'ยังไม่มีประกาศ' : 'No announcements', '');
   }catch(e){ $x('#newsBox').innerHTML = ''; }
 };
 
@@ -1985,7 +2015,7 @@ ROUTES.news = async () => {
   let items = [];
   try{ const r = await apiRetry('getAnnouncements', {}, 'GET'); items = r?.items || []; }catch(e){}
   if(!items.length){
-    $x('#list').innerHTML = emptyState(IC.bellBig, t('newsEmpty'), t('newsEmptyBody'));
+    $x('#list').innerHTML = emptyState(IC.news, t('newsEmpty'), t('newsEmptyBody'));
     return;
   }
   $x('#list').innerHTML = items.map(a => `
@@ -3475,52 +3505,62 @@ function pickFromList({ title, items, label, sub, current, search }){
   });
 }
 
-/** ช่องกรอกสถานที่ — พิมพ์แล้วกดค้นหา ได้ที่อยู่เต็มจาก Google Maps
-    ต้องกดค้นหาเอง ไม่ค้นทุกตัวอักษร เพราะโควตามีวันละ 1,000 ครั้ง
-    และการยิงทุกคีย์สโตรกจะทำให้หน้าหน่วงด้วย */
+/** ช่องค้นหาสถานที่ — พิมพ์ไปเรื่อยๆ รายการขึ้นเอง ไม่ต้องกดค้นหา
+    หน่วงไว้ 450 ms หลังหยุดพิมพ์ ไม่ยิงทุกตัวอักษร (โควตาวันละ 1,000 ครั้ง)
+    ที่ที่เคยไปแล้วขึ้นก่อนเสมอและไม่กินโควตา ยิ่งใช้ยิ่งเจอเร็ว */
 async function pickPlace(initial){
-  let q = String(initial || '');
   return new Promise(resolve => {
-    const draw = (results, busy, err) => {
-      sheet(`<h3>${esc(t('carPlace'))}</h3>
-        <div style="display:flex;gap:7px">
-          <input id="ppq" value="${esc(q)}" placeholder="${esc(t('carPlacePh'))}" style="flex:1">
-          <button class="btn primary" id="ppgo" style="width:auto;padding:0 16px">${esc(t('carFind'))}</button>
-        </div>
-        <div style="font-size:11px;color:var(--ink-3);margin-top:6px">${esc(t('carPlaceHint'))}</div>
-        <div id="ppr" style="margin-top:10px">${
-          busy ? skeleton(2)
-          : err ? `<div class="note" style="border-color:var(--bad)">${IC.info}<div>${esc(err)}</div></div>`
-          : (results || []).map((r, i) => `
-              <button class="pk-row" data-i="${i}"><span class="b">
-                <span class="t">${esc(r.name)}</span></span></button>`).join('')}</div>
-        <button class="btn ghost" id="ppuse">${esc(t('carUseTyped'))}</button>
-        <button class="btn ghost" id="ppx">${esc(t('cancel'))}</button>`);
-      const inp = $('#ppq');
-      inp.oninput = () => { q = inp.value; };
-      $('#ppx').onclick = () => { closeSheet(); resolve(null); };
-      // พิมพ์เองแล้วใช้เลยก็ได้ ไม่ต้องบังคับให้เจอใน Maps
-      // บางที่ในไทยค้นไม่เจอจริงๆ ห้ามให้ระบบพาไปติดตาย
-      $('#ppuse').onclick = () => {
-        const v = inp.value.trim();
-        if(!v){ toast(t('carPlaceShort'), 'bad'); return; }
-        closeSheet(); resolve({ name:v, typed:true });
-      };
-      $('#ppgo').onclick = async () => {
-        q = inp.value.trim();
-        if(q.length < 3){ toast(t('carPlaceShort'), 'bad'); return; }
-        draw(null, true);
-        try{
-          const r = await apiRetry('geoSuggest', { q }, 'GET');
-          draw(r?.items || [], false, (r?.items || []).length ? '' : t('carPlaceNone'));
-        }catch(e){ draw(null, false, t('netErr')); }
-      };
+    sheet(`<h3>${esc(t('carPlace'))}</h3>
+      <input id="ppq" value="${esc(initial || '')}" placeholder="${esc(t('carPlacePh'))}" autocomplete="off">
+      <div style="font-size:11px;color:var(--ink-3);margin-top:6px">${esc(t('carPlaceHint'))}</div>
+      <div id="ppr" style="margin-top:10px"></div>
+      <button class="btn ghost" id="ppuse">${esc(t('carUseTyped'))}</button>
+      <button class="btn ghost" id="ppx">${esc(t('cancel'))}</button>`);
+
+    const inp = $('#ppq');
+    let items = [], timer = null, seq = 0;
+
+    const paint = (state) => {
+      if(state === 'busy'){ $x('#ppr').innerHTML = skeleton(2); return; }
+      if(state === 'short'){ $x('#ppr').innerHTML =
+        `<div class="pk-empty">${esc(t('carPlaceShort'))}</div>`; return; }
+      $x('#ppr').innerHTML = items.length ? items.map((r, i) => `
+        <button class="pk-row place" data-i="${i}">
+          <span class="b">
+            <span class="t">${esc(r.name)}</span>
+            ${r.saved ? `<span class="s" style="color:var(--ok);font-weight:700">★ ${esc(t('carPlaceUsed'))}</span>` : ''}
+          </span>
+          <span class="pill new" style="flex:0 0 auto">${esc(t('carPick'))}</span>
+        </button>`).join('')
+        : `<div class="pk-empty">${esc(t('carPlaceNone'))}</div>`;
       document.querySelectorAll('#ppr .pk-row').forEach(b => b.onclick = () => {
-        closeSheet(); resolve((results || [])[Number(b.dataset.i)]);
+        closeSheet(); resolve(items[Number(b.dataset.i)]);
       });
-      if(!busy) setTimeout(() => inp.focus(), 260);
     };
-    draw([], false);
+
+    const search = async () => {
+      const q = inp.value.trim();
+      if(q.length < 2){ items = []; paint('short'); return; }
+      const my = ++seq;
+      paint('busy');
+      try{
+        const r = await apiRetry('geoSuggest', { q }, 'GET');
+        if(my !== seq) return;               // พิมพ์ต่อไปแล้ว ผลเก่าทิ้งไป
+        items = r?.items || []; paint();
+      }catch(e){ if(my === seq){ items = []; paint(); } }
+    };
+
+    inp.oninput = () => { clearTimeout(timer); timer = setTimeout(search, 450); };
+    $('#ppx').onclick = () => { clearTimeout(timer); closeSheet(); resolve(null); };
+    // บางที่ในไทยค้นไม่เจอจริงๆ ต้องพิมพ์เองแล้วใช้ได้เลย ห้ามพาไปติดตาย
+    $('#ppuse').onclick = () => {
+      const v = inp.value.trim();
+      if(!v){ toast(t('carPlaceShort'), 'bad'); return; }
+      clearTimeout(timer); closeSheet(); resolve({ name:v, typed:true });
+    };
+    paint('short');
+    if(initial) search();
+    setTimeout(() => inp.focus(), 260);
   });
 }
 
@@ -3547,13 +3587,19 @@ ROUTES['car-new'] = async ({ date, veh:preVeh, hour } = {}) => {
   if(!r.projects.length){
     $x('#main').innerHTML = `<div class="view">${emptyState(IC.info, t('carProjNone'), t('carProjNoneBody'))}</div>`; return; }
 
-  const OFFICE = t('carOffice');
+  const OFFICE = r.office || t('carOffice');
   let vehId   = preVeh || r.vehicles[0].resource_id;
   let tripType= 'staff_return';
   let project = '';
-  // แต่ละช่วงคือ ต้นทาง → ปลายทาง เริ่มจากออฟฟิศเสมอ
-  let legs    = [{ from:OFFICE, to:'', project_code:'' }];
+  /* เส้นทางเป็น "จุดต่อเนื่อง" ไม่ใช่ช่วงแยกกัน
+     ออฟฟิศ → จุดที่ 1 → จุดที่ 2 → … → กลับถึงออฟฟิศ
+     จุดแรกและจุดสุดท้ายตั้งเป็นออฟฟิศไว้ให้ แต่แก้ได้ (บางเที่ยวออกจากบ้าน หรือไม่กลับออฟฟิศ)
+     ระยะทางคิดจากทุกช่วงที่ต่อกัน รวมขากลับด้วย */
+  let points  = [{ name:OFFICE }, { name:'' }, { name:OFFICE, home:true }];
   let route   = null;                 // ผลจาก Google Maps
+  const segs = () => points.slice(0, -1)
+    .map((p, i) => ({ from:p.name, to:points[i+1].name }))
+    .filter(x => x.from && x.to);
 
   $x('#main').innerHTML = `<div class="view">
     <div class="card">
@@ -3591,7 +3637,7 @@ ROUTES['car-new'] = async ({ date, veh:preVeh, hour } = {}) => {
       <div style="font-size:13px;font-weight:600;margin-bottom:4px">${esc(t('carRoute'))}</div>
       <div style="font-size:11px;color:var(--ink-3);margin-bottom:9px">${esc(t('carRouteHint'))}</div>
       <div id="lg"></div>
-      <button class="btn ghost" id="addLeg" style="margin-top:6px">${esc(t('carAddStop'))}</button>
+      <button class="btn ghost" id="addLeg" style="margin-top:2px">${esc(t('carAddStop'))}</button>
       <button class="btn soft" id="calc" style="margin-top:8px">${esc(t('carCalc'))}</button>
       <div id="split" style="font-size:11.5px;font-weight:700;color:var(--primary);margin-top:9px"></div>
     </div>
@@ -3674,60 +3720,62 @@ ROUTES['car-new'] = async ({ date, veh:preVeh, hour } = {}) => {
     if(p){ project = p.code; $('#pjBtn').textContent = p.code + (p.name ? ' · ' + p.name : ''); paintSplit(); }
   };
 
-  /* ── ช่วงเดินทาง: ต้นทาง → ปลายทาง ── */
-  function paintLegs(){
-    $x('#lg').innerHTML = legs.map((L, i) => {
-      const rl = route?.legs?.[i];
-      return `<div style="border:1px solid var(--line);border-radius:12px;padding:11px;margin-bottom:9px">
-        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:7px">
-          <span style="font-size:11.5px;font-weight:800;color:var(--ink-3)">${esc(t('carLegN')(i+1))}</span>
-          ${legs.length > 1 ? `<button data-x="${i}" style="font-size:11.5px;color:var(--bad);font-weight:700">${esc(t('cancel'))}</button>` : ''}
+  /* ── เส้นทาง: จุดต่อเนื่องตั้งแต่ออกจนกลับ ── */
+  function segLabel(i){
+    const g = route?.legs?.[i];
+    if(!g || g.km == null) return '';
+    return `${g.km} ${t('carKm')} · ${g.mins} ${t('carMin')}`;
+  }
+  function paintRoute(){
+    const last = points.length - 1;
+    $x('#lg').innerHTML = points.map((pt, i) => {
+      const isFirst = i === 0, isLast = i === last;
+      const tag = isFirst ? t('carStart') : isLast ? t('carEnd') : t('carStopN')(i);
+      const done = !!pt.name;
+      return `
+      <div class="ptrow">
+        <div class="ptline">
+          <span class="ptdot ${isFirst||isLast ? 'home' : ''}">${isFirst||isLast ? '⌂' : i}</span>
+          ${isLast ? '' : '<span class="ptbar"></span>'}
         </div>
-        <button class="btn ghost placebtn" data-f="${i}"
-          style="font-weight:${L.from?'600':'400'};color:${L.from?'var(--ink)':'var(--ink-3)'}">
-          ${esc(t('carFrom'))}: ${esc(L.from || t('carPlacePh'))}</button>
-        <div style="text-align:center;font-size:13px;color:var(--ink-3);margin:2px 0">↓</div>
-        <button class="btn ghost placebtn" data-t="${i}"
-          style="font-weight:${L.to?'600':'400'};color:${L.to?'var(--ink)':'var(--ink-3)'}">
-          ${esc(t('carTo'))}: ${esc(L.to || t('carPlacePh'))}</button>
-        <div style="display:flex;gap:8px;align-items:center;margin-top:8px">
-          <button class="btn ghost" data-j="${i}" style="flex:1;text-align:left;justify-content:flex-start;
-            font-size:12px;padding:9px 11px">${esc(L.project_code || t('carSameProject'))}</button>
-          ${rl && rl.km != null ? `<span style="font-size:11.5px;font-weight:800;color:var(--primary);white-space:nowrap">
-            ${rl.km} ${esc(t('carKm'))} · ${rl.mins} ${esc(t('carMin'))}</span>` : ''}
+        <div class="ptbody">
+          <div class="pthead">
+            <span class="ptTag">${esc(tag)}</span>
+            ${(!isFirst && !isLast) ? `<button data-x="${i}" class="ptdel">${esc(t('cancel'))}</button>` : ''}
+          </div>
+          <button class="btn ghost placebtn" data-p="${i}"
+            style="font-weight:${done?'600':'400'};color:${done?'var(--ink)':'var(--ink-3)'}">
+            ${esc(pt.name || t('carPlacePh'))}</button>
+          ${(!isFirst && !isLast) ? `<button class="btn ghost" data-j="${i}"
+            style="text-align:left;justify-content:flex-start;font-size:12px;padding:8px 11px;margin-top:5px">
+            ${esc(pt.project_code || t('carSameProject'))}</button>` : ''}
+          ${isLast ? '' : `<div class="ptseg">${
+            segLabel(i) ? `<span>${esc(segLabel(i))}</span>` : `<span style="color:var(--ink-3)">↓</span>`}</div>`}
         </div>
       </div>`;
     }).join('');
 
     document.querySelectorAll('#lg [data-x]').forEach(b => b.onclick = () => {
-      legs.splice(Number(b.dataset.x), 1); route = null; paintLegs(); paintSummary(); });
-    document.querySelectorAll('#lg [data-f]').forEach(b => b.onclick = async () => {
-      const i = Number(b.dataset.f); const p = await pickPlace(legs[i].from);
-      if(p){ legs[i].from = p.name; route = null; paintLegs(); paintSummary(); } });
-    document.querySelectorAll('#lg [data-t]').forEach(b => b.onclick = async () => {
-      const i = Number(b.dataset.t); const p = await pickPlace(legs[i].to);
-      if(p){
-        legs[i].to = p.name;
-        // ปลายทางของช่วงนี้ = ต้นทางของช่วงถัดไปโดยอัตโนมัติ
-        // ไม่ทำแบบนี้ คนจะต้องพิมพ์ที่เดิมซ้ำสองครั้ง แล้วก็พิมพ์ไม่ตรงกัน
-        if(legs[i+1] && !legs[i+1].from) legs[i+1].from = p.name;
-        route = null; paintLegs(); paintSummary();
-      } });
+      points.splice(Number(b.dataset.x), 1); route = null; paintRoute(); paintSummary(); });
+    document.querySelectorAll('#lg [data-p]').forEach(b => b.onclick = async () => {
+      const i = Number(b.dataset.p);
+      const pk = await pickPlace(points[i].name);
+      if(pk){ points[i].name = pk.name; route = null; paintRoute(); paintSummary(); } });
     document.querySelectorAll('#lg [data-j]').forEach(b => b.onclick = async () => {
       const i = Number(b.dataset.j);
-      const p = await chooseProject(legs[i].project_code);
-      if(p){ legs[i].project_code = p.code; paintLegs(); paintSplit(); } });
+      const pj = await chooseProject(points[i].project_code);
+      if(pj){ points[i].project_code = pj.code; paintRoute(); paintSplit(); } });
     paintSplit();
   }
 
+  // จุดใหม่แทรกก่อนจุดสุดท้ายเสมอ เพราะจุดสุดท้ายคือขากลับ
   $('#addLeg').onclick = () => {
-    const prev = legs[legs.length - 1];
-    legs.push({ from: prev?.to || '', to:'', project_code:'' });
-    route = null; paintLegs(); paintSummary();
+    points.splice(points.length - 1, 0, { name:'', project_code:'' });
+    route = null; paintRoute(); paintSummary();
   };
 
   function paintSplit(){
-    const codes = [...new Set([project, ...legs.map(l => l.project_code)].filter(Boolean))];
+    const codes = [...new Set([project, ...points.map(p => p.project_code)].filter(Boolean))];
     $x('#split').textContent = codes.length > 1
       ? t('carSplitN')(codes.length, codes.join(' · '))
       : (codes.length ? t('carSplit') + ': ' + t('carSplitOne') : '');
@@ -3735,15 +3783,14 @@ ROUTES['car-new'] = async ({ date, veh:preVeh, hour } = {}) => {
 
   /* ── คำนวณเส้นทางจาก Google Maps ── */
   $('#calc').onclick = async () => {
-    const ready = legs.filter(l => l.from && l.to);
-    if(!ready.length){ toast(t('carNeedRoute'), 'bad'); return; }
+    if(points.filter(p => p.name).length < 2){ toast(t('carNeedRoute'), 'bad'); return; }
     const b = $('#calc'); b.disabled = true; b.textContent = t('carCalcing');
     try{
-      const res = await apiRetry('routeLegs',
-        { legs: JSON.stringify(legs.map(l => ({ from:l.from, to:l.to }))) }, 'POST');
+      // ส่งทุกช่วงที่ต่อกัน รวมช่วงกลับออฟฟิศ — ระยะทางจึงเป็นของทั้งเที่ยวจริงๆ
+      const res = await apiRetry('routeLegs', { legs: JSON.stringify(segs()) }, 'POST');
       route = res?.ok ? res : null;
       if(route && route.failed) toast(t('carRouteSome'), 'bad');
-      paintLegs(); paintSummary();
+      paintRoute(); paintSummary();
     }catch(e){ toast(t('netErr'), 'bad'); }
     b.disabled = false; b.textContent = t('carCalc');
   };
@@ -3777,7 +3824,7 @@ ROUTES['car-new'] = async ({ date, veh:preVeh, hour } = {}) => {
       </div></div>`;
   }
 
-  paintVeh(); paintLegs(); paintSummary();
+  paintVeh(); paintRoute(); paintSummary();
   ['#dd','#t1','#t2'].forEach(sl => { const el = $(sl); if(el) el.onchange = paintVeh; });
   $('#tt').onchange = () => { tripType = $('#tt').value; };
 
@@ -3793,8 +3840,9 @@ ROUTES['car-new'] = async ({ date, veh:preVeh, hour } = {}) => {
       const res = await apiRetry('createCarBooking', {
         resource_id:vehId, purpose, project_code:project, trip_type:tripType,
         passengers:$('#px').value.trim(), items:$('#it').value.trim(), note:$('#nt').value.trim(),
-        stops: JSON.stringify(legs.filter(l => l.to).map((l, i) => ({
-          from:l.from, to:l.to, project_code:l.project_code || project,
+        stops: JSON.stringify(segs().map((sg, i) => ({
+          from:sg.from, to:sg.to,
+          project_code: points[i+1]?.project_code || project,
           km: route?.legs?.[i]?.km ?? null, mins: route?.legs?.[i]?.mins ?? null }))),
         total_km: route?.total_km || 0, total_mins: route?.total_mins || 0,
         start_at:`${d}T${a}:00+07:00`, end_at:`${d}T${z}:00+07:00`
@@ -3968,7 +4016,7 @@ ROUTES.notifications = async () => {
     const dest = b.dataset.go || 'my-parcels';
     go(dest, dest === 'my-parcels' || dest === 'issues' ? { rec:b.dataset.rec } : {});
   });
-  S.notifCount = 0; $('#bellDot').hidden = true;
+  S.notifCount = 0; $x('#bellDot').hidden = true;
 };
 
 /* ── Registration ─────────────────────────────────────────────── */
@@ -4360,7 +4408,7 @@ async function boot(){
     const a = MOCK.getAuthState;
     S.me = a.user; S.isAdmin = a.isAdmin; S.isOfficer = a.isOfficer;
     S.regStatus = a.registrationStatus; S.notifCount = a.notificationCount;
-    $('#bellDot').textContent = S.notifCount; $('#bellDot').hidden = false;
+    $x('#bellDot').textContent = S.notifCount; $x('#bellDot').hidden = false;
     const banner = el(`<div style="background:#FFFBEB;border-bottom:1px solid #FDE68A;color:#92400E;
       font-size:11.5px;font-weight:600;text-align:center;padding:6px 12px">
       โหมดพรีวิว · ข้อมูลตัวอย่าง · ใส่ CFG.GAS_URL เพื่อใช้งานจริง</div>`);
@@ -4404,7 +4452,7 @@ async function boot(){
   S.isOfficer = !!(auth?.isAdmin || auth?.isOfficer);
   S.regStatus = auth?.registrationStatus || (S.me ? 'approved' : 'none');
   S.notifCount= auth?.notificationCount || 0;
-  if(S.notifCount){ $('#bellDot').textContent = S.notifCount; $('#bellDot').hidden = false; }
+  if(S.notifCount){ $x('#bellDot').textContent = S.notifCount; $x('#bellDot').hidden = false; }
 
   S.stack = [];
   if(!S.me?.consent_at)               go('consent');
