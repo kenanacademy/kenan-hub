@@ -363,6 +363,8 @@ main{flex:1 1 auto;padding:16px 16px calc(var(--nav-h) + var(--safe-b) + 24px)}
 .tbox .k{font-size:10.5px;font-weight:700;color:var(--ink-3);margin-bottom:3px;
   white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .arrow{flex:0 0 auto;color:var(--ink-3);font-size:15px;font-weight:800}
+.placebtn{text-align:left;justify-content:flex-start;line-height:1.4;white-space:normal;
+  display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
 .carleg{display:flex;gap:14px;justify-content:center;flex-wrap:wrap;margin-top:9px;
   font-size:11px;color:var(--ink-2);font-weight:600}
 .carleg i{display:inline-block;width:9px;height:9px;border-radius:3px;margin-right:5px;vertical-align:-1px}
@@ -493,7 +495,7 @@ const CFG = {
   GAS_URL : 'https://script.google.com/macros/s/AKfycbyOjh4BAAbzY5QfZNG_oGuxbmvZwHjEAKazRMuMxrDeoNknE_rqEoAFdkuJldOPP_q_eg/exec',
   LIFF_TIMEOUT_MS : 3500,
   CONSENT_VERSION : '2026-09-01',
-  BUILD : '2026-08-31c'      // ต้องตรงกับ BUILD ใน Code.gs ที่ Deploy ไว้
+  BUILD : '2026-08-31d'      // ต้องตรงกับ BUILD ใน Code.gs ที่ Deploy ไว้
 };
 
 /* เก็บ ?go=... ไว้ตั้งแต่ต้น เพราะเดี๋ยวจะล้าง query string ทิ้งหลัง LIFF ล็อกอิน
@@ -648,6 +650,9 @@ const T = {
     admResPhoto:'รูป', admResSave:'บันทึก', admResSaved:'บันทึกแล้ว',
     admResOff:'ปิดใช้งาน', admResOn:'เปิดใช้งาน', admResInactive:'ปิดอยู่',
     admResCar:'รถ', admResSeatsCar:'จำนวนที่นั่ง (รวมคนขับ)',
+    admResPlate:'ทะเบียนรถ', admResColor:'สีรถ', admResFuel:'เชื้อเพลิง',
+    admResCo2:'ค่าการปล่อย (กก. CO₂e ต่อ กม.)',
+    admResCo2Hint:'ระบบไม่ใส่ค่ากลางให้ เพราะจะกลายเป็นตัวเลขที่ดูน่าเชื่อแต่ไม่มีที่มา · หาค่าจริงได้จากบัญชีค่าน้ำมันของรถคันนี้ หรือค่ากลางที่ อบก. (TGO) เผยแพร่ ปล่อยว่างไว้ก็ได้ แค่จะไม่มีตัวเลขคาร์บอนให้ดู',
     admResDriver:'คนขับประจำรถคันนี้', admResNoDriver:'ยังไม่ได้ระบุคนขับ',
     admResDriverHint:'ระบบจะกันเวลาให้ทั้งรถและคนขับพร้อมกัน คนขับคนเดียวรับสองเที่ยวซ้อนกันไม่ได้',
     admResNoDriverYet:'ยังไม่มีใครมีสิทธิ์ "คนขับ" — ไปตั้งได้ที่ เมนูผู้ดูแล → จัดการสิทธิ์',
@@ -703,7 +708,29 @@ const T = {
     carGrabOk:'บันทึกไว้แล้ว ขอบคุณครับ',
     carCancel:'ยกเลิกการจอง', carCancelled:'ยกเลิกแล้ว',
     carTapSlot:'แตะช่องว่างในตารางเพื่อจองรถคันนั้น',
-    carUnbooked:'ไม่ได้จองล่วงหน้า', carLegMine:'ของฉัน', carBookedTime:'เวลาที่จอง', carActualTime:'เวลาจริง',
+    carUnbooked:'ไม่ได้จองล่วงหน้า', carLegMine:'ของฉัน',
+    carOffice:'ออฟฟิศคีนัน (ถนนวิทยุ)',
+    carSeatsN:n=>`${n} ที่นั่ง`,
+    carTripType:'งานประเภทไหน',
+    carRoute:'เส้นทาง', carLegN:n=>`ช่วงที่ ${n}`,
+    carRouteHint:'ใส่ต้นทาง–ปลายทางของแต่ละช่วง ระบบจะดึงระยะทางและเวลาขับจาก Google Maps ให้',
+    carFrom:'ต้นทาง', carTo:'ปลายทาง', carSameProject:'ใช้โครงการเดียวกับด้านบน',
+    carPlace:'ค้นหาสถานที่', carPlacePh:'พิมพ์ชื่อสถานที่หรือที่อยู่',
+    carPlaceHint:'พิมพ์แล้วกดค้นหา จะได้ที่อยู่เต็มจาก Google Maps · ถ้าค้นไม่เจอ กดใช้ข้อความที่พิมพ์ได้เลย',
+    carFind:'ค้นหา', carUseTyped:'ใช้ข้อความที่พิมพ์',
+    carPlaceShort:'พิมพ์อย่างน้อย 3 ตัวอักษร', carPlaceNone:'ไม่พบสถานที่นี้ — ลองพิมพ์สั้นลง หรือกดใช้ข้อความที่พิมพ์',
+    carCalc:'คำนวณระยะทางและเวลา', carCalcing:'กำลังคำนวณ…',
+    carNeedRoute:'ต้องใส่ต้นทางและปลายทางอย่างน้อยหนึ่งช่วง',
+    carRouteSome:'บางช่วงคำนวณไม่ได้ ลองแก้ชื่อสถานที่ให้ชัดขึ้น',
+    carKm:'กม.', carMin:'นาที', carDriveHr:'ชม. ขับรถ',
+    carProjSearch:'พิมพ์รหัสหรือชื่อโครงการ',
+    carItems:'สิ่งของที่ขนไปด้วย', carItemsPh:'เช่น กล่องเอกสาร 3 กล่อง · ป้ายไวนิล',
+    carNote:'หมายเหตุถึงคนขับ', carNotePh:'เช่น จอดหน้าล็อบบี้ ห้ามจอดชั้นใต้ดิน เพราะรถสูง',
+    carSummary:'สรุปเที่ยวนี้', carCo2Unit:'กก. CO₂e',
+    carDriveOnly:'เวลาที่แสดงคือเวลาขับรถตามสภาพจราจรทั่วไป ยังไม่รวมเวลาทำธุระที่ปลายทาง กรุณาเผื่อเวลาเอง',
+    carCo2From:(f,v)=>`คำนวณจากค่า ${f} กก. CO₂e ต่อ กม. ที่ตั้งไว้ให้ ${v} — เป็นค่าประมาณ ไม่ใช่ตัวเลขที่ผ่านการทวนสอบ`,
+    carCo2NoFactor:'ยังคำนวณคาร์บอนไม่ได้ — ผู้ดูแลต้องใส่ค่าการปล่อยของรถคันนี้ก่อน (เมนูผู้ดูแล → จัดการห้อง/อุปกรณ์)',
+ carBookedTime:'เวลาที่จอง', carActualTime:'เวลาจริง',
     carSt:{ requested:'รอจัดคนขับ', assigned:'พร้อมออก', in_use:'กำลังเดินทาง', returned:'กลับถึงแล้ว' },
     carEmpty:'ยังไม่มีรถในระบบ',
     carEmptyBody:'ผู้ดูแลเพิ่มรถได้ที่ เมนูผู้ดูแล → จัดการห้อง / อุปกรณ์ (เลือกประเภท "รถ")',
@@ -927,6 +954,9 @@ const T = {
     admResPhoto:'Photo', admResSave:'Save', admResSaved:'Saved',
     admResOff:'Disable', admResOn:'Enable', admResInactive:'Disabled',
     admResCar:'Vehicles', admResSeatsCar:'Seats (including driver)',
+    admResPlate:'Plate number', admResColor:'Colour', admResFuel:'Fuel',
+    admResCo2:'Emission factor (kg CO₂e per km)',
+    admResCo2Hint:'No default is supplied — a made-up number would look credible without any basis. Derive it from this vehicle\'s own fuel records, or from the published TGO factors. Leave blank and no carbon figure is shown.',
     admResDriver:'Assigned driver', admResNoDriver:'No driver assigned',
     admResDriverHint:'Both the vehicle and the driver are held for the booked time — one driver cannot take two overlapping trips.',
     admResNoDriverYet:'Nobody has the "driver" role yet — set it under Admin → Roles.',
@@ -982,7 +1012,29 @@ const T = {
     carGrabOk:'Recorded — thank you',
     carCancel:'Cancel booking', carCancelled:'Cancelled',
     carTapSlot:'Tap an empty slot to book that vehicle',
-    carUnbooked:'Not booked in advance', carLegMine:'Mine', carBookedTime:'Booked', carActualTime:'Actual',
+    carUnbooked:'Not booked in advance', carLegMine:'Mine',
+    carOffice:'Kenan office (Wireless Rd)',
+    carSeatsN:n=>`${n} seats`,
+    carTripType:'What kind of trip',
+    carRoute:'Route', carLegN:n=>`Leg ${n}`,
+    carRouteHint:'Give the start and end of each leg — distance and driving time come from Google Maps.',
+    carFrom:'From', carTo:'To', carSameProject:'Same project as above',
+    carPlace:'Find a place', carPlacePh:'Type a place name or address',
+    carPlaceHint:'Type then tap Search for the full address from Google Maps. If it is not found, you can use what you typed.',
+    carFind:'Search', carUseTyped:'Use what I typed',
+    carPlaceShort:'Type at least 3 characters', carPlaceNone:'Not found — try something shorter, or use what you typed',
+    carCalc:'Calculate distance and time', carCalcing:'Calculating…',
+    carNeedRoute:'At least one leg needs a start and an end',
+    carRouteSome:'Some legs could not be calculated — try clearer place names',
+    carKm:'km', carMin:'min', carDriveHr:'hrs driving',
+    carProjSearch:'Type a project code or name',
+    carItems:'Items being carried', carItemsPh:'e.g. 3 boxes of documents, a vinyl banner',
+    carNote:'Note for the driver', carNotePh:'e.g. park at the lobby, not the basement — the van is too tall',
+    carSummary:'Trip summary', carCo2Unit:'kg CO₂e',
+    carDriveOnly:'This is driving time in typical traffic. It does not include time spent at the destination — please allow for that yourself.',
+    carCo2From:(f,v)=>`Based on ${f} kg CO₂e per km set for ${v} — an estimate, not an audited figure`,
+    carCo2NoFactor:'Carbon cannot be estimated yet — an admin needs to set this vehicle\'s emission factor (Admin → Rooms & equipment)',
+ carBookedTime:'Booked', carActualTime:'Actual',
     carSt:{ requested:'Awaiting driver', assigned:'Ready', in_use:'On the road', returned:'Back' },
     carEmpty:'No vehicles listed yet',
     carEmptyBody:'An admin can add them under Admin → Rooms & equipment (type "vehicle").',
@@ -1155,6 +1207,12 @@ const MOCK = {
       storage_location:'ตู้ AV ชั้น 2', is_active:true },
     { resource_id:'VEH-1', kind:'vehicle', name_th:'Toyota Commuter (ฮค-1234)', capacity:12, is_active:true }] },
   saveResource:{ ok:true }, saveProject:{ ok:true },
+  geoSuggest:{ ok:true, items:[
+    { name:'โรงแรมเอเชีย ราชเทวี ถนนพญาไท แขวงถนนเพชรบุรี เขตราชเทวี กรุงเทพมหานคร 10400' },
+    { name:'โรงแรมแมนดาริน สามย่าน ถนนพระราม 4 กรุงเทพมหานคร 10500' },
+    { name:'โรงแรมปทุมวัน ปริ๊นเซส ถนนพญาไท กรุงเทพมหานคร 10330' }] },
+  routeLegs:{ ok:true, failed:0, total_km:23.4, total_mins:52,
+    legs:[{ km:8.2, mins:19 }, { km:15.2, mins:33 }] },
   getProjectsAdmin:{ ok:true, items:[
     { project_code:'BACKOFFICE', name_th:'งานสำนักงาน', type:'Core', trips:4, is_active:true },
     { project_code:'NONBILL', name_th:'ไม่ผูกโครงการ', type:'Core', trips:1, is_active:true }] },
@@ -1186,11 +1244,17 @@ const MOCK = {
     const d = new Date(), k = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
     return { ok:true, date:k, isDriver:true, isOfficer:true,
       vehicles:[
-        { resource_id:'VEH-1', name_th:'Toyota Commuter (ฮค-1234)', capacity:12,
-          note:'รถตู้', default_driver:'K-9001', driver_name:'สมพงษ์ ขับดี' },
-        { resource_id:'VEH-2', name_th:'Toyota Altis (2กท-5678)', capacity:4,
-          note:'รถเก๋ง', default_driver:'K-9002', driver_name:'ประยูร ทางไกล' }],
-      projects:[{ code:'BACKOFFICE', name:'งานสำนักงาน' }, { code:'NONBILL', name:'ไม่ผูกโครงการ' }],
+        { resource_id:'VEH-1', name_th:'Toyota Commuter', capacity:12, plate:'ฮค-1234 กรุงเทพมหานคร',
+          color:'ขาว', fuel_type:'ดีเซล', co2_per_km:'0.28',
+          note:'รถตู้', default_driver:'K-9001', driver_name:'สมพงษ์ ขับดี', driver_phone:'0812345678' },
+        { resource_id:'VEH-2', name_th:'Toyota Altis', capacity:4, plate:'2กท-5678 กรุงเทพมหานคร',
+          color:'เทา', fuel_type:'เบนซิน', co2_per_km:'',
+          note:'รถเก๋ง', default_driver:'K-9002', driver_name:'ประยูร ทางไกล', driver_phone:'0898765432' }],
+      projects:[{ code:'BACKOFFICE', name:'งานสำนักงาน' }, { code:'NONBILL', name:'ไม่ผูกโครงการ' },
+        { code:'WING2026', name:'WING — Women in Green Growth' },
+        { code:'AISKILL25', name:'AI & Digital Skills for MSMEs' },
+        { code:'DEEPSOUTH', name:'Deep South Education' },
+        { code:'HEALTHWB', name:'Health and Wellbeing' }],
       drivers:[{ id:'K-9001', name:'สมพงษ์ ขับดี' }, { id:'K-9002', name:'ประยูร ทางไกล' }],
       trips:[
         { record_id:'CAR-1', resource_id:'VEH-1', status:'in_use',
@@ -1226,8 +1290,10 @@ const MOCK = {
     { title:'อัปเดตนโยบายการเบิกค่าเดินทาง (Travel Expense Policy)', at:'2026-08-28T02:00:00Z' },
     { title:'ซ้อมอพยพหนีไฟประจำปี 12 ก.ย.',                          at:'2026-08-25T06:30:00Z' }]},
   getNotifications:{ items:[
-    { title:'มีพัสดุถึงคุณ 1 ชิ้น — กล่อง Shopee', at:'2026-08-30T02:15:00Z' },
-    { title:'เอกสารจาก HR รอคุณมารับ',            at:'2026-08-29T07:40:00Z' }]},
+    { title:'📦 มีพัสดุถึงคุณ', at:'2026-08-30T02:15:00Z', record_id:'PCL-260830-001', go:'my-parcels' },
+    { title:'🛠 มีเรื่องแจ้งเข้ามาใหม่', at:'2026-08-30T01:10:00Z', record_id:'ISU-260830-002', go:'issues' },
+    { title:'🚗 จองรถเรียบร้อย', at:'2026-08-29T09:00:00Z', record_id:'CAR-260829-003', go:'cars' },
+    { title:'👋 ลงทะเบียนเรียบร้อย', at:'2026-08-28T07:40:00Z', record_id:'', go:'' }]},
   scanParcelPhoto:{ recipientName:'วราภรณ์', trackingNo:'TH99887766554' },
   logParcel:{ ok:true }, claimParcel:{ ok:true }, notMyParcel:{ ok:true },
   acceptConsent:{ ok:true }, submitRegistration:{ ok:true }
@@ -3095,6 +3161,19 @@ ROUTES['admin-res'] = async () => {
       <div class="field" id="locF" ${(isRoom || isCar) ? 'hidden' : ''}>
         <label>${esc(t('admResLoc'))}</label>
         <input id="rloc" value="${esc(it?.storage_location || '')}" placeholder="ตู้ AV ชั้น 2 ช่อง 1"></div>
+      <div class="field" id="plateF" ${isCar ? '' : 'hidden'}>
+        <label>${esc(t('admResPlate'))}</label>
+        <input id="rplate" value="${esc(it?.plate || '')}" placeholder="1กก-1234 กรุงเทพมหานคร"></div>
+      <div class="field" id="colorF" ${isCar ? '' : 'hidden'}>
+        <label>${esc(t('admResColor'))}</label>
+        <input id="rcolor" value="${esc(it?.color || '')}" placeholder="ขาว · เทา · ดำ"></div>
+      <div class="field" id="fuelF" ${isCar ? '' : 'hidden'}>
+        <label>${esc(t('admResFuel'))}</label>
+        <input id="rfuel" value="${esc(it?.fuel_type || '')}" placeholder="ดีเซล · เบนซิน · ไฮบริด · ไฟฟ้า"></div>
+      <div class="field" id="co2F" ${isCar ? '' : 'hidden'}>
+        <label>${esc(t('admResCo2'))}</label>
+        <input id="rco2" inputmode="decimal" value="${esc(it?.co2_per_km || '')}" placeholder="0.21">
+        <div style="font-size:11px;color:var(--ink-3);margin-top:4px">${esc(t('admResCo2Hint'))}</div></div>
       <div class="field" id="drvF" ${isCar ? '' : 'hidden'}>
         <label>${esc(t('admResDriver'))}</label>
         <select id="rdrv"><option value="">${esc(t('admResNoDriver'))}</option>${
@@ -3113,7 +3192,9 @@ ROUTES['admin-res'] = async () => {
       const k = $('#rk').value;
       $('#capF').hidden = (k === 'equipment');
       $('#locF').hidden = (k !== 'equipment');
-      $('#drvF').hidden = (k !== 'vehicle');
+      ['drvF','plateF','colorF','fuelF','co2F'].forEach(id => {
+        const el = $(id === 'drvF' ? '#drvF' : '#' + id); if(el) el.hidden = (k !== 'vehicle');
+      });
       $x('#capF').querySelector('label').textContent =
         k === 'vehicle' ? t('admResSeatsCar') : t('admResCap');
     };
@@ -3128,6 +3209,8 @@ ROUTES['admin-res'] = async () => {
           name_th:name, category:$('#rc').value.trim(),
           capacity:$('#rcap')?.value.trim() || '', storage_location:$('#rloc')?.value.trim() || '',
           note:$('#rnt').value.trim(), default_driver:$('#rdrv')?.value ?? '',
+          plate:$('#rplate')?.value.trim() ?? '', color:$('#rcolor')?.value.trim() ?? '',
+          fuel_type:$('#rfuel')?.value.trim() ?? '', co2_per_km:$('#rco2')?.value.trim() ?? '',
           photo:img.v?.full || '', thumb:img.v?.thumb || '', card:img.v?.card || ''
         }, extra || {}), 'POST');
         closeSheet(); clearCache(); toast(t('admResSaved'),'ok'); go('admin-res', {}, true);
@@ -3323,12 +3406,30 @@ function tripSheet(x, r, refresh){
       ${x.passengers ? `<div class="row"><div class="body">
         <div class="s">${esc(t('carPax'))}</div>
         <div class="t">${esc(x.passengers)}</div></div></div>` : ''}
+      ${x.items ? `<div class="row"><div class="body">
+        <div class="s">${esc(t('carItems'))}</div>
+        <div class="t">${esc(x.items)}</div></div></div>` : ''}
+      ${x.note ? `<div class="row"><div class="body">
+        <div class="s">${esc(t('carNote'))}</div>
+        <div class="t" style="white-space:pre-wrap">${esc(x.note)}</div></div></div>` : ''}
     </div>
+    ${x.total_km ? `<div class="card" style="border-color:var(--primary);background:#F5F8FF;padding:12px">
+      <div style="display:flex;gap:10px;text-align:center">
+        <div style="flex:1"><div style="font-size:18px;font-weight:800;color:var(--primary)">${x.total_km}</div>
+          <div style="font-size:10px;color:var(--ink-3)">${esc(t('carKm'))}</div></div>
+        <div style="flex:1"><div style="font-size:18px;font-weight:800;color:var(--primary)">${x.total_mins}</div>
+          <div style="font-size:10px;color:var(--ink-3)">${esc(t('carMin'))}</div></div>
+        ${x.co2_kg != null ? `<div style="flex:1">
+          <div style="font-size:18px;font-weight:800;color:var(--ok)">${x.co2_kg}</div>
+          <div style="font-size:10px;color:var(--ink-3)">${esc(t('carCo2Unit'))}</div></div>` : ''}
+      </div></div>` : ''}
     ${stops.length ? `<div class="section-title" style="margin-top:4px">${esc(t('carStops'))}</div>
       <div class="rows" style="margin-bottom:12px">${stops.map((sp,i) => `
         <div class="row"><span class="av">${i+1}</span><div class="body">
-          <div class="t">${esc(sp.place || '-')}</div>
-          <div class="s">${esc(sp.project_code || '')}</div></div></div>`).join('')}</div>` : ''}
+          <div class="t">${esc(sp.to || sp.place || '-')}</div>
+          <div class="s">${esc([sp.from ? t('carFrom') + ' ' + sp.from : '', sp.project_code,
+            sp.km != null ? sp.km + ' ' + t('carKm') : ''].filter(Boolean).join(' · '))}</div>
+        </div></div>`).join('')}</div>` : ''}
     <span class="pill new" style="margin-bottom:10px;display:inline-block">${esc(carStName(x.status))}</span>
     ${mine && x.status !== 'in_use'
       ? `<button class="btn" id="cx" style="background:var(--bad);color:#fff">${esc(t('carCancel'))}</button>`
@@ -3343,6 +3444,95 @@ function tripSheet(x, r, refresh){
   };
 }
 
+/** ตัวเลือกแบบพิมพ์ค้นหาได้ — ใช้กับรายการที่ยาวเกินกว่าจะเลื่อนหา
+    ที่คีนันมีโครงการ 20+ โครงการ dropdown ธรรมดาจะหาไม่เจอจริงๆ */
+function pickFromList({ title, items, label, sub, current, search }){
+  return new Promise(resolve => {
+    sheet(`<h3>${esc(title)}</h3>
+      <input id="plq" placeholder="${esc(search || t('pkSearch'))}" autocomplete="off">
+      <div id="pll"></div>
+      <button class="btn ghost" id="plx" style="margin-top:10px">${esc(t('cancel'))}</button>`);
+    const norm = x => String(x || '').toLowerCase().replace(/\s/g, '');
+    const paint = kw => {
+      const k = norm(kw);
+      const hits = !k ? items : items.filter(i =>
+        norm(label(i)).includes(k) || norm(sub ? sub(i) : '').includes(k));
+      $x('#pll').innerHTML = hits.length ? hits.map((i, n) => `
+        <button class="pk-row" data-i="${n}">
+          <span class="b"><span class="t">${esc(label(i))}</span>
+          ${sub ? `<span class="s">${esc(sub(i))}</span>` : ''}</span>
+          ${current && label(i) === current ? '<span style="color:var(--primary);font-weight:800">✓</span>' : ''}
+        </button>`).join('') : `<div class="pk-empty">${esc(t('pkNone'))}</div>`;
+      document.querySelectorAll('#pll .pk-row').forEach(b => b.onclick = () => {
+        closeSheet(); resolve(hits[Number(b.dataset.i)]);
+      });
+    };
+    paint('');
+    const inp = $('#plq');
+    inp.oninput = () => paint(inp.value);
+    $('#plx').onclick = () => { closeSheet(); resolve(null); };
+    setTimeout(() => inp.focus(), 260);
+  });
+}
+
+/** ช่องกรอกสถานที่ — พิมพ์แล้วกดค้นหา ได้ที่อยู่เต็มจาก Google Maps
+    ต้องกดค้นหาเอง ไม่ค้นทุกตัวอักษร เพราะโควตามีวันละ 1,000 ครั้ง
+    และการยิงทุกคีย์สโตรกจะทำให้หน้าหน่วงด้วย */
+async function pickPlace(initial){
+  let q = String(initial || '');
+  return new Promise(resolve => {
+    const draw = (results, busy, err) => {
+      sheet(`<h3>${esc(t('carPlace'))}</h3>
+        <div style="display:flex;gap:7px">
+          <input id="ppq" value="${esc(q)}" placeholder="${esc(t('carPlacePh'))}" style="flex:1">
+          <button class="btn primary" id="ppgo" style="width:auto;padding:0 16px">${esc(t('carFind'))}</button>
+        </div>
+        <div style="font-size:11px;color:var(--ink-3);margin-top:6px">${esc(t('carPlaceHint'))}</div>
+        <div id="ppr" style="margin-top:10px">${
+          busy ? skeleton(2)
+          : err ? `<div class="note" style="border-color:var(--bad)">${IC.info}<div>${esc(err)}</div></div>`
+          : (results || []).map((r, i) => `
+              <button class="pk-row" data-i="${i}"><span class="b">
+                <span class="t">${esc(r.name)}</span></span></button>`).join('')}</div>
+        <button class="btn ghost" id="ppuse">${esc(t('carUseTyped'))}</button>
+        <button class="btn ghost" id="ppx">${esc(t('cancel'))}</button>`);
+      const inp = $('#ppq');
+      inp.oninput = () => { q = inp.value; };
+      $('#ppx').onclick = () => { closeSheet(); resolve(null); };
+      // พิมพ์เองแล้วใช้เลยก็ได้ ไม่ต้องบังคับให้เจอใน Maps
+      // บางที่ในไทยค้นไม่เจอจริงๆ ห้ามให้ระบบพาไปติดตาย
+      $('#ppuse').onclick = () => {
+        const v = inp.value.trim();
+        if(!v){ toast(t('carPlaceShort'), 'bad'); return; }
+        closeSheet(); resolve({ name:v, typed:true });
+      };
+      $('#ppgo').onclick = async () => {
+        q = inp.value.trim();
+        if(q.length < 3){ toast(t('carPlaceShort'), 'bad'); return; }
+        draw(null, true);
+        try{
+          const r = await apiRetry('geoSuggest', { q }, 'GET');
+          draw(r?.items || [], false, (r?.items || []).length ? '' : t('carPlaceNone'));
+        }catch(e){ draw(null, false, t('netErr')); }
+      };
+      document.querySelectorAll('#ppr .pk-row').forEach(b => b.onclick = () => {
+        closeSheet(); resolve((results || [])[Number(b.dataset.i)]);
+      });
+      if(!busy) setTimeout(() => inp.focus(), 260);
+    };
+    draw([], false);
+  });
+}
+
+const TRIP_TYPES = () => [
+  { v:'staff_one', th:'ไปส่งพนักงาน', en:'Drop staff off' },
+  { v:'staff_return', th:'ไปส่งพนักงาน แล้วไปรับกลับ', en:'Drop off and pick up' },
+  { v:'staff_wait', th:'ไปส่งพนักงาน แล้วรออยู่ที่นั่น', en:'Drop off and wait there' },
+  { v:'goods', th:'ไปส่งของ / รับของ', en:'Deliver or collect goods' },
+  { v:'guest', th:'ไปรับ-ส่งแขกหรือวิทยากร', en:'Guest or speaker transfer' },
+  { v:'other', th:'อื่นๆ (อธิบายด้านล่าง)', en:'Other (describe below)' }
+];
+
 ROUTES['car-new'] = async ({ date, veh:preVeh, hour } = {}) => {
   setTitle(t('carBook'));
   const day = date || dayKey(new Date());
@@ -3353,20 +3543,22 @@ ROUTES['car-new'] = async ({ date, veh:preVeh, hour } = {}) => {
   try{ r = await apiRetry('getCarDay', { date:day }, 'GET'); }catch(e){}
   if(!r?.ok){ errorScreen(new Error('load'), () => render('car-new', { date, veh:preVeh, hour })); return; }
   if(!r.vehicles.length){
-    $x('#main').innerHTML = `<div class="view">${emptyState(IC.car, t('carEmpty'), t('carEmptyBody'))}</div>`; return;
-  }
+    $x('#main').innerHTML = `<div class="view">${emptyState(IC.car, t('carEmpty'), t('carEmptyBody'))}</div>`; return; }
   if(!r.projects.length){
-    $x('#main').innerHTML = `<div class="view">${emptyState(IC.info, t('carProjNone'), t('carProjNoneBody'))}</div>`; return;
-  }
+    $x('#main').innerHTML = `<div class="view">${emptyState(IC.info, t('carProjNone'), t('carProjNoneBody'))}</div>`; return; }
 
-  const projOpts = ph => `<option value="">${esc(ph)}</option>` + r.projects.map(p =>
-    `<option value="${esc(p.code)}">${esc(p.code)} · ${esc(p.name || '')}</option>`).join('');
+  const OFFICE = t('carOffice');
+  let vehId   = preVeh || r.vehicles[0].resource_id;
+  let tripType= 'staff_return';
+  let project = '';
+  // แต่ละช่วงคือ ต้นทาง → ปลายทาง เริ่มจากออฟฟิศเสมอ
+  let legs    = [{ from:OFFICE, to:'', project_code:'' }];
+  let route   = null;                 // ผลจาก Google Maps
 
   $x('#main').innerHTML = `<div class="view">
     <div class="card">
       <div style="font-size:13px;font-weight:600;margin-bottom:9px">${esc(t('carPickVeh'))}</div>
       <div id="vp"></div>
-      <div style="font-size:11px;color:var(--ink-3);margin-top:2px">${esc(t('carDriverAuto'))}</div>
       <div id="noFree"></div>
     </div>
 
@@ -3385,31 +3577,41 @@ ROUTES['car-new'] = async ({ date, veh:preVeh, hour } = {}) => {
     </div>
 
     <div class="card">
+      <div class="field"><label>${esc(t('carTripType'))}<span class="req">*</span></label>
+        <select id="tt">${TRIP_TYPES().map(x =>
+          `<option value="${x.v}" ${x.v===tripType?'selected':''}>${esc(S.lang==='th'?x.th:x.en)}</option>`).join('')}</select></div>
       <div class="field"><label>${esc(t('carPurpose'))}<span class="req">*</span></label>
         <input id="pp" placeholder="${esc(t('carPurposePh'))}"></div>
       <div class="field" style="margin:0"><label>${esc(t('carProject'))}<span class="req">*</span></label>
-        <select id="pj">${projOpts(t('carProjectPh'))}</select></div>
+        <button class="btn ghost" id="pjBtn" style="text-align:left;justify-content:flex-start">${esc(t('carProjectPh'))}</button></div>
       <div style="font-size:11px;color:var(--ink-3);margin-top:6px">${esc(t('carProjWhy'))}</div>
     </div>
 
     <div class="card">
-      <div style="font-size:13px;font-weight:600;margin-bottom:4px">${esc(t('carStops'))}</div>
-      <div style="font-size:11px;color:var(--ink-3);margin-bottom:9px">${esc(t('carStopsHint'))}</div>
-      <div id="st"></div>
-      <button class="btn ghost" id="addStop" style="margin-top:6px">${esc(t('carAddStop'))}</button>
+      <div style="font-size:13px;font-weight:600;margin-bottom:4px">${esc(t('carRoute'))}</div>
+      <div style="font-size:11px;color:var(--ink-3);margin-bottom:9px">${esc(t('carRouteHint'))}</div>
+      <div id="lg"></div>
+      <button class="btn ghost" id="addLeg" style="margin-top:6px">${esc(t('carAddStop'))}</button>
+      <button class="btn soft" id="calc" style="margin-top:8px">${esc(t('carCalc'))}</button>
       <div id="split" style="font-size:11.5px;font-weight:700;color:var(--primary);margin-top:9px"></div>
     </div>
 
     <div class="card">
-      <div class="field" style="margin:0"><label>${esc(t('carPax'))}</label>
+      <div class="field"><label>${esc(t('carPax'))}</label>
         <input id="px" placeholder="${esc(t('carPaxPh'))}"></div>
+      <div class="field"><label>${esc(t('carItems'))}</label>
+        <input id="it" placeholder="${esc(t('carItemsPh'))}"></div>
+      <div class="field" style="margin:0"><label>${esc(t('carNote'))}</label>
+        <textarea id="nt" rows="3" placeholder="${esc(t('carNotePh'))}"
+          style="width:100%;resize:vertical"></textarea></div>
     </div>
+
+    <div id="sum"></div>
 
     <div class="sticky-cta"><button class="btn primary" id="goBk">${esc(t('carGo'))}</button></div>
   </div>`;
 
-  /* ── รายการรถ + บอกว่าคันไหนว่างในช่วงเวลาที่เลือก */
-  let vehId = preVeh || r.vehicles[0].resource_id;
+  /* ── รถ: รูป · ที่นั่ง · ทะเบียน · สี · คนขับ + เบอร์ ── */
   const overlap = (a1,a2,b1,b2) => Date.parse(a1) < Date.parse(b2) && Date.parse(b1) < Date.parse(a2);
   const win = () => {
     const d = $('#dd').value || day, a = $('#t1').value || h1, z = $('#t2').value || h2;
@@ -3420,85 +3622,181 @@ ROUTES['car-new'] = async ({ date, veh:preVeh, hour } = {}) => {
     $x('#vp').innerHTML = r.vehicles.map(v => {
       const busy = r.trips.some(x => x.resource_id === v.resource_id && overlap(s,e,x.start_at,x.end_at));
       const on = v.resource_id === vehId;
+      const spec = [ v.capacity ? t('carSeatsN')(v.capacity) : '', v.color, v.fuel_type ]
+        .filter(Boolean).join(' · ');
       return `<button class="row" data-v="${esc(v.resource_id)}" style="border:1.5px solid ${
         on?'var(--primary)':'var(--line)'};border-radius:12px;margin-bottom:8px;
-        background:${on?'#EEF3FF':'#fff'}">
-        ${phImg(v,'rphoto','width:52px;height:40px') || `<div class="rphoto" style="width:52px;height:40px">${IC.car}</div>`}
-        <div class="body"><div class="t">${esc(v.name_th)}</div>
-          <div class="s">${esc([v.capacity ? t('rmSeats')(v.capacity) : '',
-            v.driver_name ? t('carDriver') + ' ' + firstName(v.driver_name) : t('carNoDriver')
-            ].filter(Boolean).join(' · '))}</div>
-          <div style="font-size:10.5px;font-weight:800;color:${busy?'var(--bad)':'var(--ok)'}">
-            ${esc(busy ? t('carVehBusy') : t('carVehFree'))}</div></div>
+        background:${on?'#EEF3FF':'#fff'};align-items:flex-start">
+        ${phImg(v,'rphoto','width:62px;height:48px') || `<div class="rphoto" style="width:62px;height:48px">${IC.car}</div>`}
+        <div class="body">
+          <div class="t">${esc(v.name_th)}</div>
+          ${v.plate ? `<div style="display:inline-block;font-size:11px;font-weight:800;
+            border:1px solid var(--line);border-radius:5px;padding:1px 6px;margin:3px 0">${esc(v.plate)}</div>` : ''}
+          <div class="s">${esc(spec)}</div>
+          <div class="s">${esc(v.driver_name ? t('carDriver') + ' ' + v.driver_name : t('carNoDriver'))}${
+            v.driver_phone ? ` · <a href="tel:${esc(v.driver_phone)}" style="color:var(--primary);font-weight:700">${esc(v.driver_phone)}</a>` : ''}</div>
+          <div style="font-size:10.5px;font-weight:800;color:${busy?'var(--bad)':'var(--ok)'};margin-top:2px">
+            ${esc(busy ? t('carVehBusy') : t('carVehFree'))}</div>
+        </div>
         <span class="ck" style="color:var(--primary);font-weight:800;${on?'':'visibility:hidden'}">✓</span>
       </button>`;
     }).join('');
     paintPhotos($('#vp'));
-    document.querySelectorAll('#vp .row').forEach(b => b.onclick = () => { vehId = b.dataset.v; paintVeh(); });
-    const allBusy = r.vehicles.every(v => {
-      const [s2,e2] = win();
-      return r.trips.some(x => x.resource_id === v.resource_id && overlap(s2,e2,x.start_at,x.end_at));
+    document.querySelectorAll('#vp .row').forEach(b => b.onclick = ev => {
+      if(ev.target.closest('a')) return;      // แตะเบอร์โทร = โทร ไม่ใช่เลือกรถ
+      vehId = b.dataset.v; paintVeh(); paintSummary();
     });
+
+    const [s2,e2] = win();
+    const allBusy = r.vehicles.every(v =>
+      r.trips.some(x => x.resource_id === v.resource_id && overlap(s2,e2,x.start_at,x.end_at)));
     $x('#noFree').innerHTML = allBusy ? `<div class="note" style="border-color:var(--bad);margin-top:8px">
       ${IC.info}<div><b>${esc(t('carNoFree'))}</b><br>${esc(t('carGrabHint'))}</div></div>
       <button class="btn ghost" id="grabBtn" style="margin-top:8px">${esc(t('carGrab'))}</button>` : '';
     if($('#grabBtn')) $('#grabBtn').onclick = async () => {
       const [s3,e3] = win();
       try{ await apiRetry('logNoCar', { wanted:`${s3} → ${e3}`, alt_action:'grab',
-             project_code:$('#pj').value || '' }, 'POST');
+             project_code:project }, 'POST');
            toast(t('carGrabOk'),'ok'); back(); }
       catch(e){ toast(t('netErr'),'bad'); }
     };
   }
-  paintVeh();
-  ['#dd','#t1','#t2'].forEach(sl => { const el = $(sl); if(el) el.onchange = paintVeh; });
 
-  /* ── จุดแวะ: แต่ละจุดผูกโครงการเองได้ แล้วโชว์ให้เห็นเลยว่าหารกันยังไง */
-  let stops = [];
-  function paintStops(){
-    $x('#st').innerHTML = stops.map((sp,i) => `
-      <div style="border:1px solid var(--line);border-radius:12px;padding:10px;margin-bottom:8px">
-        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
-          <span style="font-size:11.5px;font-weight:800;color:var(--ink-3)">${esc(t('carStopN')(i+1))}</span>
-          <button data-x="${i}" style="font-size:11.5px;color:var(--bad);font-weight:700">${esc(t('cancel'))}</button>
+  /* ── โครงการ: พิมพ์ค้นหาได้ เพราะมี 20+ โครงการ ── */
+  const projOf = c => r.projects.find(p => p.code === c);
+  async function chooseProject(cur){
+    return pickFromList({ title:t('carProject'), items:r.projects,
+      label:p => p.code, sub:p => p.name || '', current:cur,
+      search:t('carProjSearch') });
+  }
+  $('#pjBtn').onclick = async () => {
+    const p = await chooseProject(project);
+    if(p){ project = p.code; $('#pjBtn').textContent = p.code + (p.name ? ' · ' + p.name : ''); paintSplit(); }
+  };
+
+  /* ── ช่วงเดินทาง: ต้นทาง → ปลายทาง ── */
+  function paintLegs(){
+    $x('#lg').innerHTML = legs.map((L, i) => {
+      const rl = route?.legs?.[i];
+      return `<div style="border:1px solid var(--line);border-radius:12px;padding:11px;margin-bottom:9px">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:7px">
+          <span style="font-size:11.5px;font-weight:800;color:var(--ink-3)">${esc(t('carLegN')(i+1))}</span>
+          ${legs.length > 1 ? `<button data-x="${i}" style="font-size:11.5px;color:var(--bad);font-weight:700">${esc(t('cancel'))}</button>` : ''}
         </div>
-        <input data-p="${i}" value="${esc(sp.place || '')}" placeholder="${esc(t('carStopPh'))}"
-          style="margin-bottom:6px">
-        <select data-j="${i}">${projOpts(t('carProjectPh'))}</select>
-      </div>`).join('');
-    stops.forEach((sp,i) => { const s2 = document.querySelector(`#st [data-j="${i}"]`); if(s2) s2.value = sp.project_code || ''; });
-    document.querySelectorAll('#st [data-x]').forEach(b =>
-      b.onclick = () => { stops.splice(Number(b.dataset.x),1); paintStops(); });
-    document.querySelectorAll('#st [data-p]').forEach(el =>
-      el.oninput = () => { stops[Number(el.dataset.p)].place = el.value; });
-    document.querySelectorAll('#st [data-j]').forEach(el =>
-      el.onchange = () => { stops[Number(el.dataset.j)].project_code = el.value; paintSplit(); });
+        <button class="btn ghost placebtn" data-f="${i}"
+          style="font-weight:${L.from?'600':'400'};color:${L.from?'var(--ink)':'var(--ink-3)'}">
+          ${esc(t('carFrom'))}: ${esc(L.from || t('carPlacePh'))}</button>
+        <div style="text-align:center;font-size:13px;color:var(--ink-3);margin:2px 0">↓</div>
+        <button class="btn ghost placebtn" data-t="${i}"
+          style="font-weight:${L.to?'600':'400'};color:${L.to?'var(--ink)':'var(--ink-3)'}">
+          ${esc(t('carTo'))}: ${esc(L.to || t('carPlacePh'))}</button>
+        <div style="display:flex;gap:8px;align-items:center;margin-top:8px">
+          <button class="btn ghost" data-j="${i}" style="flex:1;text-align:left;justify-content:flex-start;
+            font-size:12px;padding:9px 11px">${esc(L.project_code || t('carSameProject'))}</button>
+          ${rl && rl.km != null ? `<span style="font-size:11.5px;font-weight:800;color:var(--primary);white-space:nowrap">
+            ${rl.km} ${esc(t('carKm'))} · ${rl.mins} ${esc(t('carMin'))}</span>` : ''}
+        </div>
+      </div>`;
+    }).join('');
+
+    document.querySelectorAll('#lg [data-x]').forEach(b => b.onclick = () => {
+      legs.splice(Number(b.dataset.x), 1); route = null; paintLegs(); paintSummary(); });
+    document.querySelectorAll('#lg [data-f]').forEach(b => b.onclick = async () => {
+      const i = Number(b.dataset.f); const p = await pickPlace(legs[i].from);
+      if(p){ legs[i].from = p.name; route = null; paintLegs(); paintSummary(); } });
+    document.querySelectorAll('#lg [data-t]').forEach(b => b.onclick = async () => {
+      const i = Number(b.dataset.t); const p = await pickPlace(legs[i].to);
+      if(p){
+        legs[i].to = p.name;
+        // ปลายทางของช่วงนี้ = ต้นทางของช่วงถัดไปโดยอัตโนมัติ
+        // ไม่ทำแบบนี้ คนจะต้องพิมพ์ที่เดิมซ้ำสองครั้ง แล้วก็พิมพ์ไม่ตรงกัน
+        if(legs[i+1] && !legs[i+1].from) legs[i+1].from = p.name;
+        route = null; paintLegs(); paintSummary();
+      } });
+    document.querySelectorAll('#lg [data-j]').forEach(b => b.onclick = async () => {
+      const i = Number(b.dataset.j);
+      const p = await chooseProject(legs[i].project_code);
+      if(p){ legs[i].project_code = p.code; paintLegs(); paintSplit(); } });
     paintSplit();
   }
+
+  $('#addLeg').onclick = () => {
+    const prev = legs[legs.length - 1];
+    legs.push({ from: prev?.to || '', to:'', project_code:'' });
+    route = null; paintLegs(); paintSummary();
+  };
+
   function paintSplit(){
-    const codes = [...new Set([$('#pj').value, ...stops.map(s => s.project_code)].filter(Boolean))];
+    const codes = [...new Set([project, ...legs.map(l => l.project_code)].filter(Boolean))];
     $x('#split').textContent = codes.length > 1
       ? t('carSplitN')(codes.length, codes.join(' · '))
       : (codes.length ? t('carSplit') + ': ' + t('carSplitOne') : '');
   }
-  $('#addStop').onclick = () => { stops.push({ place:'', project_code:$('#pj').value || '' }); paintStops(); };
-  $('#pj').onchange = paintSplit;
-  paintStops();
 
-  /* ── ส่ง */
+  /* ── คำนวณเส้นทางจาก Google Maps ── */
+  $('#calc').onclick = async () => {
+    const ready = legs.filter(l => l.from && l.to);
+    if(!ready.length){ toast(t('carNeedRoute'), 'bad'); return; }
+    const b = $('#calc'); b.disabled = true; b.textContent = t('carCalcing');
+    try{
+      const res = await apiRetry('routeLegs',
+        { legs: JSON.stringify(legs.map(l => ({ from:l.from, to:l.to }))) }, 'POST');
+      route = res?.ok ? res : null;
+      if(route && route.failed) toast(t('carRouteSome'), 'bad');
+      paintLegs(); paintSummary();
+    }catch(e){ toast(t('netErr'), 'bad'); }
+    b.disabled = false; b.textContent = t('carCalc');
+  };
+
+  /* ── สรุปท้ายฟอร์ม ── */
+  function paintSummary(){
+    if(!route){ $x('#sum').innerHTML = ''; return; }
+    const v = r.vehicles.find(x => x.resource_id === vehId);
+    const f = Number(v?.co2_per_km) || 0;
+    const co2 = f ? Math.round(f * route.total_km * 100) / 100 : null;
+    const hrs = Math.floor(route.total_mins / 60), mm = route.total_mins % 60;
+    $x('#sum').innerHTML = `<div class="card" style="border-color:var(--primary);background:#F5F8FF">
+      <div style="font-size:13px;font-weight:800;margin-bottom:9px">${esc(t('carSummary'))}</div>
+      <div style="display:flex;gap:10px;text-align:center">
+        <div style="flex:1">
+          <div style="font-size:20px;font-weight:800;color:var(--primary)">${route.total_km}</div>
+          <div style="font-size:10.5px;color:var(--ink-3)">${esc(t('carKm'))}</div></div>
+        <div style="flex:1">
+          <div style="font-size:20px;font-weight:800;color:var(--primary)">${
+            hrs ? hrs + ':' + String(mm).padStart(2,'0') : mm}</div>
+          <div style="font-size:10.5px;color:var(--ink-3)">${esc(hrs ? t('carDriveHr') : t('carMin'))}</div></div>
+        <div style="flex:1">
+          <div style="font-size:20px;font-weight:800;color:${co2!=null?'var(--ok)':'var(--ink-3)'}">${
+            co2 != null ? co2 : '—'}</div>
+          <div style="font-size:10.5px;color:var(--ink-3)">${esc(t('carCo2Unit'))}</div></div>
+      </div>
+      <div style="font-size:11px;color:var(--ink-3);margin-top:10px;line-height:1.55">
+        ${esc(t('carDriveOnly'))}<br>
+        ${co2 != null ? esc(t('carCo2From')(f, v?.name_th || ''))
+                      : `<b style="color:var(--warn)">${esc(t('carCo2NoFactor'))}</b>`}
+      </div></div>`;
+  }
+
+  paintVeh(); paintLegs(); paintSummary();
+  ['#dd','#t1','#t2'].forEach(sl => { const el = $(sl); if(el) el.onchange = paintVeh; });
+  $('#tt').onchange = () => { tripType = $('#tt').value; };
+
+  /* ── ส่ง ── */
   $('#goBk').onclick = async () => {
     const purpose = $('#pp').value.trim();
-    const project = $('#pj').value;
     const d = $('#dd').value, a = $('#t1').value, z = $('#t2').value;
     if(!purpose){ toast(t('admNeedTitle'),'bad'); return; }
-    if(!project){ toast(t('carNeedProject'),'bad'); $('#pj').focus(); return; }
+    if(!project){ toast(t('carNeedProject'),'bad'); return; }
     if(!d || !a || !z || z <= a){ toast(t('rmBadTime'),'bad'); return; }
     const b = $('#goBk'); b.disabled = true;
     try{
       const res = await apiRetry('createCarBooking', {
-        resource_id:vehId, purpose, project_code:project,
-        passengers:$('#px').value.trim(),
-        stops: JSON.stringify(stops.filter(s => s.place.trim())),
+        resource_id:vehId, purpose, project_code:project, trip_type:tripType,
+        passengers:$('#px').value.trim(), items:$('#it').value.trim(), note:$('#nt').value.trim(),
+        stops: JSON.stringify(legs.filter(l => l.to).map((l, i) => ({
+          from:l.from, to:l.to, project_code:l.project_code || project,
+          km: route?.legs?.[i]?.km ?? null, mins: route?.legs?.[i]?.mins ?? null }))),
+        total_km: route?.total_km || 0, total_mins: route?.total_mins || 0,
         start_at:`${d}T${a}:00+07:00`, end_at:`${d}T${z}:00+07:00`
       }, 'POST');
       if(res?.error === 'CLASH'){
@@ -3562,7 +3860,8 @@ ROUTES.driver = async () => {
         </div>
       </div>
       ${stopsOf(x).length ? `<div style="margin-top:9px;font-size:12px;color:var(--ink-2)">${
-        stopsOf(x).map((sp,i) => `<div style="padding:3px 0">${i+1}. ${esc(sp.place || '')}${
+        stopsOf(x).map((sp,i) => `<div style="padding:3px 0">${i+1}. ${esc(sp.to || sp.place || '')}${
+          sp.km != null ? ` <span style="color:var(--ink-3)">· ${sp.km} ${esc(t('carKm'))}</span>` : ''}${
           sp.project_code ? ` <span style="color:var(--ink-3)">· ${esc(sp.project_code)}</span>` : ''}</div>`).join('')
       }</div>` : ''}
       ${live && x.started_at ? `<div style="font-size:11.5px;color:var(--warn);font-weight:700;margin-top:8px">
@@ -3654,17 +3953,21 @@ ROUTES.notifications = async () => {
   try{ const r = await apiRetry('getNotifications', {}, 'GET'); items = r?.items || []; }catch(e){}
   $x('#list').innerHTML = items.length
     ? `<div class="rows">${items.map(n => `
-        <button class="row" ${n.record_id ? `data-rec="${esc(n.record_id)}"` : ''}>
+        <button class="row" ${n.record_id && n.go
+          ? `data-rec="${esc(n.record_id)}" data-go="${esc(n.go)}"` : ''}>
           <div class="body">
             <div class="t">${esc(n.title || n.message)}</div>
             <div class="s">${esc(fmtDate(n.at))}</div>
           </div>
-          ${n.record_id ? `<span class="go">${IC.chev}</span>` : ''}
+          ${n.record_id && n.go ? `<span class="go">${IC.chev}</span>` : ''}
         </button>`).join('')}</div>`
     : emptyState(IC.bellBig, t('notifEmpty'), '');
   // กดแล้วต้องเด้งไปที่พัสดุชิ้นนั้นจริงๆ ไม่ใช่แค่รายการเฉยๆ
-  document.querySelectorAll('#list .row[data-rec]').forEach(b =>
-    b.onclick = () => go('my-parcels', { rec:b.dataset.rec }));
+  // เดิมส่งไปหน้าพัสดุทุกอัน เรื่องแจ้งซ่อมหรือจองรถจึงกดแล้วขึ้น "ไม่พบพัสดุชิ้นนี้"
+  document.querySelectorAll('#list .row[data-rec]').forEach(b => b.onclick = () => {
+    const dest = b.dataset.go || 'my-parcels';
+    go(dest, dest === 'my-parcels' || dest === 'issues' ? { rec:b.dataset.rec } : {});
+  });
   S.notifCount = 0; $('#bellDot').hidden = true;
 };
 
