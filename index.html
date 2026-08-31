@@ -518,7 +518,7 @@ const S = {
   isAdmin:false, isOfficer:false, isSuper:false, regStatus:'unknown',
   liffReady:false, notifCount:0,
   draft:{ photo:null, thumb:null, scan:null, recipient:null, tracking:'' },
-  regDraft:null, employees:[], stack:[],
+  regDraft:null, employees:[], stack:[], pre:null, timings:[],
   cache:{}          // เก็บผลที่ไม่ค่อยเปลี่ยน (รายชื่อ · อุปกรณ์) ไว้ในหน่วยความจำรอบนี้
 };
 
@@ -532,6 +532,33 @@ async function cached(key, ttlMs, fn){
   return v;
 }
 const clearCache = k => { if(k) delete S.cache[k]; else S.cache = {}; };
+/** ข้อมูลหน้าแรกที่เซิร์ฟเวอร์แนบมากับ bootstrap — ใช้ได้ครั้งเดียวและต้องยังสด
+    ไม่งั้นจะกลายเป็นข้อมูลค้างที่คนเข้าใจผิดว่ายังว่างอยู่ */
+function takePre(key){
+  const p = S.pre;
+  if(!p || p.key !== key || Date.now() - p.at > 12000) return null;
+  S.pre = null;
+  return p.v;
+}
+
+/** วาดจากข้อมูลรอบก่อนทันที แล้วค่อยไปถามของใหม่มาวาดทับ
+    Apps Script ตอบทีละคำขอและมีช่วงตื่นเครื่อง ยังไงก็มีหน่วงอยู่ดี
+    แต่ตั้งแต่ครั้งที่สองเป็นต้นไป ผู้ใช้จะเห็นหน้าเต็มทันที ไม่ต้องนั่งมองโครงกระดูก */
+async function swr(key, fetchFn, paint, maxAge = 0){
+  const seq = RENDER_SEQ;
+  const hit = S.cache[key];
+  if(hit){
+    try{ paint(hit.v, true); }catch(e){}
+    // เพิ่งได้ข้อมูลชุดนี้มาสดๆ (เช่นแนบมากับ bootstrap) ไม่ต้องถามซ้ำ
+    if(maxAge && Date.now() - hit.at < maxAge) return hit.v;
+  }
+  let v = null;
+  try{ v = await fetchFn(); }catch(e){ if(!hit) throw e; return hit.v; }
+  if(seq !== RENDER_SEQ) return v;      // ผู้ใช้เปลี่ยนหน้าไปแล้ว อย่าวาดทับหน้าใหม่
+  S.cache[key] = { at:Date.now(), v };
+  paint(v, false);
+  return v;
+}
 
 /* ── 3. COPY DECK — ข้อความจริงทุกบรรทัด ไทย/อังกฤษ ───────────── */
 const T = {
@@ -598,6 +625,7 @@ const T = {
     prPhone:'เบอร์ติดต่อ', prShowPhone:'เปิดเผยเบอร์ในทำเนียบบุคลากร',
     prShowPhoneSub:'ถ้าปิดไว้ เพื่อนร่วมงานจะเห็นแค่อีเมล',
     prSave:'บันทึก', prSaved:'บันทึกแล้ว',
+    spdTest:'ทดสอบความเร็วการเชื่อมต่อ', spdFirst:'ครั้งแรก (ปลุกเครื่อง)', spdSecond:'ครั้งที่สอง (เครื่องตื่นแล้ว)',
     rmGrid:'ตาราง', rmList:'รายการ', rmWeek:'รายสัปดาห์', rmDay:'รายวัน',
     rmSeats:n=>`${n} ที่นั่ง`, rmTapSlot:'แตะช่องว่างเพื่อจอง',
     rmSwap:'ติดต่อผู้จอง', rmSwapHint:'ถ้าจำเป็นต้องใช้ห้องนี้จริงๆ ลองติดต่อขอสลับกันดูครับ',
@@ -857,6 +885,7 @@ const T = {
     prPhone:'Phone', prShowPhone:'Show my phone in the staff directory',
     prShowPhoneSub:'If off, colleagues see only your email',
     prSave:'Save', prSaved:'Saved',
+    spdTest:'Test connection speed', spdFirst:'First call (waking up)', spdSecond:'Second call (already warm)',
     rmGrid:'Grid', rmList:'List', rmWeek:'Week', rmDay:'Day',
     rmSeats:n=>`${n} seats`, rmTapSlot:'Tap an empty slot to book',
     rmSwap:'Contact the person', rmSwapHint:'If you really need this room, try asking them to swap.',
@@ -1080,6 +1109,15 @@ const MOCK = {
   getUnidentifiedParcels:{ items:[
     { record_id:'PCL-260830-007', tracking_no:'TH99887766554', created_at:'2026-08-30T03:20:00Z' },
     { record_id:'PCL-260830-008', tracking_no:'',              created_at:'2026-08-30T03:22:00Z' }]},
+  getResourcesAdmin:{ ok:true, items:[
+    { resource_id:'RM-1', kind:'room', name_th:'ห้อง Inspiration', capacity:14, category:'ประชุมใหญ่', is_active:true },
+    { resource_id:'RM-2', kind:'room', name_th:'ห้อง Collaboration', capacity:8, category:'ประชุมย่อย', is_active:true },
+    { resource_id:'EQ-1', kind:'equipment', name_th:'กล้อง Canon R6', category:'กล้อง',
+      storage_location:'ตู้ AV ชั้น 2', is_active:true },
+    { resource_id:'VEH-1', kind:'vehicle', name_th:'Toyota Commuter (ฮค-1234)', capacity:12, is_active:true }] },
+  saveResource:{ ok:true },
+  getAdminSummary:{ ok:true, parcelsToday:3, unclaimed:5, unidentified:2, users:41,
+    lineUsed:64, lineQuota:300, sheetUrl:'https://docs.google.com/spreadsheets' },
   getRoomDay:(function(){
     const d = new Date(), k = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
     return { ok:true, date:k,
@@ -1097,11 +1135,11 @@ const MOCK = {
   createRoomBooking:{ ok:true }, cancelRoomBooking:{ ok:true },
   getEquipment:{ ok:true, items:[
     { resource_id:'EQ-1', name_th:'กล้อง Canon R6', category:'กล้อง', storage_location:'ตู้ AV ชั้น 2',
-      note:'แบต 2 ก้อน · สายชาร์จ', status:'available', reservations:[] },
+      note:'แบต 2 ก้อน · สายชาร์จ', available:true, reservations:[] },
     { resource_id:'EQ-2', name_th:'ไมค์ลอย Shure 2 ตัว', category:'เสียง', storage_location:'ตู้ AV ชั้น 2',
-      status:'out', holder:'วราภรณ์ ท.', since:'2026-08-28T02:00:00Z', reservations:[] },
+      available:false, holder:'วราภรณ์ ท.', since:'2026-08-28T02:00:00Z', reservations:[] },
     { resource_id:'EQ-3', name_th:'โปรเจกเตอร์ Epson', category:'ภาพ', storage_location:'ห้องเก็บของ ชั้น 1',
-      status:'available', reservations:[] }] },
+      available:true, reservations:[] }] },
   getCarDay:(function(){
     const d = new Date(), k = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
     return { ok:true, date:k, isDriver:true, isOfficer:true,
@@ -1160,6 +1198,7 @@ async function api(action, payload = {}, method = 'GET'){
     return MOCK[action] ?? { ok:true };
   }
   if(!CFG.GAS_URL || CFG.GAS_URL.startsWith('PASTE_')) throw new Error('NO_CONFIG');
+  const t0 = performance.now();
   const base = CFG.GAS_URL;
   const ac = (typeof AbortController !== 'undefined') ? new AbortController() : null;
   const tm = ac ? setTimeout(() => ac.abort(), 20000) : null;
@@ -1179,7 +1218,14 @@ async function api(action, payload = {}, method = 'GET'){
   }
   if(tm) clearTimeout(tm);
   const text = await res.text();
-  try { return JSON.parse(text); }
+  try {
+    const j = JSON.parse(text);
+    // เก็บเวลาไว้ 12 รายการหลังสุด เอาไว้ดูว่าช้าที่เครือข่าย ที่ Apps Script หรือที่ชีท
+    S.timings.unshift({ a:action, net:Math.round(performance.now()-t0),
+                        srv:j?.ms ?? null, db:j?.dbMs ?? null });
+    S.timings.length = Math.min(S.timings.length, 12);
+    return j;
+  }
   catch(e){
     // Apps Script คืน HTML แทน JSON ได้ในบางจังหวะ (cold start / หน้า redirect ของ Google)
     const err = new Error('BAD_RESPONSE');
@@ -1344,6 +1390,10 @@ function errorScreen(e, retryFn){
     let out = 'error: ' + (e?.message || e) + (e?.snippet ? '\nsnippet: ' + e.snippet : '') + '\n';
     out += 'uid: ' + (S.uid ? S.uid.slice(0,8) + '…' : '(none)') + '\n';
     out += 'liff: ' + (S.liffReady ? 'ok' : 'no') + '\n';
+    // net = เวลารวมที่รอ · srv = เวลาที่ Apps Script ใช้จริง · db = เวลาอ่าน Google Sheet
+    // net สูงแต่ srv ต่ำ = เสียเวลาไปกับการปลุกเครื่อง ไม่ใช่โค้ดเรา
+    out += 'timings (net/srv/db ms):\n' + S.timings.map(x =>
+      '  ' + x.a + ' ' + x.net + '/' + (x.srv ?? '-') + '/' + (x.db ?? '-')).join('\n') + '\n';
     try{
       const r = await api('ping', {}, 'GET');
       out += 'ping: ' + JSON.stringify(r);
@@ -1772,7 +1822,11 @@ ROUTES.profile = async () => {
     </div>
     ${S.isOfficer ? `<div style="margin-top:12px">
       <button class="btn soft" id="toAdm">${esc(t('adminTitle'))}</button></div>` : ''}
-    <div style="margin-top:12px"><button class="btn ghost" id="pol">${esc(t('prPrivacy'))}</button></div>
+    <div style="margin-top:12px"><button class="btn ghost" id="spd">${esc(t('spdTest'))}</button>
+      <pre id="spdOut" hidden style="margin:8px 0 12px;padding:11px;background:var(--surface);
+        border:1px solid var(--line);border-radius:12px;font-size:11px;
+        white-space:pre-wrap;color:var(--ink-2)"></pre>
+      <button class="btn ghost" id="pol">${esc(t('prPrivacy'))}</button></div>
   </div>`;
   if($('#toAdm')) $('#toAdm').onclick = () => go('admin');
   $('#pSave').onclick = async () => {
@@ -1792,6 +1846,20 @@ ROUTES.profile = async () => {
     S.lang = b.dataset.l; go('profile', {}, true);
   });
   $('#pol').onclick = () => go('privacy');
+
+  /* ปุ่มวัดความเร็ว — เอาไว้ส่งตัวเลขจริงให้คนแก้ดู
+     net = รอทั้งหมด · srv = Apps Script ใช้จริง · db = อ่าน Google Sheet
+     net สูงแต่ srv ต่ำ แปลว่าเสียเวลาไปกับการปลุกเครื่อง ไม่ใช่โค้ดช้า */
+  $('#spd').onclick = async () => {
+    const box = $('#spdOut'); box.hidden = false; box.textContent = t('loading');
+    const t1 = performance.now(); await apiRetry('ping', {}, 'GET');
+    const cold = Math.round(performance.now() - t1);
+    const t2 = performance.now(); await apiRetry('ping', {}, 'GET');
+    const warm = Math.round(performance.now() - t2);
+    box.textContent = t('spdFirst') + ': ' + cold + ' ms\n' +
+                      t('spdSecond') + ': ' + warm + ' ms\n\n' +
+      S.timings.map(x => x.a + '  ' + x.net + ' / ' + (x.srv ?? '-') + ' / ' + (x.db ?? '-')).join('\n');
+  };
 };
 
 /* ── ข่าวสาร · ระบบจอง · เมนูผู้ดูแล (ปุ่มบน Rich Menu) ────────── */
@@ -1870,24 +1938,25 @@ ROUTES.admin = async () => {
   let s = null;
   try{ s = await apiRetry('getAdminSummary', {}, 'GET'); }catch(e){}
   if(!s?.ok){ $x('#sum').innerHTML = ''; return; }
-  const pct = Math.round(s.lineUsed / s.lineQuota * 100);
+  const used = Number(s.lineUsed) || 0, quota = Number(s.lineQuota) || 300;
+  const pct = Math.round(used / quota * 100);
   const warn = pct >= 80;
   $x('#sum').innerHTML = `
     <div class="tiles">
-      <div class="tile" style="min-height:82px"><div class="nm" style="font-size:23px">${s.parcelsToday}</div>
+      <div class="tile" style="min-height:82px"><div class="nm" style="font-size:23px">${Number(s.parcelsToday) || 0}</div>
         <div class="en">${esc(t('admParcelsToday'))}</div></div>
-      <div class="tile" style="min-height:82px"><div class="nm" style="font-size:23px">${s.unclaimed}</div>
+      <div class="tile" style="min-height:82px"><div class="nm" style="font-size:23px">${Number(s.unclaimed) || 0}</div>
         <div class="en">${esc(t('admUnclaimed'))}</div></div>
-      <div class="tile" style="min-height:82px"><div class="nm" style="font-size:23px">${s.unidentified}</div>
+      <div class="tile" style="min-height:82px"><div class="nm" style="font-size:23px">${Number(s.unidentified) || 0}</div>
         <div class="en">${esc(t('admUnidentified'))}</div></div>
-      <div class="tile" style="min-height:82px"><div class="nm" style="font-size:23px">${s.users}</div>
+      <div class="tile" style="min-height:82px"><div class="nm" style="font-size:23px">${Number(s.users) || 0}</div>
         <div class="en">${esc(t('admUsers'))}</div></div>
     </div>
     <div class="note ${warn ? '' : 'info'}" style="margin-top:12px">${IC.info}<div>
-      <b>${esc(t('admQuota'))} ${s.lineUsed}/${s.lineQuota}</b> (${pct}%)<br>
+      <b>${esc(t('admQuota'))} ${used}/${quota}</b> (${pct}%)<br>
       ${esc(warn ? t('admQuotaWarn') : t('admQuotaOk'))}</div></div>
     ${S.isAdmin ? `<div style="margin-top:12px">
-      <a class="btn ghost" href="${esc(s.sheetUrl)}" target="_blank"
+      <a class="btn ghost" href="${esc(s.sheetUrl || '#')}" target="_blank"
          style="display:flex;text-decoration:none">${esc(t('admOpenSheet'))}</a></div>` : ''}`;
 };
 
@@ -2010,6 +2079,8 @@ ROUTES.directory = async () => {
              border-radius:12px;font-size:16px;margin-bottom:12px">
     <div id="dl">${skeleton(4)}</div></div>`;
   let people = [];
+  const preDir = takePre('dir');
+  if(preDir) S.cache.dir = { at:Date.now(), v:preDir };
   try{ const r = await cached('dir', 3e5, () => apiRetry('getDirectory', {}, 'GET'));
        people = r?.items || []; }catch(e){}
   if(!people.length){ $x('#dl').innerHTML = emptyState(IC.info, t('dirEmpty'), t('dirEmptyBody')); return; }
@@ -2397,9 +2468,9 @@ ROUTES.rooms = async (params = {}) => {
   document.querySelectorAll('#sg button').forEach(b =>
     b.onclick = () => go('rooms', { date:sel, mode:b.dataset.m }, true));
 
-  let r = null;
-  try{ r = await apiRetry('getRoomDay',
-        { date: mode==='week' ? sel : sel, days: mode==='week' ? 7 : 1 }, 'GET'); }catch(e){}
+  let r = (mode === 'day' && sel === dayKey(base)) ? takePre('room') : null;
+  if(!r){ try{ r = await apiRetry('getRoomDay',
+        { date: sel, days: mode==='week' ? 7 : 1 }, 'GET'); }catch(e){} }
   if(!r?.ok){ $x('#rl').innerHTML = emptyState(IC.info, t('netErr'), ''); return; }
 
   let room0 = params.room || r.rooms[0]?.resource_id;
@@ -2492,8 +2563,7 @@ ROUTES.rooms = async (params = {}) => {
   // ── การ์ดห้อง: รูป + จำนวนที่นั่ง
   $x('#rooms').innerHTML = r.rooms.map(rm => `
     <button class="rcard" data-r="${esc(rm.resource_id)}">
-      ${rm.thumb_id ? `<img class="rphoto" data-ph="${esc(rm.thumb_id)}" alt="">`
-                    : `<div class="rphoto">${IC.cal}</div>`}
+      ${phImg(rm,'rphoto') || `<div class="rphoto">${IC.cal}</div>`}
       <div style="flex:1;min-width:0">
         <div style="font-size:14.5px;font-weight:700">${esc(rm.name_th)}</div>
         <div style="font-size:11.5px;color:var(--ink-3)">${
@@ -2520,8 +2590,7 @@ ROUTES['room-new'] = async ({ date, room:preRoom, hour } = {}) => {
         <button class="row" data-v="${esc(rm.resource_id)}" style="border:1.5px solid ${
           (preRoom?rm.resource_id===preRoom:i===0)?'var(--primary)':'var(--line)'};border-radius:12px;
           margin-bottom:8px;background:${(preRoom?rm.resource_id===preRoom:i===0)?'#EEF3FF':'#fff'}">
-          ${rm.thumb_id ? `<img class="rphoto" style="width:52px;height:40px" data-ph="${esc(rm.thumb_id)}" alt="">`
-                        : `<div class="rphoto" style="width:52px;height:40px">${IC.cal}</div>`}
+          ${phImg(rm,'rphoto','width:52px;height:40px') || `<div class="rphoto" style="width:52px;height:40px">${IC.cal}</div>`}
           <div class="body"><div class="t">${esc(rm.name_th)}</div>
             <div class="s">${esc([rm.capacity?t('rmSeats')(rm.capacity):'', rm.note].filter(Boolean).join(' · '))}</div></div>
           <span class="ck" style="color:var(--primary);font-weight:800;${
@@ -2588,21 +2657,26 @@ ROUTES.equipment = async () => {
   setTitle(t('eqTitle'));
   $x('#main').innerHTML = `<div class="view">
     <div class="note info">${IC.info}<div>${esc(t('eqWhy'))}</div></div>
-    <div id="el" style="margin-top:12px">${skeleton(3)}</div></div>`;
-  let items = [];
-  try{ const r = await apiRetry('getEquipment', {}, 'GET'); items = r?.items || []; }catch(e){}
+    <div id="el" style="margin-top:12px">${S.cache.eq ? '' : skeleton(3)}</div></div>`;
+  const pre = takePre('eq');
+  if(pre) S.cache.eq = { at:Date.now(), v:pre };
+  await swr('eq', () => apiRetry('getEquipment', {}, 'GET'),
+            r => paintEquipment(r?.items || []), 12000);
+};
+
+function paintEquipment(items){
   if(!items.length){ $x('#el').innerHTML = emptyState(IC.laptop, t('eqEmpty'), t('eqEmptyBody')); return; }
 
   const mine  = items.filter(i => i.mine);
   const myRes = items.filter(i => i.reservations?.some(x => x.mine));
   const card = i => `
     <button class="rcard" data-id="${esc(i.resource_id)}">
-      ${i.thumb_id ? `<img class="rphoto" data-ph="${esc(i.thumb_id)}" alt="">`
-                   : `<div class="rphoto">${IC.laptop}</div>`}
+      ${phImg(i,'rphoto') || `<div class="rphoto">${IC.laptop}</div>`}
       <div style="flex:1;min-width:0">
         <div style="font-size:14.5px;font-weight:700">${esc(i.name_th)}</div>
         <div style="font-size:11.5px;color:var(--ink-3)">${
-          esc(i.available ? (i.storage_location || i.category || '') : t('eqBy')(i.holder))}</div>
+          esc(i.available ? (i.storage_location || i.category || '')
+                          : (i.holder ? t('eqBy')(i.holder) : t('eqOut')))}</div>
         ${i.reservations?.length ? `<div style="font-size:10.5px;color:var(--warn);font-weight:700;margin-top:2px">
           ${esc(t('eqUpcoming'))}: ${esc(fmtDate(i.reservations[0].start_at))}${
             i.reservations.length>1?` +${i.reservations.length-1}`:''}</div>` : ''}
@@ -2619,7 +2693,7 @@ ROUTES.equipment = async () => {
   document.querySelectorAll('#el .rcard').forEach(b => b.onclick = () => {
     const i = items.find(x => x.resource_id === b.dataset.id); if(i) itemSheet(i);
   });
-};
+}
 
 /** การ์ดอุปกรณ์: เลือกได้ทั้งรับเลย และจองล่วงหน้า
     จองล่วงหน้าจำเป็น เพราะคนต้องวางแผนงานล่วงหน้าว่าจะมีของใช้แน่ */
@@ -2651,7 +2725,7 @@ function itemSheet(i){
   document.querySelectorAll('[data-cr]').forEach(b => b.onclick = async () => {
     closeSheet();
     try{ await apiRetry('cancelReservation', { record_id:b.dataset.cr }, 'POST');
-         toast(t('rmCancelled'),'ok'); go('equipment', {}, true); }
+         toast(t('rmCancelled'),'ok'); (clearCache('eq'), go('equipment', {}, true)); }
     catch(e){ toast(t('netErr'),'bad'); }
   });
 }
@@ -2677,7 +2751,7 @@ function reserveSheet(i){
         start_at:`${a}T08:00:00+07:00`, end_at:`${z}T18:00:00+07:00`,
         purpose:$('#rp2').value.trim() }, 'POST');
       if(r?.error === 'CLASH'){ toast(`${t('eqClash')} · ${r.clash?.who||''}`,'bad'); b.disabled=false; return; }
-      closeSheet(); toast(t('eqResvOk'),'ok'); go('equipment', {}, true);
+      closeSheet(); toast(t('eqResvOk'),'ok'); (clearCache('eq'), go('equipment', {}, true));
     }catch(e){ toast(t('netErr'),'bad'); b.disabled = false; }
   };
 }
@@ -2720,7 +2794,7 @@ function borrowSheet(i){
         purpose:$('#bp').value.trim(), photo:before.v.full, thumb:before.v.thumb }, 'POST');
       closeSheet();
       toast(r?.error === 'BUSY' ? t('eqBusy') : t('eqBorrowed'), r?.error ? 'bad' : 'ok');
-      go('equipment', {}, true);
+      (clearCache('eq'), go('equipment', {}, true));
     }catch(e){ toast(t('netErr'), 'bad'); b.disabled = false; }
   };
 }
@@ -2745,7 +2819,7 @@ function returnSheet(i){
     try{
       await apiRetry('returnItem', { record_id:i.loan_id, note:$('#rn').value.trim(),
         photo:after.v.full, shelfPhoto:shelf.v.thumb }, 'POST');
-      closeSheet(); toast(t('eqReturned'), 'ok'); go('equipment', {}, true);
+      closeSheet(); toast(t('eqReturned'), 'ok'); (clearCache('eq'), go('equipment', {}, true));
     }catch(e){ toast(t('netErr'), 'bad'); b.disabled = false; }
   };
 }
@@ -2851,8 +2925,7 @@ ROUTES['admin-res'] = async () => {
     <div class="section-title">${esc(label)}</div>
     ${grp[k].map(i => `
       <button class="rcard" data-id="${esc(i.resource_id)}" ${i.is_active?'':'style="opacity:.5"'}>
-        ${i.thumb_id ? `<img class="rphoto" data-ph="${esc(i.thumb_id)}" alt="">`
-                     : `<div class="rphoto">${k==='room'?IC.cal:IC.laptop}</div>`}
+        ${phImg(i,'rphoto') || `<div class="rphoto">${k==='room'?IC.cal:IC.laptop}</div>`}
         <div style="flex:1;min-width:0">
           <div style="font-size:14.5px;font-weight:700">${esc(i.name_th)}</div>
           <div style="font-size:11.5px;color:var(--ink-3)">${esc([
@@ -2905,7 +2978,7 @@ ROUTES['admin-res'] = async () => {
           name_th:name, category:$('#rc').value.trim(),
           capacity:$('#rcap')?.value.trim() || '', storage_location:$('#rloc')?.value.trim() || '',
           note:$('#rnt').value.trim(),
-          photo:img.v?.full || '', thumb:img.v?.thumb || ''
+          photo:img.v?.full || '', thumb:img.v?.thumb || '', card:img.v?.card || ''
         }, extra || {}), 'POST');
         closeSheet(); clearCache(); toast(t('admResSaved'),'ok'); go('admin-res', {}, true);
       }catch(e){ toast(t('netErr'),'bad'); }
@@ -2951,8 +3024,9 @@ ROUTES.cars = async (params = {}) => {
   document.querySelectorAll('#sg button').forEach(b =>
     b.onclick = () => go('cars', { date:sel, mode:b.dataset.m }, true));
 
-  let r = null;
-  try{ r = await apiRetry('getCarDay', { date:sel, days: mode==='week' ? 7 : 1 }, 'GET'); }catch(e){}
+  // ถ้าเข้ามาจาก Rich Menu ข้อมูลวันนี้ถูกแนบมากับ bootstrap แล้ว ไม่ต้องถามซ้ำ
+  let r = (mode === 'day' && sel === dayKey(today)) ? takePre('car') : null;
+  if(!r){ try{ r = await apiRetry('getCarDay', { date:sel, days: mode==='week' ? 7 : 1 }, 'GET'); }catch(e){} }
   if(!r?.ok){ $x('#gr').innerHTML = emptyState(IC.info, t('netErr'), ''); return; }
 
   if(!r.vehicles.length){
@@ -3052,8 +3126,7 @@ ROUTES.cars = async (params = {}) => {
     const n = r.trips.filter(x => x.resource_id === v.resource_id).length;
     const live = r.trips.some(x => x.resource_id === v.resource_id && x.status === 'in_use');
     return `<button class="rcard" data-v="${esc(v.resource_id)}">
-      ${v.thumb_id ? `<img class="rphoto" data-ph="${esc(v.thumb_id)}" alt="">`
-                   : `<div class="rphoto">${IC.car}</div>`}
+      ${phImg(v,'rphoto') || `<div class="rphoto">${IC.car}</div>`}
       <div style="flex:1;min-width:0">
         <div style="font-size:14.5px;font-weight:700">${esc(v.name_th)}</div>
         <div style="font-size:11.5px;color:var(--ink-3)">${esc([
@@ -3200,8 +3273,7 @@ ROUTES['car-new'] = async ({ date, veh:preVeh, hour } = {}) => {
       return `<button class="row" data-v="${esc(v.resource_id)}" style="border:1.5px solid ${
         on?'var(--primary)':'var(--line)'};border-radius:12px;margin-bottom:8px;
         background:${on?'#EEF3FF':'#fff'}">
-        ${v.thumb_id ? `<img class="rphoto" style="width:52px;height:40px" data-ph="${esc(v.thumb_id)}" alt="">`
-                     : `<div class="rphoto" style="width:52px;height:40px">${IC.car}</div>`}
+        ${phImg(v,'rphoto','width:52px;height:40px') || `<div class="rphoto" style="width:52px;height:40px">${IC.car}</div>`}
         <div class="body"><div class="t">${esc(v.name_th)}</div>
           <div class="s">${esc([v.capacity ? t('rmSeats')(v.capacity) : '',
             v.driver_name ? t('carDriver') + ' ' + firstName(v.driver_name) : t('carNoDriver')
@@ -3653,7 +3725,8 @@ function shrink2(file){
         c.getContext('2d').drawImage(img, 0, 0, w, h);
         return c.toDataURL('image/jpeg', q);
       };
-      res({ full: draw(1280, .82), thumb: draw(400, .7) });
+      // card = รูปจิ๋วสำหรับเก็บลงชีทโดยตรง ต้องเล็กพอที่ช่องเดียวรับไหว (50,000 ตัวอักษร)
+      res({ full: draw(1280, .82), thumb: draw(400, .7), card: draw(220, .6) });
     };
     img.onerror = rej;
     fr.readAsDataURL(file);
@@ -3662,6 +3735,15 @@ function shrink2(file){
 
 /** โหลดรูปทุกใบในหน้าเดียวด้วยคำขอเดียว — เดิมยิงทีละใบแล้วต่อคิวกันจนช้า */
 const photoCache = {};
+/** รูปเล็กของห้อง/อุปกรณ์/รถ
+    ถ้ามาพร้อมรายการอยู่แล้ว (o.thumb) วาดเลย ไม่ต้องยิงขอรูปเป็นคำขอที่สอง
+    ที่ยังไม่มีค่อยขอผ่าน data-ph ตามเดิม (ของเก่าที่อัปโหลดไว้ก่อนหน้านี้) */
+function phImg(o, cls, style){
+  const st = style ? ` style="${style}"` : '';
+  if(o?.thumb)    return `<img class="${cls}"${st} src="${o.thumb}" alt="">`;
+  if(o?.thumb_id) return `<img class="${cls}"${st} data-ph="${esc(o.thumb_id)}" alt="">`;
+  return '';
+}
 async function paintPhotos(scope){
   const els = [...(scope || document).querySelectorAll('img[data-ph]')];
   if(!els.length) return;
@@ -3855,8 +3937,9 @@ async function boot(){
 
   let auth;
   try{
-    auth = await apiRetry('bootstrap', {}, 'GET');
+    auth = await apiRetry('bootstrap', { want: START_AT || '' }, 'GET');
     if(auth?.announcements) S.bootNews = auth.announcements;
+    if(auth?.pre) S.pre = { key:auth.pre.key, v:auth.pre.v, at:Date.now() };
   }catch(e){
     if(e.message === 'NO_CONFIG'){ render('home'); return; }
     S.stack = []; render('offline', {}); return;   // ต่อเซิร์ฟเวอร์ไม่ได้ → อย่าพาไปกรอกฟอร์ม
