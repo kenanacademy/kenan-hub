@@ -33,6 +33,8 @@
   --danger-bg:#FEF2F2;
   /* ชื่อย่อที่โค้ดเรียกใช้อยู่หลายที่ ถ้าไม่ประกาศไว้ สีแดงจะหายไปเงียบๆ
      (หน้าฉุกเฉิน เส้นเวลาปัจจุบัน ปุ่มยกเลิก เรื่องด่วน) */
+  /* น้ำเงินเข้มของเมนูข้าง — ให้แอปมีสันหลัง ไม่ใช่การ์ดขาวลอยบนเทาทั้งหน้า */
+  --navy:#0B1B45;
   --bad:#DC2626;
   --bad-bg:#FEF2F2;
   --bad-line:#FECACA;
@@ -141,6 +143,29 @@ main{flex:1 1 auto;padding:16px 16px calc(var(--nav-h) + var(--safe-b) + 24px)}
 .greet h2{margin:0;font-size:21px;font-weight:700;letter-spacing:-.02em}
 .greet p{margin:3px 0 0;color:var(--ink-3);font-size:13px}
 
+/* ── หน้าแรก: ทักทาย · สิ่งที่ค้าง · ตารางวันนี้ ─────────────── */
+.hgreet{margin-bottom:20px}
+.hdate{font-size:11.5px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;
+  color:var(--primary);margin-bottom:6px}
+.hgreet h2{margin:0;font-size:26px;font-weight:800;letter-spacing:-.025em;line-height:1.2}
+.hgreet p{margin:5px 0 0;font-size:13.5px;color:var(--ink-3)}
+.todo{display:grid;grid-template-columns:repeat(auto-fit,minmax(132px,1fr));gap:10px;margin-bottom:22px}
+.todoc{display:flex;align-items:baseline;gap:9px;padding:14px 15px;border-radius:var(--r);
+  background:#EEF3FF;border:1px solid #D6E1FF;text-align:left}
+.todoc .n{font-size:25px;font-weight:800;line-height:1;color:var(--primary)}
+.todoc .l{font-size:12px;font-weight:600;color:var(--ink-2);line-height:1.3}
+.todoc.warn{background:var(--warn-bg);border-color:#FDE49A}
+.todoc.warn .n{color:var(--warn)}
+.todoc.bad{background:var(--bad-bg);border-color:var(--bad-line)}
+.todoc.bad .n{color:var(--bad)}
+.quiet{font-size:13px;color:var(--ink-3);padding:16px 2px}
+.hsplit{display:block}
+@media(min-width:900px){
+  .hsplit{display:grid;grid-template-columns:minmax(0,1.55fr) minmax(0,1fr);gap:34px;align-items:start}
+  .hsplit .section-title:first-child{margin-top:0}
+  .hgreet h2{font-size:30px}
+}
+
 /* ── Module tiles ──────────────────────────────────────────── */
 .tiles{display:grid;grid-template-columns:1fr 1fr;gap:11px}
 .tile{
@@ -157,8 +182,9 @@ main{flex:1 1 auto;padding:16px 16px calc(var(--nav-h) + var(--safe-b) + 24px)}
   display:grid;place-items:center;
 }
 .tile .ic svg{width:21px;height:21px}
-.tile .nm{font-size:14.5px;font-weight:700;line-height:1.3}
+.tile .nm{font-size:14px;font-weight:700;line-height:1.3}
 .tile .en{font-size:11px;color:var(--ink-3);font-weight:500;margin-top:1px}
+.tile .badge.soonb{background:var(--neutral);color:var(--ink-3)}
 .tile .badge{
   position:absolute;top:11px;right:11px;
   padding:3px 8px;border-radius:99px;
@@ -438,10 +464,125 @@ main{flex:1 1 auto;padding:16px 16px calc(var(--nav-h) + var(--safe-b) + 24px)}
 .callbtn.sos{background:var(--danger)}
 .callbtn svg{width:20px;height:20px}
 
-@media(min-width:600px){
-  main{max-width:560px;margin:0 auto;width:100%}
+/* ── แท็บเล็ต: กว้างขึ้นแต่ยังเป็นคอลัมน์เดียว ───────────────── */
+@media(min-width:600px) and (max-width:899px){
+  main{max-width:620px;margin:0 auto;width:100%}
   .tiles{grid-template-columns:repeat(3,1fr)}
 }
+
+/* ══════════════════════════════════════════════════════════════
+   เดสก์ท็อป (≥900px) — เปลี่ยนโครงหน้าจริง ไม่ใช่แค่ขยายคอลัมน์มือถือ
+   ของเดิมบีบทุกอย่างไว้ 560px บนจอ 1440px = ทิ้งพื้นที่ไป 880px
+   และแถบเมนูล่างแบบมือถือบนจอคอมเป็นรูปแบบที่ผิดตั้งแต่ต้น
+   ══════════════════════════════════════════════════════════════ */
+#side{display:none}
+
+@media(min-width:900px){
+  #app{
+    display:grid;
+    grid-template-columns:252px minmax(0,1fr);
+    grid-template-rows:auto minmax(0,1fr);
+    min-height:100dvh;
+  }
+  #side{
+    grid-row:1/3;grid-column:1;
+    display:flex;flex-direction:column;
+    background:var(--navy);color:#fff;
+    position:sticky;top:0;height:100dvh;overflow-y:auto;
+  }
+  .topbar{grid-column:2;grid-row:1;height:66px;padding:0 26px}
+  .topbar h1{font-size:22px;font-weight:800;letter-spacing:-.02em}
+  .topbar .icon-btn{width:34px;height:34px;margin-left:-6px}
+  .brand{display:none!important}
+  main{grid-column:2;grid-row:2;max-width:1180px;padding:26px 30px 60px}
+  .nav{display:none}
+  .tiles{grid-template-columns:repeat(4,1fr);gap:14px}
+  .tile{min-height:118px;padding:17px 16px}
+
+  /* ตารางจอง: ให้คอลัมน์ยืดเต็มความกว้าง ไม่ใช่ 84px แล้วเหลือที่ว่างครึ่งจอ */
+  .gridscroll > div{width:100%}
+  .gcol,.ghead .hcell{flex:1 1 0;min-width:104px}
+  .ghours,.ghead .corner{flex:0 0 42px}
+  .gnow{left:42px}
+
+  /* ปุ่มหลักยังลอยติดตาม แต่ไม่กินความกว้างทั้งจอและไม่บังตาราง */
+  .sticky-cta{padding:10px 0;background:none;border:0;display:flex;justify-content:flex-end;
+    bottom:14px;pointer-events:none}
+  .sticky-cta .btn{width:auto;min-width:210px;pointer-events:auto;box-shadow:var(--shadow)}
+
+  /* บล็อกการจองบนจอกว้าง: อ่านเหมือนปฏิทินจริง ไม่ใช่แผ่นสีทึบเต็มช่อง */
+  .gev{color:var(--ink);background:#EEF3FF;border-left:3px solid var(--primary);
+    padding:6px 9px;border-radius:6px}
+  .gev .t{font-size:11.5px}
+  .gev .w{font-size:11px;opacity:.72}
+  .gev .p{font-size:10px;opacity:.7}
+  .gev.mine{background:var(--ok-bg);border-left-color:var(--ok)}
+  .gev.live{background:var(--warn-bg);border-left-color:var(--warn)}
+  .gev.unb{background:var(--bad-bg);border-left-color:var(--bad)}
+  .fab{bottom:26px;right:26px}
+
+  /* ฟอร์มและรายการไม่ควรยืดเต็ม 1180px — บรรทัดยาวเกินไปอ่านไม่ไหว
+     ของที่ควรกว้างจริงๆ (ตาราง · ไทล์ · แดชบอร์ด) ยกเว้นไว้ด้านล่าง */
+  main > .view > .card,
+  main > .view > .rows,
+  main > .view > .note,
+  main > .view > .empty,
+  main > .view > input,
+  main > .view > select,
+  main > .view > textarea,
+  main > .view > .btn{max-width:780px}
+  main > .view > #dq{max-width:520px}
+  main > .view > .gridwrap,
+  main > .view > .tiles,
+  main > .view > .hsplit,
+  main > .view > .todo,
+  main > .view > .cols2{max-width:none}
+
+  /* รายชื่อ 40 คนบนจอกว้าง อ่านสองคอลัมน์เร็วกว่าไล่ลงทีละแถว */
+  /* ใช้ column ไม่ใช่ grid — grid จะโยนหัวข้อแผนกไปคอลัมน์ซ้ายและคนไปคอลัมน์ขวา
+     column ยังไหลตามลำดับการอ่านเดิม */
+  .dircols{columns:2;column-gap:26px;max-width:none}
+  .dircols .dgrp{break-inside:avoid;-webkit-column-break-inside:avoid;display:inline-block;width:100%}
+  .dircols .dgrp .section-title:first-child{margin-top:0}
+  .cols2{display:grid;grid-template-columns:1fr 1fr;gap:14px;align-items:start}
+  .cols2 .rows{margin:0}
+  /* แผ่นล่างบนจอคอมไม่ควรกว้างเต็ม 1440px — อ่านยากและดูเหมือนหลุดขอบ */
+  #sheet{max-width:540px;left:50%;right:auto;transform:translateX(-50%) translateY(100%);
+         padding:8px 22px 24px}
+  #sheet.on{transform:translateX(-50%) translateY(0)}
+}
+
+@media(min-width:1280px){
+  main{padding:30px 44px 64px}
+  .tiles{grid-template-columns:repeat(4,1fr)}
+}
+
+/* ── เมนูข้าง ─────────────────────────────────────────────────── */
+.sbrand{display:flex;align-items:center;gap:10px;padding:20px 18px 18px}
+.sbrand .mark{width:34px;height:34px;border-radius:9px;background:#fff;color:var(--navy);
+  display:grid;place-items:center;font-weight:800;font-size:17px;flex:0 0 auto}
+.sbrand .txt{font-size:16px;font-weight:800;letter-spacing:-.01em;line-height:1.15}
+.sbrand .sub{font-size:10.5px;font-weight:600;color:rgba(255,255,255,.5);letter-spacing:.04em;
+  text-transform:uppercase}
+.sgrp{font-size:10px;font-weight:800;letter-spacing:.09em;text-transform:uppercase;
+  color:rgba(255,255,255,.38);padding:16px 18px 7px}
+#side nav{display:flex;flex-direction:column;padding:0 8px;gap:1px}
+.slink{display:flex;align-items:center;gap:11px;padding:9px 11px;border-radius:9px;
+  color:rgba(255,255,255,.76);font-size:13.5px;font-weight:600;text-align:left;width:100%}
+.slink svg{width:19px;height:19px;flex:0 0 auto;opacity:.85}
+.slink:hover{background:rgba(255,255,255,.07);color:#fff}
+.slink.on{background:var(--primary);color:#fff}
+.slink.on svg{opacity:1}
+.slink .sb{margin-left:auto;min-width:19px;height:19px;padding:0 5px;border-radius:10px;
+  background:var(--bad);color:#fff;font-size:10px;font-weight:800;line-height:19px;text-align:center}
+.sfoot{margin-top:auto;padding:14px 16px 18px;border-top:1px solid rgba(255,255,255,.1)}
+.sme{display:flex;align-items:center;gap:10px;width:100%;text-align:left}
+.sme .av{width:32px;height:32px;border-radius:50%;background:rgba(255,255,255,.14);color:#fff;
+  display:grid;place-items:center;font-size:13px;font-weight:800;flex:0 0 auto}
+.sme .n{font-size:13px;font-weight:700;line-height:1.25;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.sme .d{font-size:10.5px;color:rgba(255,255,255,.5);
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 </style>
 </head>
 <body>
@@ -455,6 +596,26 @@ main{flex:1 1 auto;padding:16px 16px calc(var(--nav-h) + var(--safe-b) + 24px)}
     <h1 id="title" hidden></h1>
     <span class="icon-btn" aria-hidden="true"></span>
   </header>
+
+  <aside id="side">
+    <button class="sbrand" id="sHome">
+      <div class="mark">K</div>
+      <div style="min-width:0">
+        <div class="txt">Kenan Connect</div>
+        <div class="sub">Staff Hub</div>
+      </div>
+    </button>
+    <nav id="sNav"></nav>
+    <div class="sfoot">
+      <button class="sme" id="sMe">
+        <span class="av" id="sAv">·</span>
+        <span style="min-width:0">
+          <span class="n" id="sName">—</span>
+          <span class="d" id="sDept"></span>
+        </span>
+      </button>
+    </div>
+  </aside>
 
   <main id="main"></main>
 
@@ -516,7 +677,7 @@ const CFG = {
   GAS_URL : 'https://script.google.com/macros/s/AKfycbyOjh4BAAbzY5QfZNG_oGuxbmvZwHjEAKazRMuMxrDeoNknE_rqEoAFdkuJldOPP_q_eg/exec',
   LIFF_TIMEOUT_MS : 3500,
   CONSENT_VERSION : '2026-09-01',
-  BUILD : '2026-08-31e'      // ต้องตรงกับ BUILD ใน Code.gs ที่ Deploy ไว้
+  BUILD : '2026-09-01a'      // ต้องตรงกับ BUILD ใน Code.gs ที่ Deploy ไว้
 };
 
 /* เก็บ ?go=... ไว้ตั้งแต่ต้น เพราะเดี๋ยวจะล้าง query string ทิ้งหลัง LIFF ล็อกอิน
@@ -542,7 +703,7 @@ const S = {
   isAdmin:false, isOfficer:false, isSuper:false, regStatus:'unknown',
   liffReady:false, notifCount:0,
   draft:{ photo:null, thumb:null, scan:null, recipient:null, tracking:'' },
-  regDraft:null, employees:[], stack:[], pre:null, timings:[],
+  regDraft:null, employees:[], stack:[], pre:null, timings:[], today:null,
   cache:{}          // เก็บผลที่ไม่ค่อยเปลี่ยน (รายชื่อ · อุปกรณ์) ไว้ในหน่วยความจำรอบนี้
 };
 
@@ -590,6 +751,13 @@ const T = {
     appName:'Kenan Connect',
     navHome:'หน้าแรก', navParcel:'พัสดุ', navSos:'ฉุกเฉิน', navMe:'ฉัน', navLog:'บันทึกพัสดุ',
     navNotif:'แจ้งเตือน',
+    sgWork:'งานของฉัน', sgBook:'จอง ยืม คืน', sgInfo:'ข้อมูลองค์กร', sgAdmin:'สำหรับผู้ดูแล',
+    dbHasTodo:'มีเรื่องรอคุณอยู่ด้านล่าง', dbAllClear:'ไม่มีอะไรค้างอยู่ ✓',
+    dbParcels:'พัสดุรอคุณมารับ', dbDriving:'งานขับรถวันนี้', dbLoans:'ของที่ยังไม่ได้คืน',
+    dbIssues:'เรื่องที่คุณแจ้งยังไม่ปิด', dbUnid:'พัสดุไม่ทราบผู้รับ',
+    dbToday:'ตารางของคุณวันนี้', dbNoBookings:'วันนี้ไม่มีจองห้องหรือจองรถ',
+    dbQuick:'ทางลัด',
+
     greet:n=>`สวัสดีครับ ${n}`, greetSub:'วันนี้มีอะไรให้ช่วยไหม',
     loading:'กำลังโหลด…', retry:'ลองอีกครั้ง', cancel:'ยกเลิก', save:'บันทึก',
     back:'ย้อนกลับ', close:'ปิด', confirm:'ยืนยัน', soon:'เร็วๆ นี้',
@@ -898,6 +1066,13 @@ const T = {
     appName:'Kenan Connect',
     navHome:'Home', navParcel:'Parcels', navSos:'Emergency', navMe:'Me', navLog:'Log parcel',
     navNotif:'Alerts',
+    sgWork:'My work', sgBook:'Book & borrow', sgInfo:'Directory & info', sgAdmin:'Admin',
+    dbHasTodo:'A few things are waiting for you', dbAllClear:'Nothing outstanding ✓',
+    dbParcels:'parcels waiting for you', dbDriving:'driving jobs today', dbLoans:'items not returned',
+    dbIssues:'open reports of yours', dbUnid:'unidentified parcels',
+    dbToday:'Your day', dbNoBookings:'No room or vehicle bookings today',
+    dbQuick:'Quick links',
+
     greet:n=>`Hello, ${n}`, greetSub:'What can we help with today?',
     loading:'Loading…', retry:'Try again', cancel:'Cancel', save:'Save',
     back:'Back', close:'Close', confirm:'Confirm', soon:'Coming soon',
@@ -1210,6 +1385,24 @@ const t = k => T[S.lang][k];
        พอใส่ GAS_URL จริงแล้ว โหมดนี้ปิดเอง                     ── */
 const DEMO = !CFG.GAS_URL || CFG.GAS_URL.startsWith('PASTE_') || location.search.includes('demo');
 const MOCK = {
+  bootstrap:(function(){
+    const d=new Date(), k=`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+    return { ok:true, registered:true, isAdmin:true, isOfficer:true, isSuper:true,
+      registrationStatus:'approved', notificationCount:2,
+      user:{ kenan_user_id:'K-4920', name_th:'พิพัฒน์ สุริยสมบูรณ์', name_en:'Pipat S.', nickname:'พิ',
+             department:'Social Impact and Innovation', position:'Senior Program Manager',
+             email:'pipats@kenan-asia.org', office:'BKK', consent_at:'2026-08-20T03:00:00Z',
+             roles:'staff,admin,driver' },
+      today:{ parcels:2, issues:1, loans:1, unidentified:2, driving:1,
+        bookings:[
+          { type:'room', record_id:'RB-1', title:'ประชุมทีม WING ประจำสัปดาห์',
+            where:'ห้อง Inspiration', start_at:k+'T09:00:00+07:00', end_at:k+'T11:00:00+07:00' },
+          { type:'car', record_id:'CAR-2', title:'ตรวจสถานที่จัดอบรม', where:'Toyota Commuter',
+            start_at:k+'T13:00:00+07:00', end_at:k+'T16:30:00+07:00', driver:'สมพงษ์ ขับดี' }] },
+      announcements:[
+        { title:'อัปเดตนโยบายการเบิกค่าเดินทาง (Travel Expense Policy)', at:'2026-08-28T02:00:00Z' },
+        { title:'ซ้อมอพยพหนีไฟประจำปี 12 ก.ย.', at:'2026-08-25T06:30:00Z' }] };
+  })(),
   getAuthState:{ ok:true, isAdmin:true, isOfficer:true, registrationStatus:'approved', notificationCount:2,
     user:{ kenan_user_id:'K-4920', name_th:'พิพัฒน์ ส.', name_en:'Pipat S.', nickname:'พิ',
            department:'Social Impact and Innovation', email:'pipat@kenan-asia.org',
@@ -1229,6 +1422,27 @@ const MOCK = {
   getUnidentifiedParcels:{ items:[
     { record_id:'PCL-260830-007', tracking_no:'TH99887766554', created_at:'2026-08-30T03:20:00Z' },
     { record_id:'PCL-260830-008', tracking_no:'',              created_at:'2026-08-30T03:22:00Z' }]},
+  getDirectory:{ ok:true, items:[
+    { kenan_user_id:'K-1000', name_th:'พิพัฒน์ สุริยสมบูรณ์', name_en:'', nickname:'', position:'Senior Program Manager', department:'Education Program', email:'staff00@kenan-asia.org', phone:'0812345000', show_phone:false },
+    { kenan_user_id:'K-1007', name_th:'สมชาย กิตติวงศ์', name_en:'', nickname:'', position:'Program Officer', department:'Business and Economy', email:'staff01@kenan-asia.org', phone:'0812345001', show_phone:true },
+    { kenan_user_id:'K-1014', name_th:'วราภรณ์ ทองดี', name_en:'', nickname:'', position:'M&E Specialist', department:'Social Impact and Innovation', email:'staff02@kenan-asia.org', phone:'0812345002', show_phone:true },
+    { kenan_user_id:'K-1021', name_th:'ณัฐพล มณีรัตน์', name_en:'', nickname:'', position:'IT Officer', department:'HR', email:'staff03@kenan-asia.org', phone:'0812345003', show_phone:false },
+    { kenan_user_id:'K-1028', name_th:'ชุนหลี แซ่ลิ้ม', name_en:'', nickname:'', position:'IT Manager', department:'Finance and Accounting', email:'staff04@kenan-asia.org', phone:'0812345004', show_phone:true },
+    { kenan_user_id:'K-1035', name_th:'อารยา พงษ์ไพบูลย์', name_en:'', nickname:'', position:'HR Officer', department:'IT', email:'staff05@kenan-asia.org', phone:'0812345005', show_phone:true },
+    { kenan_user_id:'K-1042', name_th:'กิตติ ศรีสุข', name_en:'', nickname:'', position:'Finance Officer', department:'Partnership and Communications', email:'staff06@kenan-asia.org', phone:'0812345006', show_phone:false },
+    { kenan_user_id:'K-1049', name_th:'มณฑา ใจดี', name_en:'', nickname:'', position:'Admin Officer', department:'General Administration', email:'staff07@kenan-asia.org', phone:'0812345007', show_phone:true },
+    { kenan_user_id:'K-1056', name_th:'ธนกร วัฒนา', name_en:'', nickname:'', position:'Partnership Lead', department:'Education Program', email:'staff08@kenan-asia.org', phone:'0812345008', show_phone:true },
+    { kenan_user_id:'K-1063', name_th:'ปิยะดา สุขสันต์', name_en:'', nickname:'', position:'Communications Officer', department:'Business and Economy', email:'staff09@kenan-asia.org', phone:'0812345009', show_phone:false },
+    { kenan_user_id:'K-1070', name_th:'สมพงษ์ ขับดี', name_en:'', nickname:'', position:'Driver', department:'Social Impact and Innovation', email:'staff10@kenan-asia.org', phone:'0812345010', show_phone:true },
+    { kenan_user_id:'K-1077', name_th:'ประยูร ทางไกล', name_en:'', nickname:'', position:'Driver', department:'HR', email:'staff11@kenan-asia.org', phone:'0812345011', show_phone:true }] },
+  getUsersForAdmin:{ ok:true, items:[
+    { kenan_user_id:'K-4920', name_th:'พิพัฒน์ สุริยสมบูรณ์', email:'pipats@kenan-asia.org',
+      department:'Social Impact and Innovation', roles:'staff,admin,driver', status:'active', is_super:true },
+    { kenan_user_id:'K-1180', name_th:'สมชาย กิตติวงศ์', email:'somchai@kenan-asia.org',
+      department:'Education Program', roles:'staff', status:'active', is_super:false },
+    { kenan_user_id:'K-9001', name_th:'สมพงษ์ ขับดี', email:'sompong@kenan-asia.org',
+      department:'General Administration', roles:'staff,driver', status:'active', is_super:false }] },
+  setUserRoles:{ ok:true },
   getResourcesAdmin:{ ok:true, items:[
     { resource_id:'RM-1', kind:'room', name_th:'ห้อง Inspiration', capacity:14, category:'ประชุมใหญ่', is_active:true },
     { resource_id:'RM-2', kind:'room', name_th:'ห้อง Collaboration', capacity:8, category:'ประชุมย่อย', is_active:true },
@@ -1436,6 +1650,7 @@ const IC = {
   chat:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.4 8.4 0 01-.9 3.8 8.5 8.5 0 01-7.6 4.7 8.4 8.4 0 01-3.8-.9L3 21l1.9-5.7a8.4 8.4 0 01-.9-3.8 8.5 8.5 0 014.7-7.6 8.4 8.4 0 013.8-.9h.5a8.5 8.5 0 018 8z"/></svg>',
   laptop:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="12" rx="2"/><path d="M2 20h20"/></svg>',
   sos:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M10.3 3.9L1.8 18a2 2 0 001.7 3h17a2 2 0 001.7-3L13.7 3.9a2 2 0 00-3.4 0z"/><path d="M12 9v4M12 17h.01"/></svg>',
+  homeIc:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M3 10l9-7 9 7v10a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><path d="M9 22V12h6v10"/></svg>',
   news:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5h11a1 1 0 011 1v13H5a1 1 0 01-1-1z"/><path d="M16 8h3a1 1 0 011 1v8a2 2 0 01-2 2h-2"/><path d="M7 8h5M7 11h5M7 14h5"/></svg>',
   bellBig:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.7 21a2 2 0 01-3.4 0"/></svg>',
   user:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>',
@@ -1474,19 +1689,77 @@ window.addEventListener('popstate', () => {
   }
 });
 $('#backBtn').onclick = back;
+if($('#sHome')) $('#sHome').onclick = () => { S.stack = []; go('home'); };
+if($('#sMe'))   $('#sMe').onclick   = () => go('profile');
 
 function paintNav(){
   document.querySelectorAll('[data-nav]').forEach(el => el.textContent = t(el.dataset.nav));
 }
+
+/** เมนูข้างของจอคอม — ทุกโมดูลเข้าถึงได้ในคลิกเดียว
+    บนมือถือต้องกลับหน้าแรกก่อนแล้วค่อยกดไทล์ ซึ่งบนจอคอมไม่มีเหตุผลให้ทำแบบนั้น */
+const SIDE_GROUPS = () => [
+  { g:t('sgWork'), items:[
+    { go:'home',        ic:IC.homeIc, label:t('navHome') },
+    { go:'my-parcels',  ic:IC.box,    label:t('mParcel') },
+    { go:'notifications', ic:IC.bellBig, label:t('navNotif'), badge:true },
+    { go:'issues',      ic:IC.tool,   label:t('mIssue') },
+    { go:'activity',    ic:IC.clock,  label:t('mAct') }
+  ]},
+  { g:t('sgBook'), items:[
+    { go:'rooms',     ic:IC.cal,    label:t('resvRoom') },
+    { go:'equipment', ic:IC.laptop, label:t('resvEq') },
+    { go:'cars',      ic:IC.car,    label:t('resvCar') }
+  ]},
+  { g:t('sgInfo'), items:[
+    { go:'news',      ic:IC.news,  label:t('news') },
+    { go:'directory', ic:IC.user,  label:t('mDir') },
+    { go:'calltree',  ic:IC.sos,   label:t('mCall') }
+  ]}
+];
+
+function paintSide(active){
+  const groups = SIDE_GROUPS();
+  if(S.isOfficer || S.isAdmin){
+    const admin = [{ go:'admin', ic:IC.user, label:t('adminTitle') }];
+    if(S.isAdmin){
+      admin.push({ go:'admin-res',  ic:IC.laptop, label:t('admRes') });
+      admin.push({ go:'admin-proj', ic:IC.info,   label:t('admProj') });
+    }
+    if(isDriverNow()) admin.unshift({ go:'driver', ic:IC.car, label:t('drvTitle') });
+    groups.push({ g:t('sgAdmin'), items:admin });
+  }else if(isDriverNow()){
+    groups.push({ g:t('sgAdmin'), items:[{ go:'driver', ic:IC.car, label:t('drvTitle') }] });
+  }
+
+  $x('#sNav').innerHTML = groups.map(gr => `
+    <div class="sgrp">${esc(gr.g)}</div>
+    ${gr.items.map(i => `
+      <button class="slink ${i.go === active ? 'on' : ''}" data-sgo="${i.go}">
+        ${i.ic}<span>${esc(i.label)}</span>
+        ${i.badge && S.notifCount ? `<span class="sb">${S.notifCount}</span>` : ''}
+      </button>`).join('')}`).join('');
+  document.querySelectorAll('#sNav .slink').forEach(b =>
+    b.onclick = () => { S.stack = []; go(b.dataset.sgo); });
+
+  const nm = S.me?.name_th || S.me?.name_en || S.profile?.displayName || '';
+  $x('#sName').textContent = nm || '—';
+  $x('#sDept').textContent = S.me?.position || S.me?.department || '';
+  $x('#sAv').textContent = (nm.trim().charAt(0) || '·');
+}
 function chrome(name){
   paintNav();
+  paintSide(name);
   const isHome = name === 'home';
+  if(isHome) setTitle(t('navHome'));
   // 'privacy' = หน้าเดียวกับ consent แต่เปิดจากโปรไฟล์ → ต้องมีปุ่มกลับและเมนูล่าง
   const isFull = ['register','otp','consent','gate','offline'].includes(name);
   $('#backBtn').hidden = isHome || isFull;
-  $('#brand').hidden   = !isHome;
-  $('#title').hidden   = isHome;
+  // จอคอมมีเมนูข้างที่มีโลโก้อยู่แล้ว แถบบนจึงควรบอก "อยู่หน้าไหน" ทุกหน้า รวมหน้าแรก
+  $('#brand').hidden   = !isHome || window.innerWidth >= 900;
+  $('#title').hidden   = isHome && window.innerWidth < 900;
   $('#nav').hidden     = isFull;
+  $x('#side').style.display = isFull ? 'none' : '';
   // ปุ่มลอยโผล่เฉพาะหน้าที่เกี่ยวกับพัสดุและเมนูผู้ดูแลเท่านั้น
   // หน้าอื่น (โดยเฉพาะหน้าฉุกเฉิน) ห้ามมีอะไรมาบัง
   $('#fab').hidden = !S.isOfficer ||
@@ -1548,52 +1821,112 @@ $('#fab').onclick = () => go('parcel-in');
 
 /* ── 7. VIEWS ─────────────────────────────────────────────────── */
 
+/* ── หน้าแรก ─────────────────────────────────────────────────────
+   มือถือ = ไทล์เมนู (เพราะไม่มีเมนูข้าง ต้องมีทางเข้าทุกโมดูล)
+   จอคอม  = แดชบอร์ด "วันนี้มีอะไรรอคุณ" เพราะเมนูข้างทำหน้าที่เมนูไปแล้ว
+            ถ้าโชว์ไทล์ซ้ำอีกก็คือเมนูสองชุดบนหน้าเดียว ซึ่งไม่ช่วยใคร */
+const isWide = () => window.innerWidth >= 900;
+
 ROUTES.home = async () => {
-  const name = S.me?.nickname || S.me?.name_th || S.profile?.displayName || '';
+  const name = S.me?.name_th || S.me?.nickname || S.profile?.displayName || '';
+  const d = S.today || {};
+
   const mods = [
-    { ic:IC.box,   th:t('mParcel'), en:t('mParcelEn'), go:'my-parcels',
-      badge:S.notifCount ? `${S.notifCount} ใหม่` : '' },
-    { ic:IC.sos,   th:t('mCall'),   en:t('mCallEn'),   go:'calltree', sos:true },
-    { ic:IC.user,  th:t('mDir'),    en:t('mDirEn'),    go:'directory' },
-    { ic:IC.clock, th:t('mAct'),    en:t('mActEn'),    go:'activity' },
-    { ic:IC.news,   th:t('news'),  en:t('newsEn'),    go:'news' },
-    { ic:IC.cal,   th:t('mResv'),   en:'Reservation',  go:'reservation' },
-    { ic:IC.tool,  th:t('mIssue'),  en:t('mIssueEn'),  go:'issues' },
-    { ic:IC.chat,  th:t('mFaq'),    en:t('mFaqEn'),    soon:true }
+    { ic:IC.box,   th:t('mParcel'), go:'my-parcels',
+      badge:d.parcels ? String(d.parcels) : '' },
+    { ic:IC.sos,   th:t('mCall'),   go:'calltree', sos:true },
+    { ic:IC.user,  th:t('mDir'),    go:'directory' },
+    { ic:IC.clock, th:t('mAct'),    go:'activity' },
+    { ic:IC.news,  th:t('news'),    go:'news' },
+    { ic:IC.cal,   th:t('mResv'),   go:'reservation' },
+    { ic:IC.tool,  th:t('mIssue'),  go:'issues' },
+    { ic:IC.chat,  th:t('mFaq'),    soon:true }
   ];
-  // ผู้ดูแลต้องกลับเข้าเมนูตัวเองได้จากในแอป ไม่ใช่ต้องออกไปกด Rich Menu ทุกครั้ง
-  // คนขับรถต้องเจอหน้างานของตัวเองตั้งแต่หน้าแรก ไม่ต้องไล่หาในเมนูจอง
-  if(isDriverNow()) mods.push({ ic:IC.car, th:t('drvTitle'), en:'Driving jobs', go:'driver' });
-  if(S.isOfficer) mods.push({ ic:IC.user, th:t('adminTitle'), en:'Admin', go:'admin' });
+  if(isDriverNow()) mods.push({ ic:IC.car, th:t('drvTitle'), go:'driver' });
+  if(S.isOfficer)   mods.push({ ic:IC.user, th:t('adminTitle'), go:'admin' });
+
+  // สิ่งที่ค้างอยู่จริงๆ เท่านั้น ไม่มีก็ไม่ต้องขึ้นการ์ดเปล่า
+  const todo = [
+    { n:d.parcels,      lbl:t('dbParcels'),  go:'my-parcels',   tone:'warn' },
+    { n:d.driving,      lbl:t('dbDriving'),  go:'driver',       tone:'warn', only:isDriverNow() },
+    { n:d.loans,        lbl:t('dbLoans'),    go:'equipment',    tone:'' },
+    { n:d.issues,       lbl:t('dbIssues'),   go:'issues',       tone:'' },
+    { n:d.unidentified, lbl:t('dbUnid'),     go:'unidentified', tone:'bad', only:S.isOfficer }
+  ].filter(x => x.n > 0 && x.only !== false);
+
+  const bk = d.bookings || [];
+  const dateLine = new Date().toLocaleDateString(S.lang === 'th' ? 'th-TH' : 'en-GB',
+    { weekday:'long', day:'numeric', month:'long' });
+
   $x('#main').innerHTML = `<div class="view">
-    <div class="greet"><h2>${esc(t('greet')(name))}</h2><p>${esc(t('greetSub'))}</p></div>
-    <div class="section-title">${esc(t('services'))}<span class="en">${esc(t('servicesEn'))}</span></div>
-    <div class="tiles">${mods.map(m => `
-      <button class="tile ${m.soon ? 'soon' : ''} ${m.sos ? 'sos' : ''}" data-go="${m.go || ''}">
-        ${m.badge ? `<span class="badge">${esc(m.badge)}</span>` : ''}
-        ${m.soon ? `<span class="badge">${esc(t('soon'))}</span>` : ''}
-        <div class="ic">${m.ic}</div>
-        <div><div class="nm">${esc(m.th)}</div><div class="en">${esc(m.en)}</div></div>
-      </button>`).join('')}</div>
-    <div class="section-title">${esc(t('news'))}<span class="en">${esc(t('newsEn'))}</span></div>
-    <div id="newsBox">${skeleton(1)}</div>
-    <div style="margin-top:10px"><button class="btn ghost" id="allNews">${esc(t('news'))} →</button></div>
+    <div class="hgreet">
+      <div class="hdate">${esc(dateLine)}</div>
+      <h2>${esc(t('greet')(firstName(name) || name))}</h2>
+      <p>${esc(todo.length ? t('dbHasTodo') : t('dbAllClear'))}</p>
+    </div>
+
+    ${todo.length ? `<div class="todo">${todo.map(x => `
+      <button class="todoc ${x.tone}" data-go="${x.go}">
+        <span class="n">${x.n}</span>
+        <span class="l">${esc(x.lbl)}</span>
+      </button>`).join('')}</div>` : ''}
+
+    <div class="hsplit">
+      <section>
+        <div class="section-title">${esc(t('dbToday'))}</div>
+        ${bk.length ? `<div class="rows">${bk.map(x => `
+          <button class="row" data-bgo="${x.type === 'car' ? 'cars' : 'rooms'}">
+            <div class="thumb" style="background:#EEF3FF;color:var(--primary)">${
+              x.type === 'car' ? IC.car : IC.cal}</div>
+            <div class="body">
+              <div class="t">${esc(x.title || '-')}</div>
+              <div class="s">${esc([hhmm(x.start_at) + '–' + hhmm(x.end_at), x.where,
+                x.driver ? t('carDriver') + ' ' + firstName(x.driver) : ''].filter(Boolean).join(' · '))}</div>
+            </div><span class="go">${IC.chev}</span>
+          </button>`).join('')}</div>`
+          : `<div class="quiet">${esc(t('dbNoBookings'))}</div>`}
+
+        <div class="section-title">${esc(t('dbQuick'))}</div>
+        <div class="tiles" id="tiles"></div>
+      </section>
+
+      <aside>
+        <div class="section-title">${esc(t('news'))}</div>
+        <div id="newsBox">${skeleton(1)}</div>
+        <button class="btn ghost" id="allNews" style="margin-top:10px">${esc(t('news'))} →</button>
+      </aside>
+    </div>
   </div>`;
-  document.querySelectorAll('.tile[data-go]').forEach(b => {
+
+  // บนจอคอมโชว์ทางลัดที่เมนูข้างไม่มี (จองห้อง/ยืมของ/บันทึกพัสดุ) ไม่ใช่ซ้ำทั้งชุด
+  const tileSet = isWide()
+    ? mods.filter(m => ['reservation','issues','my-parcels','calltree'].includes(m.go))
+    : mods;
+  $x('#tiles').innerHTML = tileSet.map(m => `
+    <button class="tile ${m.soon ? 'soon' : ''} ${m.sos ? 'sos' : ''}" data-go="${m.go || ''}">
+      ${m.badge ? `<span class="badge">${esc(m.badge)}</span>` : ''}
+      ${m.soon ? `<span class="badge soonb">${esc(t('soon'))}</span>` : ''}
+      <div class="ic">${m.ic}</div>
+      <div class="nm">${esc(m.th)}</div>
+    </button>`).join('');
+
+  document.querySelectorAll('[data-go]').forEach(b => {
     if(b.dataset.go) b.onclick = () => go(b.dataset.go);
   });
+  document.querySelectorAll('[data-bgo]').forEach(b => b.onclick = () => go(b.dataset.bgo));
   $('#allNews').onclick = () => go('news');
+
   try{
     const r = S.bootNews ? { items:S.bootNews } : await apiRetry('getAnnouncements', {}, 'GET');
     S.bootNews = null;
     const list = r?.items || [];
     $x('#newsBox').innerHTML = list.length
-      ? `<div class="rows">${list.slice(0,3).map(a => `
+      ? `<div class="rows">${list.slice(0,4).map(a => `
           <div class="row"><div class="body">
-            <div class="t">${esc(a.title)}</div>
+            <div class="t">${esc(a.title || a.title_th || a.title_en)}</div>
             <div class="s">${esc(fmtDate(a.at))}</div>
           </div></div>`).join('')}</div>`
-      : emptyState(IC.news, S.lang === 'th' ? 'ยังไม่มีประกาศ' : 'No announcements', '');
+      : `<div class="quiet">${esc(S.lang === 'th' ? 'ยังไม่มีประกาศ' : 'No announcements')}</div>`;
   }catch(e){ $x('#newsBox').innerHTML = ''; }
 };
 
@@ -2236,7 +2569,7 @@ ROUTES.directory = async () => {
     <input id="dq" placeholder="${esc(t('pkSearch'))}"
       style="width:100%;padding:13px 14px;border:1.5px solid var(--line);
              border-radius:12px;font-size:16px;margin-bottom:12px">
-    <div id="dl">${skeleton(4)}</div></div>`;
+    <div id="dl" class="dircols">${skeleton(4)}</div></div>`;
   let people = [];
   const preDir = takePre('dir');
   if(preDir) S.cache.dir = { at:Date.now(), v:preDir };
@@ -2255,6 +2588,7 @@ ROUTES.directory = async () => {
     const groups = {};
     hits.forEach(p => { (groups[p.department || '—'] ||= []).push(p); });
     $x('#dl').innerHTML = Object.keys(groups).map(d => `
+      <div class="dgrp">
       <div class="section-title">${esc(d)}</div>
       <div class="rows">${groups[d].map(p => `
         <button class="row" data-id="${esc(p.kenan_user_id)}">
@@ -2263,7 +2597,7 @@ ROUTES.directory = async () => {
             <div class="t">${esc(p.name_th || p.name_en)}${p.nickname ? ' · ' + esc(p.nickname) : ''}</div>
             <div class="s">${esc(p.position || p.phone || p.email || t('dirNoPhone'))}</div>
           </div><span class="go">${IC.chev}</span>
-        </button>`).join('')}</div>`).join('');
+        </button>`).join('')}</div></div>`).join('');
     // ปุ่มวงกลมเล็กๆ สองอันชิดกันกดพลาดง่ายบนมือถือ → เปิดการ์ดที่มีปุ่มเต็มความกว้างแทน
     document.querySelectorAll('#dl .row[data-id]').forEach(b => b.onclick = () => {
       const p = people.find(x => x.kenan_user_id === b.dataset.id); if(!p) return;
@@ -4405,9 +4739,10 @@ async function boot(){
   if(DEMO){
     S.uid = 'U-demo';
     S.profile = { displayName:'พิพัฒน์ ส.', pictureUrl:'' };
-    const a = MOCK.getAuthState;
-    S.me = a.user; S.isAdmin = a.isAdmin; S.isOfficer = a.isOfficer;
+    const a = MOCK.bootstrap || MOCK.getAuthState;
+    S.me = a.user; S.isAdmin = a.isAdmin; S.isOfficer = a.isOfficer; S.isSuper = !!a.isSuper;
     S.regStatus = a.registrationStatus; S.notifCount = a.notificationCount;
+    S.today = a.today || null; S.bootNews = a.announcements || null;
     $x('#bellDot').textContent = S.notifCount; $x('#bellDot').hidden = false;
     const banner = el(`<div style="background:#FFFBEB;border-bottom:1px solid #FDE68A;color:#92400E;
       font-size:11.5px;font-weight:600;text-align:center;padding:6px 12px">
@@ -4441,6 +4776,7 @@ async function boot(){
     auth = await apiRetry('bootstrap', { want: START_AT || '' }, 'GET');
     if(auth?.announcements) S.bootNews = auth.announcements;
     if(auth?.pre) S.pre = { key:auth.pre.key, v:auth.pre.v, at:Date.now() };
+    if(auth?.today) S.today = auth.today;
   }catch(e){
     if(e.message === 'NO_CONFIG'){ render('home'); return; }
     S.stack = []; render('offline', {}); return;   // ต่อเซิร์ฟเวอร์ไม่ได้ → อย่าพาไปกรอกฟอร์ม
