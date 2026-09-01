@@ -397,6 +397,51 @@ main{flex:1 1 auto;padding:16px 16px calc(var(--nav-h) + var(--safe-b) + 24px)}
 .tbox .k{font-size:10.5px;font-weight:700;color:var(--ink-3);margin-bottom:3px;
   white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .arrow{flex:0 0 auto;color:var(--ink-3);font-size:15px;font-weight:800}
+/* การ์ดรถในหน้าจอง — อุตส่าห์ใส่รูปแล้ว ต้องเห็นว่ารถหน้าตายังไงจริงๆ
+   และรูปคนขับต้องอยู่คู่กัน คนจองจะรู้ว่าไปเจอใครที่จุดนัด */
+/* วันเกิดขึ้นบนหน้าแรกให้ทุกคนเห็น แทนการยิง LINE หา 40 คน
+   (40 คน × 3 วันเกิด/เดือน = 120 ข้อความ = 40% ของโควตาฟรีทั้งเดือน) */
+.bday{display:flex;align-items:center;gap:12px;padding:14px 16px;border-radius:var(--r);
+  background:linear-gradient(100deg,#FFF7ED,#FEF2F2);border:1px solid #FED7AA;
+  font-size:13px;color:var(--ink-2);line-height:1.5;margin-bottom:18px}
+.bday .cake{font-size:24px;flex:0 0 auto}
+.ntag{font-size:10px;font-weight:800;padding:2px 7px;border-radius:99px;
+  background:var(--neutral);color:var(--ink-2);letter-spacing:.01em}
+.ntag.hot{background:var(--bad-bg);color:var(--bad)}
+.imggrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(78px,1fr));gap:7px}
+.imgcell{position:relative;aspect-ratio:4/3;border-radius:9px;overflow:hidden;background:var(--neutral)}
+.imgcell img{width:100%;height:100%;object-fit:cover}
+.imgcell button{position:absolute;top:3px;right:3px;width:20px;height:20px;border-radius:50%;
+  background:rgba(0,0,0,.6);color:#fff;font-size:11px;line-height:20px}
+.paxrow{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:2px}
+.paxchip{display:inline-flex;align-items:center;gap:6px;padding:5px 8px 5px 11px;
+  border-radius:99px;background:#EEF3FF;border:1px solid #D6E1FF;
+  font-size:12px;font-weight:600;color:var(--primary)}
+.paxchip button{font-size:13px;line-height:1;color:var(--primary);opacity:.6}
+.vcard{display:flex;gap:0;flex-direction:column;width:100%;text-align:left;
+  border:1.5px solid var(--line);border-radius:14px;overflow:hidden;
+  background:var(--surface);margin-bottom:11px}
+.vcard.on{border-color:var(--primary);box-shadow:0 0 0 3px #EEF3FF}
+.vphoto{width:100%;height:150px;object-fit:cover;background:var(--neutral);
+  display:grid;place-items:center;color:var(--ink-3)}
+.vphoto svg{width:38px;height:38px}
+.vbody{padding:12px 13px 13px}
+.vhead{display:flex;align-items:flex-start;justify-content:space-between;gap:8px}
+.vname{font-size:15.5px;font-weight:800;line-height:1.25}
+.vplate{display:inline-block;font-size:11.5px;font-weight:800;letter-spacing:.02em;
+  border:1.5px solid var(--ink-2);border-radius:5px;padding:1px 7px;margin-top:4px}
+.vspec{font-size:11.5px;color:var(--ink-3);margin-top:5px}
+.vdrv{display:flex;align-items:center;gap:9px;margin-top:10px;padding-top:10px;
+  border-top:1px solid var(--line)}
+.dav{width:36px;height:36px;border-radius:50%;object-fit:cover;flex:0 0 auto;
+  background:#EEF3FF;color:var(--primary);display:grid;place-items:center;
+  font-size:14px;font-weight:800}
+.dnm{font-size:13px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.dco{font-size:10.5px;color:var(--ink-3)}
+.dtel{font-size:11.5px;font-weight:800;color:var(--primary);white-space:nowrap;flex:0 0 auto}
+.vfree{font-size:11px;font-weight:800;margin-top:8px}
+@media(min-width:900px){ .vphoto{height:132px} }
+
 .ptrow{display:flex;gap:10px}
 .ptline{flex:0 0 26px;display:flex;flex-direction:column;align-items:center;padding-top:20px}
 .ptdot{width:22px;height:22px;border-radius:50%;background:var(--primary);color:#fff;
@@ -697,7 +742,7 @@ const CFG = {
   GAS_URL : 'https://script.google.com/macros/s/AKfycbyOjh4BAAbzY5QfZNG_oGuxbmvZwHjEAKazRMuMxrDeoNknE_rqEoAFdkuJldOPP_q_eg/exec',
   LIFF_TIMEOUT_MS : 3500,
   CONSENT_VERSION : '2026-09-01',
-  BUILD : '2026-09-01b'      // ต้องตรงกับ BUILD ใน Code.gs ที่ Deploy ไว้
+  BUILD : '2026-09-01c'      // ต้องตรงกับ BUILD ใน Code.gs ที่ Deploy ไว้
 };
 
 /* เก็บ ?go=... ไว้ตั้งแต่ต้น เพราะเดี๋ยวจะล้าง query string ทิ้งหลัง LIFF ล็อกอิน
@@ -881,6 +926,24 @@ const T = {
     admResDriver:'คนขับประจำรถคันนี้', admResNoDriver:'ยังไม่ได้ระบุคนขับ',
     admResDriverHint:'ระบบจะกันเวลาให้ทั้งรถและคนขับพร้อมกัน คนขับคนเดียวรับสองเที่ยวซ้อนกันไม่ได้',
     admResNoDriverYet:'ยังไม่มีใครมีสิทธิ์ "คนขับ" — ไปตั้งได้ที่ เมนูผู้ดูแล → จัดการสิทธิ์',
+    admProjPm:'PM ของโครงการ', admProjPmPick:'เลือก PM', admProjMemN:'คน',
+    admProjPmWhy:'จำเป็น เพราะเวลาไม่มีรถว่าง ระบบต้องรู้ว่าจะแจ้ง/ขออนุมัติจากใคร',
+    admProjMembers:'สมาชิกโครงการ', admProjMemAdd:'＋ เพิ่มสมาชิก',
+    admProjNoPm:'⚠ ยังไม่ได้ระบุ PM',
+    admDrvLic:'เลขใบขับขี่', admDrvLicPh:'เช่น 12345678',
+    admDrvLicExp:'ใบขับขี่หมดอายุ', admDrvLicPhoto:'รูปใบขับขี่',
+    admDrvLicWhy:'รูปใบขับขี่เก็บใน Drive แบบส่วนตัวเท่านั้น ไม่แสดงในหน้าจอง เพราะเป็นเอกสารราชการที่มีเลขประจำตัว',
+    licExpired:'⚠ ใบขับขี่หมดอายุแล้ว', licSoon:d=>`⚠ ใบขับขี่หมดอายุในอีก ${d} วัน`,
+    admNewsTags:'แท็ก', admNewsTagsHint:'กดเลือกได้หลายอัน หรือพิมพ์เพิ่มเอง',
+    admNewsImages:'รูปประกอบ (ไม่เกิน 4 รูป)',
+    admNewsImagesWhy:'จำกัด 4 รูป เพราะแต่ละรูปคือการอ่านไฟล์หนึ่งครั้ง หน้าข่าวจะช้าลงตามจำนวนรูป · ถ้าต้องใช้รูปเยอะกว่านี้ ควรเป็นไฟล์แนบมากกว่าประกาศ',
+    admNewsCta:'ปุ่มให้กด (ถ้ามี)', admNewsCtaLabel:'ข้อความบนปุ่ม',
+    admNewsCtaLabelPh:'เช่น กรอกแบบฟอร์ม', admNewsCtaUrl:'ลิงก์',
+    admNewsDue:'หมดเขตเมื่อไหร่', admNewsDueWhy:'เลยกำหนดแล้วประกาศจะไม่ขึ้นหน้าแรกอีก แต่ยังอ่านย้อนหลังได้ในหน้าข่าวสาร',
+    admNewsPaste:'วางข้อความจากอีเมล', admNewsPasteBtn:'แยกหัวข้อ/เนื้อหาให้',
+    admNewsPasteHint:'ก๊อปอีเมลทั้งฉบับมาวาง ระบบจะเอาบรรทัดแรกเป็นหัวข้อ ที่เหลือเป็นเนื้อหา',
+    newsDue:d=>`หมดเขต ${d}`, newsExpired:'หมดเขตแล้ว', newsBy:w=>`โดย ${w}`,
+    newsAll:'ทั้งหมด',
     admProj:'จัดการรหัสโครงการ', admProjAdd:'เพิ่มโครงการ', admProjCode:'รหัสโครงการ',
     admProjCodePh:'เช่น WING2026', admProjName:'ชื่อโครงการ',
     admProjNamePh:'เช่น WING — Women in Green Growth',
@@ -935,6 +998,27 @@ const T = {
     carTapSlot:'แตะช่องว่างในตารางเพื่อจองรถคันนั้น',
     carUnbooked:'ไม่ได้จองล่วงหน้า', carLegMine:'ของฉัน',
     carOffice:'ออฟฟิศคีนัน (ถนนวิทยุ)',
+    carPaxAdd:'＋ เลือกผู้โดยสารจากรายชื่อ', carPaxOther:'ผู้โดยสารอื่นที่ไม่อยู่ในระบบ',
+    carPaxWhy:'เลือกจากรายชื่อแล้วระบบจะแจ้งเตือนเขาทาง LINE ให้ด้วย ว่ารถออกกี่โมง คนขับใคร เบอร์อะไร',
+    carAltLead:'ช่วงเวลานี้รถไม่ว่างทุกคัน เลือกได้ว่าจะแจ้ง PM แล้วเดินทางเลย หรือขออนุมัติก่อน',
+    carAltNeedProj:'ต้องเลือกโครงการก่อน ระบบจะได้รู้ว่าต้องแจ้ง PM คนไหน',
+    carAltNoPm:'โครงการนี้ยังไม่ได้ระบุ PM — บันทึกไว้ได้ แต่จะไม่มีใครได้รับแจ้ง (ผู้ดูแลใส่ PM ได้ที่จัดการรหัสโครงการ)',
+    carAltPm:'PM ของโครงการ', carAltMode:'จะเดินทางด้วยอะไร',
+    carAltCost:'ประมาณการค่าใช้จ่าย (บาท)', carAltCostPh:'เช่น 400',
+    carAltNote:'เหตุผล / รายละเอียด', carAltNotePh:'เช่น ต้องไปรับเอกสารด่วนก่อน 15:00',
+    carAltNotify:'แจ้ง PM แล้วเดินทางเลย',
+    carAltNotifyWhy:'เหมาะกับของด่วนหน้างานที่รอไม่ได้ · PM ได้รับแจ้งทันทีเพื่อทราบ ไม่ต้องกดอะไร',
+    carAltRequest:'ขออนุมัติ PM ก่อนเดินทาง',
+    carAltRequestWhy:'เหมาะกับเที่ยวที่วางแผนไว้และมีค่าใช้จ่ายสูง · ต้องรอ PM กดอนุมัติในแอป',
+    carAltLogged:pm=>`บันทึกแล้ว${pm ? ' · แจ้ง ' + pm + ' เรียบร้อย' : ''}`,
+    carAltSent:pm=>`ส่งคำขอแล้ว${pm ? ' · รอ ' + pm + ' อนุมัติ' : ''}`,
+    dbApprovals:'คำขอที่รอคุณอนุมัติ', dbBirthdays:'วันเกิดวันนี้',
+    apvApprove:'อนุมัติ', apvReject:'ไม่อนุมัติ', apvNote:'หมายเหตุ (ถ้ามี)',
+    apvDone:'บันทึกแล้ว', apvCost:'ประมาณการ',
+    prBirthday:'วันเกิด (วัน-เดือน)', prShowBirthday:'ให้เพื่อนร่วมงานเห็นวันเกิด',
+    prShowBirthdaySub:'ถ้าเปิด ชื่อคุณจะขึ้นหน้าแรกในวันเกิด และคุณจะได้รับคำอวยพรใน LINE · ไม่เก็บปีเกิด',
+    bdayWish:n=>`สุขสันต์วันเกิด ${n} 🎂`,
+
     carStart:'จุดออก', carEnd:'กลับถึง', carStopN:n=>`จุดที่ ${n}`,
     carPlaceUsed:'เคยไปแล้ว', carPick:'เลือก',
 
@@ -1212,6 +1296,24 @@ const T = {
     admResDriver:'Assigned driver', admResNoDriver:'No driver assigned',
     admResDriverHint:'Both the vehicle and the driver are held for the booked time — one driver cannot take two overlapping trips.',
     admResNoDriverYet:'Nobody has the "driver" role yet — set it under Admin → Roles.',
+    admProjPm:'Project PM', admProjPmPick:'Choose a PM', admProjMemN:'members',
+    admProjPmWhy:'Required — when no vehicle is free, the system needs to know who to notify or ask.',
+    admProjMembers:'Project members', admProjMemAdd:'＋ Add a member',
+    admProjNoPm:'⚠ No PM set',
+    admDrvLic:'Licence number', admDrvLicPh:'e.g. 12345678',
+    admDrvLicExp:'Licence expires', admDrvLicPhoto:'Licence photo',
+    admDrvLicWhy:'The licence photo is kept privately in Drive and never shown on the booking page — it is an official document with an ID number on it.',
+    licExpired:'⚠ Licence has expired', licSoon:d=>`⚠ Licence expires in ${d} days`,
+    admNewsTags:'Tags', admNewsTagsHint:'Pick any that apply, or type your own',
+    admNewsImages:'Images (up to 4)',
+    admNewsImagesWhy:'Capped at 4 — each image is one file read, so the news page slows down with more. If you need more, an attachment suits better than an announcement.',
+    admNewsCta:'Action button (optional)', admNewsCtaLabel:'Button text',
+    admNewsCtaLabelPh:'e.g. Fill in the form', admNewsCtaUrl:'Link',
+    admNewsDue:'Deadline', admNewsDueWhy:'After the deadline it drops off the home page but stays readable in News.',
+    admNewsPaste:'Paste text from an email', admNewsPasteBtn:'Split into title and body',
+    admNewsPasteHint:'Paste the whole email — the first line becomes the title, the rest the body.',
+    newsDue:d=>`Due ${d}`, newsExpired:'Deadline passed', newsBy:w=>`by ${w}`,
+    newsAll:'All',
     admProj:'Project codes', admProjAdd:'Add a project', admProjCode:'Project code',
     admProjCodePh:'e.g. WING2026', admProjName:'Project name',
     admProjNamePh:'e.g. WING — Women in Green Growth',
@@ -1266,6 +1368,27 @@ const T = {
     carTapSlot:'Tap an empty slot to book that vehicle',
     carUnbooked:'Not booked in advance', carLegMine:'Mine',
     carOffice:'Kenan office (Wireless Rd)',
+    carPaxAdd:'＋ Pick passengers from the directory', carPaxOther:'Other passengers not in the system',
+    carPaxWhy:'Picking from the directory lets the system notify them on LINE — departure time, driver, phone number.',
+    carAltLead:'No vehicle is free at that time. Choose whether to tell the PM and go, or ask for approval first.',
+    carAltNeedProj:'Choose a project first, so the system knows which PM to tell.',
+    carAltNoPm:'This project has no PM set — it will be logged, but nobody gets notified. An admin can set the PM under Project codes.',
+    carAltPm:'Project PM', carAltMode:'How will you travel',
+    carAltCost:'Estimated cost (THB)', carAltCostPh:'e.g. 400',
+    carAltNote:'Reason / details', carAltNotePh:'e.g. urgent document pickup before 15:00',
+    carAltNotify:'Tell the PM and go',
+    carAltNotifyWhy:'For urgent situations that cannot wait. The PM is informed immediately, no action needed from them.',
+    carAltRequest:'Ask the PM to approve first',
+    carAltRequestWhy:'For planned trips with a higher cost. You wait for the PM to approve in the app.',
+    carAltLogged:pm=>`Logged${pm ? ' · ' + pm + ' has been told' : ''}`,
+    carAltSent:pm=>`Request sent${pm ? ' · waiting for ' + pm : ''}`,
+    dbApprovals:'Waiting for your approval', dbBirthdays:'Birthdays today',
+    apvApprove:'Approve', apvReject:'Decline', apvNote:'Note (optional)',
+    apvDone:'Saved', apvCost:'Estimate',
+    prBirthday:'Birthday (day and month)', prShowBirthday:'Let colleagues see my birthday',
+    prShowBirthdaySub:'If on, your name appears on the home page on your birthday and you get a message on LINE. The year is never stored.',
+    bdayWish:n=>`Happy birthday, ${n} 🎂`,
+
     carStart:'Start', carEnd:'Back at', carStopN:n=>`Stop ${n}`,
     carPlaceUsed:'used before', carPick:'Pick',
 
@@ -1444,8 +1567,12 @@ const MOCK = {
       user:{ kenan_user_id:'K-4920', name_th:'พิพัฒน์ สุริยสมบูรณ์', name_en:'Pipat S.', nickname:'พิ',
              department:'Social Impact and Innovation', position:'Senior Program Manager',
              email:'pipats@kenan-asia.org', office:'BKK', consent_at:'2026-08-20T03:00:00Z',
-             roles:'staff,admin,driver' },
+             roles:'staff,admin,driver', birthday:'11-24', show_birthday:true },
       today:{ parcels:2, issues:1, loans:1, unidentified:2, driving:1,
+        birthdays:[{ name:'วราภรณ์ ทองดี', nickname:'หนิง', department:'Social Impact and Innovation' }],
+        approvals:[{ record_id:'CAR-ALT-1', title:'ไปรับเอกสารด่วนที่กรมพัฒนาธุรกิจ',
+          project_code:'WING2026', who:'สมชาย กิตติวงศ์',
+          wanted:'วันนี้ 13:00 → 16:00', est_cost:'450', at:'2026-09-01T04:10:00Z' }],
         bookings:[
           { type:'room', record_id:'RB-1', title:'ประชุมทีม WING ประจำสัปดาห์',
             where:'ห้อง Inspiration', start_at:k+'T09:00:00+07:00', end_at:k+'T11:00:00+07:00' },
@@ -1508,6 +1635,9 @@ const MOCK = {
     { resource_id:'ZM-4', kind:'zoom', name_th:'Zoom 4', capacity:500, note:'zoom4@kenan-asia.org', is_active:true },
     { resource_id:'ZM-8', kind:'zoom', name_th:'Zoom 8', capacity:1000, note:'zoom8@kenan-asia.org', is_active:true }] },
   saveResource:{ ok:true }, saveProject:{ ok:true }, saveDriver:{ ok:true },
+  addAnnouncement:{ ok:true, images:0 }, importNews:{ ok:true, added:2 },
+  decideAltTransport:{ ok:true },
+  logNoCar:{ ok:true, record_id:'CAR-ALT-9', mode:'notify', pm_notified:true, pm_name:'ธนกร วัฒนา' },
   getDriversAdmin:{ ok:true, items:[
     { driver_id:'DRV-A1', name:'สมพงษ์ ขับดี', phone:'0812345678', company:'Kenan',
       vehicles:'Toyota Commuter', note:'ขับรถตู้ได้ · ใบขับขี่ ท.2', thumb:'', is_active:true },
@@ -1523,8 +1653,12 @@ const MOCK = {
   routeLegs:{ ok:true, failed:0, total_km:31.6, total_mins:74,
     legs:[{ km:8.2, mins:19 }, { km:15.2, mins:33 }, { km:8.2, mins:22 }] },
   getProjectsAdmin:{ ok:true, items:[
-    { project_code:'BACKOFFICE', name_th:'งานสำนักงาน', type:'Core', trips:4, is_active:true },
-    { project_code:'NONBILL', name_th:'ไม่ผูกโครงการ', type:'Core', trips:1, is_active:true }] },
+    { project_code:'BACKOFFICE', name_th:'งานสำนักงาน', type:'Core', trips:4, is_active:true,
+      pm_id:'K-1000', pm_name:'พิพัฒน์ สุริยสมบูรณ์', member_ids:['K-1007'], member_names:['สมชาย กิตติวงศ์'] },
+    { project_code:'WING2026', name_th:'WING — Women in Green Growth', type:'Donor-funded', trips:7,
+      is_active:true, pm_id:'K-1063', pm_name:'ธนกร วัฒนา', member_ids:[], member_names:[] },
+    { project_code:'NONBILL', name_th:'ไม่ผูกโครงการ', type:'Core', trips:1, is_active:true,
+      pm_id:'', pm_name:'', member_ids:[], member_names:[] }] },
   getAdminSummary:{ ok:true, parcelsToday:3, unclaimed:5, unidentified:2, users:41,
     lineUsed:64, lineQuota:300, sheetUrl:'https://docs.google.com/spreadsheets' },
   getRoomDay:(function(){
@@ -1564,12 +1698,14 @@ const MOCK = {
       vehicles:[
         { resource_id:'VEH-1', name_th:'Toyota Commuter', capacity:12, plate:'ฮค-1234 กรุงเทพมหานคร',
           color:'ขาว', fuel_type:'ดีเซล', co2_per_km:'0.28',
-          note:'รถตู้', default_driver:'K-9001', driver_name:'สมพงษ์ ขับดี', driver_phone:'0812345678' },
+          note:'รถตู้', default_driver:'DRV-A1', driver_name:'สมพงษ์ ขับดี',
+          driver_company:'Kenan', driver_phone:'0812345678', driver_thumb:'' },
         { resource_id:'VEH-2', name_th:'Toyota Altis', capacity:4, plate:'2กท-5678 กรุงเทพมหานคร',
           color:'เทา', fuel_type:'เบนซิน', co2_per_km:'',
-          note:'รถเก๋ง', default_driver:'K-9002', driver_name:'ประยูร ทางไกล', driver_phone:'0898765432' }],
+          note:'รถเก๋ง', default_driver:'DRV-B2', driver_name:'ประยูร ทางไกล',
+          driver_company:'บริษัทรถเช่า ABC', driver_phone:'0898765432', driver_thumb:'' }],
       projects:[{ code:'BACKOFFICE', name:'งานสำนักงาน' }, { code:'NONBILL', name:'ไม่ผูกโครงการ' },
-        { code:'WING2026', name:'WING — Women in Green Growth' },
+        { code:'WING2026', name:'WING — Women in Green Growth', pm_id:'K-1063', pm_name:'ธนกร วัฒนา' },
         { code:'AISKILL25', name:'AI & Digital Skills for MSMEs' },
         { code:'DEEPSOUTH', name:'Deep South Education' },
         { code:'HEALTHWB', name:'Health and Wellbeing' }],
@@ -1606,8 +1742,19 @@ const MOCK = {
     { group:'internal', name_th:'ฝ่ายไอที',             name_en:'IT Support',         phone:'020000001' },
     { group:'internal', name_th:'นิติบุคคลอาคาร',        name_en:'Building Management',phone:'020000002' }]},
   getAnnouncements:{ items:[
-    { title:'อัปเดตนโยบายการเบิกค่าเดินทาง (Travel Expense Policy)', at:'2026-08-28T02:00:00Z' },
-    { title:'ซ้อมอพยพหนีไฟประจำปี 12 ก.ย.',                          at:'2026-08-25T06:30:00Z' }]},
+    { id:'N-1', title_th:'อัปเดตนโยบายการเบิกค่าเดินทาง (Travel Expense Policy)',
+      body_th:'มีผลตั้งแต่ 1 ต.ค. 2569\nอัตราค่าเดินทางในเขตกรุงเทพปรับใหม่ กรุณาอ่านเอกสารแนบและกรอกแบบฟอร์มรับทราบ',
+      at:'2026-08-28T02:00:00Z', tags:['สำคัญ','ต้องดำเนินการ','นโยบาย'], image_ids:[],
+      cta_label:'กรอกแบบฟอร์มรับทราบ', cta_url:'https://example.org/form',
+      due_at:'2026-09-15T23:59:00+07:00', expired:false, author:'อารยา พงษ์ไพบูลย์' },
+    { id:'N-2', title_th:'ซ้อมอพยพหนีไฟประจำปี 12 ก.ย.',
+      body_th:'วันศุกร์ที่ 12 ก.ย. เวลา 14:00 ทุกคนลงจุดรวมพลหน้าอาคาร',
+      at:'2026-08-25T06:30:00Z', tags:['ทั้งองค์กร','อาคาร/สถานที่'], image_ids:[],
+      expired:false, author:'มณฑา ใจดี' },
+    { id:'N-3', title_th:'ปิดปรับปรุงห้องประชุม Focus 20-22 ส.ค.',
+      body_th:'งดใช้ห้อง Focus ชั่วคราว ใช้ห้อง Collaboration แทนได้',
+      at:'2026-08-18T03:00:00Z', tags:['อาคาร/สถานที่'], image_ids:[],
+      due_at:'2026-08-22T23:59:00+07:00', expired:true, author:'มณฑา ใจดี' }]},
   getNotifications:{ items:[
     { title:'📦 มีพัสดุถึงคุณ', at:'2026-08-30T02:15:00Z', record_id:'PCL-260830-001', go:'my-parcels' },
     { title:'🛠 มีเรื่องแจ้งเข้ามาใหม่', at:'2026-08-30T01:10:00Z', record_id:'ISU-260830-002', go:'issues' },
@@ -1912,6 +2059,22 @@ $('#fab').onclick = () => go('parcel-in');
    จอคอม  = แดชบอร์ด "วันนี้มีอะไรรอคุณ" เพราะเมนูข้างทำหน้าที่เมนูไปแล้ว
             ถ้าโชว์ไทล์ซ้ำอีกก็คือเมนูสองชุดบนหน้าเดียว ซึ่งไม่ช่วยใคร */
 const isWide = () => window.innerWidth >= 900;
+/* ในชีทเก็บเป็น MM-DD (เทียบกับวันนี้ได้ตรงๆ) แต่คนไทยอ่าน วัน-เดือน
+   จึงสลับเฉพาะตอนแสดงในฟอร์ม */
+/* ใบขับขี่หมดอายุแล้วยังให้ขับต่อ = ความเสี่ยงทั้งกับคนขับและองค์กร
+   เตือนล่วงหน้า 60 วัน เพื่อให้มีเวลาไปต่ออายุ */
+function licWarn(exp){
+  if(!exp) return '';
+  const days = Math.floor((Date.parse(exp) - Date.now()) / 86400000);
+  if(isNaN(days) || days > 60) return '';
+  const bad = days < 0;
+  return `<div style="font-size:10.5px;font-weight:800;margin-top:2px;color:${
+    bad ? 'var(--bad)' : 'var(--warn)'}">${esc(bad ? t('licExpired') : t('licSoon')(days))}</div>`;
+}
+const mmddToDdmm = v => {
+  const m = String(v || '').match(/^(\d{2})-(\d{2})$/);
+  return m ? `${m[2]}-${m[1]}` : '';
+};
 
 ROUTES.home = async () => {
   const name = S.me?.name_th || S.me?.nickname || S.profile?.displayName || '';
@@ -1957,6 +2120,20 @@ ROUTES.home = async () => {
         <span class="l">${esc(x.lbl)}</span>
       </button>`).join('')}</div>` : ''}
 
+    ${(d.birthdays || []).length ? `<div class="bday">
+      <span class="cake">🎂</span>
+      <div><b>${esc(t('dbBirthdays'))}</b><br>${(d.birthdays || []).map(x =>
+        esc(x.nickname ? `${x.name} (${x.nickname})` : x.name)).join(' · ')}</div></div>` : ''}
+
+    ${(d.approvals || []).length ? `<div class="section-title">${esc(t('dbApprovals'))}</div>
+      <div class="rows" id="apv">${(d.approvals || []).map(a => `
+        <button class="row" data-a="${esc(a.record_id)}">
+          <div class="thumb" style="background:var(--warn-bg);color:var(--warn)">🚕</div>
+          <div class="body"><div class="t">${esc(a.title || '-')}</div>
+            <div class="s">${esc([a.who, a.project_code, a.wanted,
+              a.est_cost ? t('apvCost') + ' ' + a.est_cost : ''].filter(Boolean).join(' · '))}</div></div>
+          <span class="go">${IC.chev}</span></button>`).join('')}</div>` : ''}
+
     <div class="hsplit">
       <section>
         <div class="section-title">${esc(t('dbToday'))}</div>
@@ -2000,6 +2177,36 @@ ROUTES.home = async () => {
     if(b.dataset.go) b.onclick = () => go(b.dataset.go);
   });
   document.querySelectorAll('[data-bgo]').forEach(b => b.onclick = () => go(b.dataset.bgo));
+
+  // PM กดอนุมัติได้จากหน้าแรกเลย ไม่ต้องไล่หาในเมนู
+  document.querySelectorAll('#apv .row').forEach(b => b.onclick = () => {
+    const a = (d.approvals || []).find(x => x.record_id === b.dataset.a); if(!a) return;
+    sheet(`<h3>${esc(a.title || '-')}</h3>
+      <p class="sub">${esc([a.who, a.project_code].filter(Boolean).join(' · '))}</p>
+      <div class="rows" style="margin-bottom:12px">
+        ${a.wanted ? `<div class="row"><div class="body"><div class="s">${esc(t('carAltMode'))}</div>
+          <div class="t">${esc(a.wanted)}</div></div></div>` : ''}
+        ${a.est_cost ? `<div class="row"><div class="body"><div class="s">${esc(t('carAltCost'))}</div>
+          <div class="t">${esc(a.est_cost)}</div></div></div>` : ''}
+      </div>
+      <div class="field"><label>${esc(t('apvNote'))}</label><input id="apn"></div>
+      <button class="btn primary" id="apOk">${esc(t('apvApprove'))}</button>
+      <button class="btn" id="apNo" style="background:var(--bad);color:#fff">${esc(t('apvReject'))}</button>
+      <button class="btn ghost" id="apCx">${esc(t('close'))}</button>`);
+    $('#apCx').onclick = closeSheet;
+    const decide = v => async () => {
+      $('#apOk').disabled = true; $('#apNo').disabled = true;
+      try{
+        await apiRetry('decideAltTransport',
+          { record_id:a.record_id, decide:v, note:$('#apn').value.trim() }, 'POST');
+        closeSheet(); toast(t('apvDone'),'ok');
+        S.today.approvals = (S.today.approvals || []).filter(x => x.record_id !== a.record_id);
+        go('home', {}, true);
+      }catch(e){ toast(t('netErr'),'bad'); $('#apOk').disabled = false; $('#apNo').disabled = false; }
+    };
+    $('#apOk').onclick = decide('ok');
+    $('#apNo').onclick = decide('no');
+  });
   $('#allNews').onclick = () => go('news');
 
   try{
@@ -2367,6 +2574,15 @@ ROUTES.profile = async () => {
     <div class="card" style="margin-top:12px">
       <div class="field"><label>${esc(t('prPosition'))}</label>
         <input id="pPos" value="${esc(m.position || '')}" placeholder="${esc(t('prPositionPh'))}"></div>
+      <div class="field"><label>${esc(t('prBirthday'))}</label>
+        <input id="pBd" type="text" inputmode="numeric" maxlength="5" placeholder="15-08"
+          value="${esc(mmddToDdmm(S.me?.birthday))}"></div>
+      <label class="switch" style="margin-bottom:12px">
+        <input type="checkbox" id="pShowBd" ${(S.me?.show_birthday === true ||
+          String(S.me?.show_birthday).toUpperCase() === 'TRUE') ? 'checked' : ''}>
+        <span><b>${esc(t('prShowBirthday'))}</b><br>
+          <span style="font-size:11.5px;color:var(--ink-3)">${esc(t('prShowBirthdaySub'))}</span></span>
+      </label>
       <div class="field"><label>${esc(t('prPhone'))}</label>
         <input id="pPhone" inputmode="tel" value="${esc(m.phone || '')}" placeholder="08x-xxx-xxxx"></div>
       <label class="check" style="margin:0">
@@ -2391,9 +2607,12 @@ ROUTES.profile = async () => {
     try{
       await apiRetry('updateMyProfile',
         { phone:$('#pPhone').value.trim(), position:$('#pPos').value.trim(),
+          birthday:$('#pBd').value.trim(),
+          show_birthday:$('#pShowBd').checked ? 'true' : 'false',
           show_phone:$('#pShow').checked ? 'true' : 'false' }, 'POST');
       S.me = S.me || {}; S.me.phone = $('#pPhone').value.trim();
       S.me.position = $('#pPos').value.trim(); S.me.show_phone = $('#pShow').checked;
+      S.me.birthday = $('#pBd').value.trim(); S.me.show_birthday = $('#pShowBd').checked;
       clearCache('dir'); clearCache('emp');
       toast(t('prSaved'), 'ok');
     }catch(e){ toast(t('netErr'), 'bad'); }
@@ -2442,14 +2661,51 @@ ROUTES.news = async () => {
     $x('#list').innerHTML = emptyState(IC.news, t('newsEmpty'), t('newsEmptyBody'));
     return;
   }
-  $x('#list').innerHTML = items.map(a => `
-    <div class="card">
-      <div style="font-size:11px;color:var(--ink-3);font-weight:700">${esc(fmtDate(a.at))}</div>
-      <h3 style="margin:5px 0 6px;font-size:16px;font-weight:700">
+  // กรองด้วยแท็ก — 40 คนอ่านประกาศเดียวกันหมด แต่ไม่ใช่ทุกเรื่องเกี่ยวกับทุกคน
+  const allTags = [...new Set(items.flatMap(a => a.tags || []))];
+  let sel = '';
+  const card = a => `
+    <div class="card" style="${a.expired ? 'opacity:.62' : ''}">
+      <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap">
+        <div style="font-size:11px;color:var(--ink-3);font-weight:700">${esc(fmtDate(a.at))}${
+          a.author ? ' · ' + esc(t('newsBy')(a.author)) : ''}</div>
+        ${(a.tags || []).length ? `<div style="display:flex;gap:5px;flex-wrap:wrap">${
+          a.tags.map(x => `<span class="ntag ${/สำคัญ|เร่งด่วน|Urgent|Important|ดำเนินการ|Action/.test(x)
+            ? 'hot' : ''}">${esc(x)}</span>`).join('')}</div>` : ''}
+      </div>
+      <h3 style="margin:6px 0 7px;font-size:16.5px;font-weight:800;line-height:1.35">
         ${esc(S.lang==='th' ? (a.title_th || a.title_en) : (a.title_en || a.title_th))}</h3>
-      <div style="font-size:13.5px;color:var(--ink-2);white-space:pre-wrap">${
+      ${a.due_at ? `<div style="font-size:11.5px;font-weight:800;margin-bottom:7px;color:${
+        a.expired ? 'var(--ink-3)' : 'var(--warn)'}">${
+        esc(a.expired ? t('newsExpired') : t('newsDue')(fmtDate(a.due_at)))}</div>` : ''}
+      <div style="font-size:13.5px;color:var(--ink-2);white-space:pre-wrap;line-height:1.65">${
         esc(S.lang==='th' ? (a.body_th || a.body_en || '') : (a.body_en || a.body_th || ''))}</div>
-    </div>`).join('');
+      ${(a.image_ids || []).length ? `<div class="imggrid" style="margin-top:11px">${
+        a.image_ids.map(id => `<div class="imgcell"><img data-ph="${esc(id)}" alt=""></div>`).join('')}</div>` : ''}
+      ${a.cta_url && !a.expired ? `<a class="btn primary" href="${esc(a.cta_url)}" target="_blank"
+        rel="noopener" style="margin-top:12px;text-decoration:none">${
+        esc(a.cta_label || t('admNewsCta'))}</a>` : ''}
+    </div>`;
+
+  const paint = () => {
+    const list = sel ? items.filter(a => (a.tags || []).includes(sel)) : items;
+    $x('#nl').innerHTML = list.length ? list.map(card).join('')
+      : `<div class="quiet">${esc(t('pkNone'))}</div>`;
+    paintPhotos($('#nl'));
+  };
+
+  $x('#list').innerHTML = `
+    ${allTags.length ? `<div class="chips" id="nf" style="margin-bottom:14px">
+      <button class="chip on" data-tg="">${esc(t('newsAll'))}</button>
+      ${allTags.map(x => `<button class="chip" data-tg="${esc(x)}">${esc(x)}</button>`).join('')}
+    </div>` : ''}
+    <div id="nl"></div>`;
+  document.querySelectorAll('#nf .chip').forEach(b => b.onclick = () => {
+    sel = b.dataset.tg;
+    document.querySelectorAll('#nf .chip').forEach(x => x.classList.toggle('on', x === b));
+    paint();
+  });
+  paint();
 };
 
 ROUTES.reservation = async () => {
@@ -2553,17 +2809,89 @@ ROUTES['admin-news'] = async () => {
     <div class="note info">${IC.info}<div>${esc(t('admImportHint'))}</div></div>
     <button class="btn soft" id="imp" style="margin:12px 0 4px">${esc(t('admImport'))}</button>
 
+    <div class="section-title">${esc(t('admNewsPaste'))}</div>
+    <div class="card">
+      <textarea id="pasteBox" rows="4" placeholder="${esc(t('admNewsPasteHint'))}"
+        style="width:100%;resize:vertical"></textarea>
+      <button class="btn ghost" id="paste" style="margin-top:8px">${esc(t('admNewsPasteBtn'))}</button>
+    </div>
+
     <div class="section-title">${esc(t('admWriteOwn'))}</div>
     <div class="card">
       <div class="field"><label>${esc(t('admTitleTh'))}<span class="req">*</span></label>
         <input id="nTh" placeholder="${esc(t('admTitlePh'))}"></div>
       <div class="field"><label>${esc(t('admBodyTh'))}</label>
         <textarea id="bTh" rows="6" placeholder="${esc(t('admBodyPh'))}"></textarea></div>
-      <div class="field" style="margin-bottom:0"><label>${esc(t('admTitleEn'))}</label>
+      <div class="field"><label>${esc(t('admTitleEn'))}</label>
         <input id="nEn" placeholder="(optional)"></div>
+
+      <div class="field"><label>${esc(t('admNewsTags'))}</label>
+        <div class="chips" id="tagPick" style="margin-bottom:7px"></div>
+        <input id="nTag" placeholder="${esc(t('admNewsTagsHint'))}"></div>
+
+      <div class="field"><label>${esc(t('admNewsImages'))}</label>
+        <div id="imgGrid" class="imggrid"></div>
+        <button class="btn ghost" id="imgAdd" style="margin-top:7px">＋ ${esc(t('admResPhoto'))}</button>
+        <input type="file" id="imgFile" accept="image/*" hidden>
+        <div style="font-size:11px;color:var(--ink-3);margin-top:5px">${esc(t('admNewsImagesWhy'))}</div></div>
+
+      <div class="field"><label>${esc(t('admNewsCta'))}</label>
+        <input id="nCtaL" placeholder="${esc(t('admNewsCtaLabelPh'))}" style="margin-bottom:7px">
+        <input id="nCtaU" type="url" placeholder="https://…"></div>
+
+      <div class="field" style="margin-bottom:0"><label>${esc(t('admNewsDue'))}</label>
+        <input id="nDue" type="date">
+        <div style="font-size:11px;color:var(--ink-3);margin-top:4px">${esc(t('admNewsDueWhy'))}</div></div>
     </div>
     <div class="sticky-cta"><button class="btn primary" id="post">${esc(t('admPost'))}</button></div>
   </div>`;
+
+  /* วางข้อความจากอีเมลแล้วแยกหัวข้อ/เนื้อหาให้
+     HR ประกาศทางอีเมลอยู่แล้ว การก๊อปมาวางเร็วกว่าพิมพ์ใหม่ทั้งฉบับ
+     (อ่านไฟล์ .docx ตรงๆ ต้องเปิด Drive advanced service เพิ่ม ยังไม่ทำให้รอบนี้) */
+  $('#paste').onclick = () => {
+    const raw = $('#pasteBox').value.trim();
+    if(!raw){ toast(t('admNeedTitle'), 'bad'); return; }
+    const lines = raw.split(/\n+/).map(x => x.trim()).filter(Boolean);
+    $('#nTh').value = lines[0] || '';
+    $('#bTh').value = lines.slice(1).join('\n');
+    $('#pasteBox').value = '';
+    toast(t('admNewsPasteBtn'), 'ok');
+  };
+
+  const TAGS = S.lang === 'th'
+    ? ['สำคัญ','เร่งด่วน','ต้องดำเนินการ','HR','ทั้งองค์กร','กิจกรรม','อาคาร/สถานที่','นโยบาย']
+    : ['Important','Urgent','Action required','HR','All staff','Event','Building','Policy'];
+  let tags = [];
+  function paintTags(){
+    $x('#tagPick').innerHTML = TAGS.map(x => `
+      <button class="chip ${tags.includes(x) ? 'on' : ''}" data-tag="${esc(x)}">${esc(x)}</button>`).join('');
+    document.querySelectorAll('#tagPick .chip').forEach(b => b.onclick = () => {
+      const v = b.dataset.tag;
+      tags = tags.includes(v) ? tags.filter(x => x !== v) : tags.concat(v);
+      paintTags();
+    });
+  }
+  paintTags();
+
+  // รูปประกอบ สูงสุด 4 รูป
+  let imgs = [];
+  function paintImgs(){
+    $x('#imgGrid').innerHTML = imgs.map((im, i) => `
+      <div class="imgcell"><img src="${im.thumb}" alt="">
+        <button data-im="${i}">✕</button></div>`).join('');
+    document.querySelectorAll('#imgGrid [data-im]').forEach(b =>
+      b.onclick = () => { imgs.splice(Number(b.dataset.im), 1); paintImgs(); $('#imgAdd').hidden = false; });
+    $('#imgAdd').hidden = imgs.length >= 4;
+  }
+  $('#imgAdd').onclick = () => $('#imgFile').click();
+  $('#imgFile').onchange = async () => {
+    const f = $('#imgFile').files?.[0]; if(!f) return;
+    try{ const v = await shrink2(f); imgs.push(v); paintImgs(); }
+    catch(e){ toast(t('netErr'), 'bad'); }
+    $('#imgFile').value = '';
+  };
+  paintImgs();
 
   $('#imp').onclick = async () => {
     const b = $('#imp'); b.disabled = true; b.textContent = t('loading');
@@ -2578,8 +2906,14 @@ ROUTES['admin-news'] = async () => {
     if(!title){ toast(t('admNeedTitle'), 'bad'); return; }
     const b = $('#post'); b.disabled = true;
     try{
+      const extra = $('#nTag').value.split(',').map(x => x.trim()).filter(Boolean);
       await apiRetry('addAnnouncement', {
-        title_th:title, title_en:$('#nEn').value.trim(), body_th:$('#bTh').value.trim()
+        title_th:title, title_en:$('#nEn').value.trim(), body_th:$('#bTh').value.trim(),
+        tags: [...new Set(tags.concat(extra))].join(','),
+        images: JSON.stringify(imgs.map(x => x.full)),
+        card: imgs[0]?.card || '',
+        cta_label:$('#nCtaL').value.trim(), cta_url:$('#nCtaU').value.trim(),
+        due_at:$('#nDue').value ? $('#nDue').value + 'T23:59:00+07:00' : ''
       }, 'POST');
       toast(t('admPosted'), 'ok');
       S.stack = []; go('news');
@@ -3542,6 +3876,7 @@ ROUTES['admin-drv'] = async () => {
         <div style="font-size:11.5px;color:var(--ink-3)">${esc([d.company, d.phone].filter(Boolean).join(' · '))}</div>
         ${d.vehicles ? `<div style="font-size:10.5px;color:var(--ok);font-weight:700;margin-top:2px">
           ${esc(t('carDriver'))}: ${esc(d.vehicles)}</div>` : ''}
+        ${licWarn(d.licence_expiry)}
       </div>
       ${d.is_active ? `<span class="go">${IC.chev}</span>`
         : `<span class="pill" style="background:var(--neutral);color:var(--ink-3)">${esc(t('admResInactive'))}</span>`}
@@ -3563,10 +3898,17 @@ ROUTES['admin-drv'] = async () => {
         <input id="dnt" value="${esc(it?.note || '')}" placeholder="${esc(t('admDrvNotePh'))}"></div>
       ${photoField('dph', t('admDrvPhoto'))}
       <div style="font-size:11px;color:var(--ink-3);margin:-6px 0 12px">${esc(t('admDrvPhotoWhy'))}</div>
+      <div class="field"><label>${esc(t('admDrvLic'))}</label>
+        <input id="dlic" value="${esc(it?.licence_no || '')}" placeholder="${esc(t('admDrvLicPh'))}"></div>
+      <div class="field"><label>${esc(t('admDrvLicExp'))}</label>
+        <input id="dexp" type="date" value="${esc(it?.licence_expiry || '')}"></div>
+      ${photoField('dlp', t('admDrvLicPhoto'))}
+      <div class="note info" style="margin:-4px 0 12px">${IC.info}<div>${esc(t('admDrvLicWhy'))}</div></div>
       <button class="btn primary" id="dsv">${esc(t('admResSave'))}</button>
       ${it ? `<button class="btn ghost" id="dtog">${esc(it.is_active ? t('admResOff') : t('admResOn'))}</button>` : ''}
       <button class="btn ghost" id="dcx">${esc(t('cancel'))}</button>`);
     const img = { v:null }; wirePhoto('dph', img);
+    const lic = { v:null }; wirePhoto('dlp', lic);
     $('#dcx').onclick = closeSheet;
     const save = extra => async () => {
       const name = $('#dn').value.trim();
@@ -3577,7 +3919,9 @@ ROUTES['admin-drv'] = async () => {
           driver_id: it?.driver_id || '', name,
           phone:$('#dp').value.trim(), company:$('#dc').value.trim(),
           note:$('#dnt').value.trim(),
-          photo:img.v?.full || '', card:img.v?.card || ''
+          licence_no:$('#dlic').value.trim(), licence_expiry:$('#dexp').value,
+          photo:img.v?.full || '', card:img.v?.card || '',
+          licence_photo:lic.v?.full || ''
         }, extra || {}), 'POST');
         closeSheet(); clearCache(); toast(t('admResSaved'),'ok'); go('admin-drv', {}, true);
       }catch(e){ toast(t('netErr'),'bad'); b.disabled = false; }
@@ -3613,6 +3957,10 @@ ROUTES['admin-proj'] = async () => {
       <div class="body">
         <div class="t">${esc(p.project_code)}</div>
         <div class="s">${esc([p.name_th || p.name_en, p.type].filter(Boolean).join(' · '))}</div>
+        <div style="font-size:10.5px;font-weight:700;margin-top:2px;color:${
+          p.pm_name ? 'var(--ok)' : 'var(--warn)'}">${
+          esc(p.pm_name ? 'PM: ' + p.pm_name + (p.member_names?.length ? ` · ${p.member_names.length} ${t('admProjMemN')}` : '')
+                        : t('admProjNoPm'))}</div>
         ${p.trips ? `<div style="font-size:10.5px;color:var(--ink-3);margin-top:2px">${
           esc(t('admProjTrips')(p.trips))}</div>` : ''}
       </div>
@@ -3634,10 +3982,41 @@ ROUTES['admin-proj'] = async () => {
         <input id="pn" value="${esc(it?.name_th || '')}" placeholder="${esc(t('admProjNamePh'))}"></div>
       <div class="field"><label>${esc(t('admProjType'))}</label>
         <input id="pt" value="${esc(it?.type || '')}" placeholder="${esc(t('admProjTypePh'))}"></div>
+      <div class="field"><label>${esc(t('admProjPm'))}<span class="req">*</span></label>
+        <button class="btn ghost" id="pmBtn" style="text-align:left;justify-content:flex-start">${
+          esc(it?.pm_name || t('admProjPmPick'))}</button>
+        <div style="font-size:11px;color:var(--ink-3);margin-top:4px">${esc(t('admProjPmWhy'))}</div></div>
+      <div class="field"><label>${esc(t('admProjMembers'))}</label>
+        <div id="memList"></div>
+        <button class="btn ghost" id="memAdd" style="margin-top:6px">${esc(t('admProjMemAdd'))}</button></div>
       <button class="btn primary" id="psv">${esc(t('admResSave'))}</button>
       ${it ? `<button class="btn ghost" id="ptog">${esc(it.is_active ? t('admResOff') : t('admResOn'))}</button>` : ''}
       <button class="btn ghost" id="pcx">${esc(t('cancel'))}</button>`);
     $('#pcx').onclick = closeSheet;
+
+    let pm = it?.pm_id ? { kenan_user_id:it.pm_id, name_th:it.pm_name } : null;
+    let mem = (it?.member_ids || []).map((id, i) =>
+      ({ kenan_user_id:id, name_th:(it.member_names || [])[i] || id }));
+    function paintMem(){
+      $x('#memList').innerHTML = mem.length ? `<div class="paxrow">${mem.map((m, i) => `
+        <span class="paxchip">${esc(m.name_th)}<button data-m="${i}">✕</button></span>`).join('')}</div>` : '';
+      document.querySelectorAll('#memList [data-m]').forEach(b =>
+        b.onclick = () => { mem.splice(Number(b.dataset.m), 1); paintMem(); });
+    }
+    paintMem();
+    $('#pmBtn').onclick = async () => {
+      await ensureEmployees();
+      const x = await pickFromList({ title:t('admProjPm'), items:S.employees,
+        label:u => u.name_th || u.name_en, sub:u => [u.position, u.department].filter(Boolean).join(' · ') });
+      if(x){ pm = x; $('#pmBtn').textContent = x.name_th || x.name_en; }
+    };
+    $('#memAdd').onclick = async () => {
+      await ensureEmployees();
+      const x = await pickFromList({ title:t('admProjMemAdd'), items:S.employees,
+        label:u => u.name_th || u.name_en, sub:u => [u.position, u.department].filter(Boolean).join(' · ') });
+      if(x && !mem.some(m => m.kenan_user_id === x.kenan_user_id)){ mem.push(x); paintMem(); }
+    };
+
     const save = extra => async () => {
       const code = $('#pc').value.trim();
       if(!code){ toast(t('admProjNeedCode'),'bad'); return; }
@@ -3646,6 +4025,8 @@ ROUTES['admin-proj'] = async () => {
         const r = await apiRetry('saveProject', Object.assign({
           project_code:code, orig:it?.project_code || '',
           name_th:$('#pn').value.trim(), type:$('#pt').value.trim(),
+          pm_id: pm?.kenan_user_id || '',
+          member_ids: mem.map(m => m.kenan_user_id).join(','),
           is_active: it ? it.is_active : true
         }, extra || {}), 'POST');
         if(r?.error === 'CODE_LOCKED'){ toast(t('admProjLocked'),'bad'); b.disabled = false; return; }
@@ -4202,6 +4583,10 @@ ROUTES['car-new'] = async ({ date, veh:preVeh, hour } = {}) => {
 
     <div class="card">
       <div class="field"><label>${esc(t('carPax'))}</label>
+        <div id="paxList"></div>
+        <button class="btn ghost" id="paxAdd" style="margin-top:6px">${esc(t('carPaxAdd'))}</button>
+        <div style="font-size:11px;color:var(--ink-3);margin-top:5px">${esc(t('carPaxWhy'))}</div></div>
+      <div class="field"><label>${esc(t('carPaxOther'))}</label>
         <input id="px" placeholder="${esc(t('carPaxPh'))}"></div>
       <div class="field"><label>${esc(t('carItems'))}</label>
         <input id="it" placeholder="${esc(t('carItemsPh'))}"></div>
@@ -4228,25 +4613,33 @@ ROUTES['car-new'] = async ({ date, veh:preVeh, hour } = {}) => {
       const on = v.resource_id === vehId;
       const spec = [ v.capacity ? t('carSeatsN')(v.capacity) : '', v.color, v.fuel_type ]
         .filter(Boolean).join(' · ');
-      return `<button class="row" data-v="${esc(v.resource_id)}" style="border:1.5px solid ${
-        on?'var(--primary)':'var(--line)'};border-radius:12px;margin-bottom:8px;
-        background:${on?'#EEF3FF':'#fff'};align-items:flex-start">
-        ${phImg(v,'rphoto','width:62px;height:48px') || `<div class="rphoto" style="width:62px;height:48px">${IC.car}</div>`}
-        <div class="body">
-          <div class="t">${esc(v.name_th)}</div>
-          ${v.plate ? `<div style="display:inline-block;font-size:11px;font-weight:800;
-            border:1px solid var(--line);border-radius:5px;padding:1px 6px;margin:3px 0">${esc(v.plate)}</div>` : ''}
-          <div class="s">${esc(spec)}</div>
-          <div class="s">${esc(v.driver_name ? t('carDriver') + ' ' + v.driver_name : t('carNoDriver'))}${
-            v.driver_phone ? ` · <a href="tel:${esc(v.driver_phone)}" style="color:var(--primary);font-weight:700">${esc(v.driver_phone)}</a>` : ''}</div>
-          <div style="font-size:10.5px;font-weight:800;color:${busy?'var(--bad)':'var(--ok)'};margin-top:2px">
+      return `<button class="vcard ${on?'on':''}" data-v="${esc(v.resource_id)}">
+        ${phImg(v,'vphoto') || `<div class="vphoto">${IC.car}</div>`}
+        <div class="vbody">
+          <div class="vhead">
+            <div style="min-width:0">
+              <div class="vname">${esc(v.name_th)}</div>
+              ${v.plate ? `<span class="vplate">${esc(v.plate)}</span>` : ''}
+            </div>
+            <span class="ck" style="color:var(--primary);font-weight:800;font-size:17px;${on?'':'visibility:hidden'}">✓</span>
+          </div>
+          <div class="vspec">${esc(spec)}</div>
+          <div class="vdrv">
+            ${v.driver_thumb ? `<img class="dav" src="${v.driver_thumb}" alt="">`
+              : `<span class="dav">${esc(String(v.driver_name || '?').trim().charAt(0))}</span>`}
+            <div style="min-width:0;flex:1">
+              <div class="dnm">${esc(v.driver_name || t('carNoDriver'))}</div>
+              ${v.driver_company ? `<div class="dco">${esc(v.driver_company)}</div>` : ''}
+            </div>
+            ${v.driver_phone ? `<a class="dtel" href="tel:${esc(v.driver_phone)}">📞 ${esc(v.driver_phone)}</a>` : ''}
+          </div>
+          <div class="vfree" style="color:${busy?'var(--bad)':'var(--ok)'}">
             ${esc(busy ? t('carVehBusy') : t('carVehFree'))}</div>
         </div>
-        <span class="ck" style="color:var(--primary);font-weight:800;${on?'':'visibility:hidden'}">✓</span>
       </button>`;
     }).join('');
     paintPhotos($('#vp'));
-    document.querySelectorAll('#vp .row').forEach(b => b.onclick = ev => {
+    document.querySelectorAll('#vp .vcard').forEach(b => b.onclick = ev => {
       if(ev.target.closest('a')) return;      // แตะเบอร์โทร = โทร ไม่ใช่เลือกรถ
       vehId = b.dataset.v; paintVeh(); paintSummary();
     });
@@ -4257,13 +4650,57 @@ ROUTES['car-new'] = async ({ date, veh:preVeh, hour } = {}) => {
     $x('#noFree').innerHTML = allBusy ? `<div class="note" style="border-color:var(--bad);margin-top:8px">
       ${IC.info}<div><b>${esc(t('carNoFree'))}</b><br>${esc(t('carGrabHint'))}</div></div>
       <button class="btn ghost" id="grabBtn" style="margin-top:8px">${esc(t('carGrab'))}</button>` : '';
-    if($('#grabBtn')) $('#grabBtn').onclick = async () => {
-      const [s3,e3] = win();
-      try{ await apiRetry('logNoCar', { wanted:`${s3} → ${e3}`, alt_action:'grab',
-             project_code:project }, 'POST');
-           toast(t('carGrabOk'),'ok'); back(); }
-      catch(e){ toast(t('netErr'),'bad'); }
+    if($('#grabBtn')) $('#grabBtn').onclick = () => altSheet();
+  }
+
+  /* ไม่มีรถว่าง → ให้เลือกเองว่าจะแจ้ง PM แล้วไปเลย หรือขออนุมัติก่อน
+     สองสถานการณ์นี้ต่างกันจริง: ของด่วนหน้างานรอไม่ได้ ส่วนเที่ยวที่วางแผนไว้ควรผ่านตา PM
+     ระบบตัดสินแทนไม่ได้ จึงถามตอนกด */
+  function altSheet(){
+    const pj = projOf(project);
+    const [s3, e3] = win();
+    sheet(`<h3>${esc(t('carNoFree'))}</h3>
+      <p class="sub">${esc(t('carAltLead'))}</p>
+      ${!project ? `<div class="note" style="border-color:var(--warn)">${IC.info}
+        <div>${esc(t('carAltNeedProj'))}</div></div>` : ''}
+      ${project && !pj?.pm_id ? `<div class="note" style="border-color:var(--warn)">${IC.info}
+        <div>${esc(t('carAltNoPm'))}</div></div>` : ''}
+      ${pj?.pm_name ? `<div class="rows" style="margin-bottom:12px"><div class="row"><div class="body">
+        <div class="s">${esc(t('carAltPm'))}</div><div class="t">${esc(pj.pm_name)}</div></div></div></div>` : ''}
+      <div class="field"><label>${esc(t('carAltMode'))}</label>
+        <select id="am">
+          <option value="grab">Grab / แท็กซี่</option>
+          <option value="taxi">รถรับจ้างอื่น</option>
+          <option value="rental">รถเช่า</option>
+          <option value="public">ขนส่งสาธารณะ</option>
+        </select></div>
+      <div class="field"><label>${esc(t('carAltCost'))}</label>
+        <input id="ac" inputmode="numeric" placeholder="${esc(t('carAltCostPh'))}"></div>
+      <div class="field"><label>${esc(t('carAltNote'))}</label>
+        <input id="an" placeholder="${esc(t('carAltNotePh'))}"></div>
+      <button class="btn primary" id="aNotify" ${project ? '' : 'disabled'}>${esc(t('carAltNotify'))}</button>
+      <div style="font-size:11px;color:var(--ink-3);margin:-4px 0 10px">${esc(t('carAltNotifyWhy'))}</div>
+      <button class="btn soft" id="aReq" ${project ? '' : 'disabled'}>${esc(t('carAltRequest'))}</button>
+      <div style="font-size:11px;color:var(--ink-3);margin:-4px 0 10px">${esc(t('carAltRequestWhy'))}</div>
+      <button class="btn ghost" id="aCx">${esc(t('cancel'))}</button>`);
+    $('#aCx').onclick = closeSheet;
+    const send = mode => async () => {
+      const b = $(mode === 'approve' ? '#aReq' : '#aNotify'); b.disabled = true;
+      try{
+        const r = await apiRetry('logNoCar', {
+          mode, alt_action:$('#am').value, est_cost:$('#ac').value.trim(),
+          note:$('#an').value.trim(), purpose:$('#pp').value.trim(),
+          project_code:project, wanted:`${s3} → ${e3}`,
+          start_at:s3, end_at:e3 }, 'POST');
+        closeSheet();
+        toast(mode === 'approve'
+          ? t('carAltSent')(r?.pm_name || '')
+          : t('carAltLogged')(r?.pm_name || ''), 'ok');
+        S.stack = [{ name:'home', params:{} }]; go('home');
+      }catch(e){ toast(t('netErr'),'bad'); b.disabled = false; }
     };
+    $('#aNotify').onclick = send('notify');
+    $('#aReq').onclick    = send('approve');
   }
 
   /* ── โครงการ: พิมพ์ค้นหาได้ เพราะมี 20+ โครงการ ── */
@@ -4382,6 +4819,25 @@ ROUTES['car-new'] = async ({ date, veh:preVeh, hour } = {}) => {
       </div></div>`;
   }
 
+  /* ผู้โดยสารเลือกจากรายชื่อ เพื่อให้ระบบแจ้งเตือนเขาได้จริง
+     พิมพ์ชื่อเป็นข้อความเฉยๆ ระบบไม่รู้ว่าเป็นใคร แจ้งไม่ได้ */
+  let pax = [];
+  function paintPax(){
+    $x('#paxList').innerHTML = pax.length ? `<div class="paxrow">${pax.map((p, i) => `
+      <span class="paxchip">${esc(p.name_th || p.name_en)}
+        <button data-px="${i}" aria-label="remove">✕</button></span>`).join('')}</div>` : '';
+    document.querySelectorAll('#paxList [data-px]').forEach(b =>
+      b.onclick = () => { pax.splice(Number(b.dataset.px), 1); paintPax(); });
+  }
+  $('#paxAdd').onclick = async () => {
+    await ensureEmployees();
+    const p = await pickFromList({ title:t('carPaxAdd'), items:S.employees,
+      label:x => x.name_th || x.name_en, sub:x => [x.position, x.department].filter(Boolean).join(' · '),
+      search:t('pkSearch') });
+    if(p && !pax.some(x => x.kenan_user_id === p.kenan_user_id)){ pax.push(p); paintPax(); }
+  };
+  paintPax();
+
   paintVeh(); paintRoute(); paintSummary();
   ['#dd','#t1','#t2'].forEach(sl => { const el = $(sl); if(el) el.onchange = paintVeh; });
   $('#tt').onchange = () => { tripType = $('#tt').value; };
@@ -4398,6 +4854,7 @@ ROUTES['car-new'] = async ({ date, veh:preVeh, hour } = {}) => {
       const res = await apiRetry('createCarBooking', {
         resource_id:vehId, purpose, project_code:project, trip_type:tripType,
         passengers:$('#px').value.trim(), items:$('#it').value.trim(), note:$('#nt').value.trim(),
+        passenger_ids: pax.map(x => x.kenan_user_id).join(','),
         stops: JSON.stringify(segs().map((sg, i) => ({
           from:sg.from, to:sg.to,
           project_code: points[i+1]?.project_code || project,
