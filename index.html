@@ -536,12 +536,23 @@ main{flex:1 1 auto;padding:16px 16px calc(var(--nav-h) + var(--safe-b) + 24px)}
   main > .view > .tiles,
   main > .view > .hsplit,
   main > .view > .todo,
-  main > .view > .cols2{max-width:none}
+  main > .view > .cols2,
+  main > .view > .bkwrap{max-width:none}
+
+  /* หน้าจอง: ตารางซ้าย · รายการห้อง/รถ/Zoom ขวา
+     เดิมรายการอยู่ล่างสุดเพราะเขียนเรียงตามมือถือ บนจอกว้างจึงเหลือที่ว่างข้างตารางเปล่าๆ
+     ต้องเลื่อนลงไปดูรถทั้งที่มีที่ว่างอยู่ข้างๆ */
+  .bkwrap{display:grid;grid-template-columns:minmax(0,1fr) 330px;gap:26px;align-items:start;max-width:none}
+  .bkwrap .section-title:first-child{margin-top:0}
+  .bkside{position:sticky;top:82px}
 
   /* รายชื่อ 40 คนบนจอกว้าง อ่านสองคอลัมน์เร็วกว่าไล่ลงทีละแถว */
   /* ใช้ column ไม่ใช่ grid — grid จะโยนหัวข้อแผนกไปคอลัมน์ซ้ายและคนไปคอลัมน์ขวา
      column ยังไหลตามลำดับการอ่านเดิม */
   .dircols{columns:2;column-gap:26px;max-width:none}
+  .eqcols{columns:2;column-gap:22px;max-width:none}
+  .eqcols .rcard{break-inside:avoid;display:flex;width:100%}
+  .eqcols .section-title{break-inside:avoid}
   .dircols .dgrp{break-inside:avoid;-webkit-column-break-inside:avoid;display:inline-block;width:100%}
   .dircols .dgrp .section-title:first-child{margin-top:0}
   .cols2{display:grid;grid-template-columns:1fr 1fr;gap:14px;align-items:start}
@@ -558,6 +569,13 @@ main{flex:1 1 auto;padding:16px 16px calc(var(--nav-h) + var(--safe-b) + 24px)}
 }
 
 /* ── เมนูข้าง ─────────────────────────────────────────────────── */
+/* สลับภาษาต้องอยู่ตรงที่เห็นทันที ไม่ใช่ซ่อนในหน้าโปรไฟล์
+   ออฟฟิศมีทั้งเจ้าหน้าที่ต่างชาติ และคนไทยที่ไม่สะดวกภาษาอังกฤษ */
+.langtop{display:flex;gap:2px;background:var(--neutral);border-radius:9px;padding:3px;flex:0 0 auto}
+.langtop button{padding:5px 10px;border-radius:7px;font-size:11.5px;font-weight:800;color:var(--ink-3)}
+.langtop button.on{background:#fff;color:var(--primary);box-shadow:0 1px 2px rgba(0,0,0,.08)}
+@media(min-width:900px){ .langtop{margin-left:auto} }
+
 .sbrand{display:flex;align-items:center;gap:10px;padding:20px 18px 18px}
 .sbrand .mark{width:34px;height:34px;border-radius:9px;background:#fff;color:var(--navy);
   display:grid;place-items:center;font-weight:800;font-size:17px;flex:0 0 auto}
@@ -594,7 +612,9 @@ main{flex:1 1 auto;padding:16px 16px calc(var(--nav-h) + var(--safe-b) + 24px)}
     </button>
     <div class="brand" id="brand"><div class="mark">K</div><div class="txt">Kenan Connect</div></div>
     <h1 id="title" hidden></h1>
-    <span class="icon-btn" aria-hidden="true"></span>
+    <div class="langtop" id="langTop">
+      <button data-l="th">TH</button><button data-l="en">EN</button>
+    </div>
   </header>
 
   <aside id="side">
@@ -677,7 +697,7 @@ const CFG = {
   GAS_URL : 'https://script.google.com/macros/s/AKfycbyOjh4BAAbzY5QfZNG_oGuxbmvZwHjEAKazRMuMxrDeoNknE_rqEoAFdkuJldOPP_q_eg/exec',
   LIFF_TIMEOUT_MS : 3500,
   CONSENT_VERSION : '2026-09-01',
-  BUILD : '2026-09-01a'      // ต้องตรงกับ BUILD ใน Code.gs ที่ Deploy ไว้
+  BUILD : '2026-09-01b'      // ต้องตรงกับ BUILD ใน Code.gs ที่ Deploy ไว้
 };
 
 /* เก็บ ?go=... ไว้ตั้งแต่ต้น เพราะเดี๋ยวจะล้าง query string ทิ้งหลัง LIFF ล็อกอิน
@@ -689,7 +709,7 @@ const START_AT = (function(){
             'news','reservation','admin','directory','activity','issues',
             'alert-board','issue-queue',
             'rooms','room-new','equipment','admin-res',
-            'cars','car-new','driver','admin-proj'].includes(g) ? g : null;
+            'cars','car-new','driver','admin-proj','admin-drv','zoom'].includes(g) ? g : null;
   }catch(e){ return null; }
 })();
 /* ?rec=PCL-xxx → เปิดพัสดุชิ้นนั้นให้เลย (ลิงก์ที่ส่งไปในข้อความ LINE) */
@@ -752,6 +772,21 @@ const T = {
     navHome:'หน้าแรก', navParcel:'พัสดุ', navSos:'ฉุกเฉิน', navMe:'ฉัน', navLog:'บันทึกพัสดุ',
     navNotif:'แจ้งเตือน',
     sgWork:'งานของฉัน', sgBook:'จอง ยืม คืน', sgInfo:'ข้อมูลองค์กร', sgAdmin:'สำหรับผู้ดูแล',
+    admDrv:'จัดการคนขับ', admDrvAdd:'เพิ่มคนขับ', admDrvName:'ชื่อคนขับ',
+    admDrvPhone:'เบอร์โทร', admDrvCompany:'สังกัด', admDrvCompanyPh:'เช่น Kenan / บริษัทรถเช่า ABC',
+    admDrvNote:'หมายเหตุ', admDrvNotePh:'เช่น ขับรถตู้ได้ · มีใบขับขี่ ท.2',
+    admDrvPhoto:'รูปคนขับ',
+    admDrvPhotoWhy:'มีรูปแล้วคนจองรู้ว่าจะเจอใครที่จุดนัด ไม่ต้องยืนถามกันหน้าตึก',
+    admDrvWhy:'แยกจากทำเนียบพนักงาน เพราะคนขับหลายคนเป็น outsource ไม่มีอีเมลองค์กรและเปลี่ยนตัวบ่อย · คนขับที่เป็นพนักงานคีนันให้ตั้งสิทธิ์ "คนขับ" ในหน้าจัดการสิทธิ์เพิ่มด้วย จะกดออก-กลับในแอปได้',
+    admDrvEmpty:'ยังไม่มีคนขับในระบบ',
+    admDrvEmptyBody:'เพิ่มคนขับก่อน แล้วจะเลือกเป็นคนขับประจำรถแต่ละคันได้',
+    admRes2:'จัดการทรัพยากร', admRes2Sub:'ห้องประชุม · รถ · อุปกรณ์ · Zoom',
+    admResZoom:'Zoom', admResZoomCap:'จำนวนผู้เข้าร่วมสูงสุด',
+    resvZoom:'จอง Zoom', zoomTitle:'จอง Zoom', zoomPick:'เลือกบัญชี Zoom',
+    newsAdd:'＋ เพิ่มข่าว / ประกาศ',
+    newsGuide:'ควรลงอะไร: ประกาศจาก HR · นโยบายใหม่ · วันหยุด · ซ้อมอพยพ · กิจกรรมองค์กร · การปิดปรับปรุงอาคาร — เรื่องที่ทุกคนต้องรู้พร้อมกัน ไม่ใช่เรื่องของทีมเดียว',
+    langLabel:'ภาษา',
+
     dbHasTodo:'มีเรื่องรอคุณอยู่ด้านล่าง', dbAllClear:'ไม่มีอะไรค้างอยู่ ✓',
     dbParcels:'พัสดุรอคุณมารับ', dbDriving:'งานขับรถวันนี้', dbLoans:'ของที่ยังไม่ได้คืน',
     dbIssues:'เรื่องที่คุณแจ้งยังไม่ปิด', dbUnid:'พัสดุไม่ทราบผู้รับ',
@@ -833,7 +868,7 @@ const T = {
     eqCancelResv:'ยกเลิกการจอง', eqResvOk:'จองอุปกรณ์เรียบร้อย',
     eqClash:'ช่วงเวลานี้มีคนจองไว้แล้ว', eqDue:'กำหนดคืน',
     admSettings:'ตั้งค่าระบบ',
-    admRes:'จัดการห้อง / อุปกรณ์', admResAdd:'เพิ่มรายการใหม่',
+    admRes:'จัดการทรัพยากร', admResAdd:'เพิ่มรายการใหม่',
     admResKind:'ประเภท', admResRoom:'ห้องประชุม', admResEq:'อุปกรณ์',
     admResName:'ชื่อ (ไทย)', admResNameEn:'ชื่อ (อังกฤษ)', admResCat:'หมวด',
     admResCap:'จำนวนที่นั่ง', admResLoc:'ที่เก็บ', admResNote:'หมายเหตุ / อุปกรณ์ประกอบ',
@@ -942,6 +977,7 @@ const T = {
     drvNoVeh:'เลือกรถที่ใช้',
     resvRoom:'ห้องประชุม', resvEq:'ยืมอุปกรณ์', resvCar:'จองรถ',
 
+    dirAdmins:'ผู้ดูแลระบบ (ติดต่อได้เมื่อมีปัญหา)',
     dirCall:'โทร', dirMail:'ส่งอีเมล', dirCopy:'คัดลอกเบอร์', dirCopied:'คัดลอกแล้ว',
     isuNew:'แจ้งเรื่อง / สอบถาม', isuMine:'เรื่องที่ฉันแจ้ง', isuQueue:'คิวที่ต้องจัดการ',
     isuCat:'เรื่องอะไร', isuDetail:'รายละเอียด',
@@ -1067,6 +1103,21 @@ const T = {
     navHome:'Home', navParcel:'Parcels', navSos:'Emergency', navMe:'Me', navLog:'Log parcel',
     navNotif:'Alerts',
     sgWork:'My work', sgBook:'Book & borrow', sgInfo:'Directory & info', sgAdmin:'Admin',
+    admDrv:'Drivers', admDrvAdd:'Add a driver', admDrvName:'Driver name',
+    admDrvPhone:'Phone', admDrvCompany:'Employer', admDrvCompanyPh:'e.g. Kenan / ABC car rental',
+    admDrvNote:'Notes', admDrvNotePh:'e.g. can drive the van, holds a Type 2 licence',
+    admDrvPhoto:'Driver photo',
+    admDrvPhotoWhy:'With a photo, whoever booked knows who to look for at the pickup point.',
+    admDrvWhy:'Kept separate from the staff directory because many drivers are outsourced — no work email, and they change often. For Kenan staff who drive, also give them the "driver" role so they can log departure and return.',
+    admDrvEmpty:'No drivers yet',
+    admDrvEmptyBody:'Add drivers first, then you can assign one to each vehicle.',
+    admRes2:'Resources', admRes2Sub:'Rooms · vehicles · equipment · Zoom',
+    admResZoom:'Zoom', admResZoomCap:'Max participants',
+    resvZoom:'Book Zoom', zoomTitle:'Book Zoom', zoomPick:'Choose a Zoom account',
+    newsAdd:'＋ Add an announcement',
+    newsGuide:'What belongs here: HR announcements, new policies, holidays, fire drills, company events, building works — things everyone needs to know at once, not one team\'s business.',
+    langLabel:'Language',
+
     dbHasTodo:'A few things are waiting for you', dbAllClear:'Nothing outstanding ✓',
     dbParcels:'parcels waiting for you', dbDriving:'driving jobs today', dbLoans:'items not returned',
     dbIssues:'open reports of yours', dbUnid:'unidentified parcels',
@@ -1148,7 +1199,7 @@ const T = {
     eqCancelResv:'Cancel booking', eqResvOk:'Equipment reserved',
     eqClash:'That time is already booked', eqDue:'Due back',
     admSettings:'System settings',
-    admRes:'Rooms & equipment', admResAdd:'Add new',
+    admRes:'Resources', admResAdd:'Add new',
     admResKind:'Type', admResRoom:'Meeting room', admResEq:'Equipment',
     admResName:'Name (Thai)', admResNameEn:'Name (English)', admResCat:'Category',
     admResCap:'Seats', admResLoc:'Stored at', admResNote:'Notes / accessories',
@@ -1257,6 +1308,7 @@ const T = {
     drvNoVeh:'Choose the vehicle used',
     resvRoom:'Meeting rooms', resvEq:'Equipment', resvCar:'Vehicles',
 
+    dirAdmins:'System admins (contact for problems)',
     dirCall:'Call', dirMail:'Email', dirCopy:'Copy number', dirCopied:'Copied',
     isuNew:'Report an issue', isuMine:'My reports', isuQueue:'Queue',
     isuCat:'What is it about', isuDetail:'Details',
@@ -1423,12 +1475,12 @@ const MOCK = {
     { record_id:'PCL-260830-007', tracking_no:'TH99887766554', created_at:'2026-08-30T03:20:00Z' },
     { record_id:'PCL-260830-008', tracking_no:'',              created_at:'2026-08-30T03:22:00Z' }]},
   getDirectory:{ ok:true, items:[
-    { kenan_user_id:'K-1000', name_th:'พิพัฒน์ สุริยสมบูรณ์', name_en:'', nickname:'', position:'Senior Program Manager', department:'Education Program', email:'staff00@kenan-asia.org', phone:'0812345000', show_phone:false },
+    { kenan_user_id:'K-1000', name_th:'พิพัฒน์ สุริยสมบูรณ์', name_en:'', nickname:'', roles:'staff,admin', position:'Senior Program Manager', department:'Education Program', email:'staff00@kenan-asia.org', phone:'0812345000', show_phone:false },
     { kenan_user_id:'K-1007', name_th:'สมชาย กิตติวงศ์', name_en:'', nickname:'', position:'Program Officer', department:'Business and Economy', email:'staff01@kenan-asia.org', phone:'0812345001', show_phone:true },
     { kenan_user_id:'K-1014', name_th:'วราภรณ์ ทองดี', name_en:'', nickname:'', position:'M&E Specialist', department:'Social Impact and Innovation', email:'staff02@kenan-asia.org', phone:'0812345002', show_phone:true },
     { kenan_user_id:'K-1021', name_th:'ณัฐพล มณีรัตน์', name_en:'', nickname:'', position:'IT Officer', department:'HR', email:'staff03@kenan-asia.org', phone:'0812345003', show_phone:false },
-    { kenan_user_id:'K-1028', name_th:'ชุนหลี แซ่ลิ้ม', name_en:'', nickname:'', position:'IT Manager', department:'Finance and Accounting', email:'staff04@kenan-asia.org', phone:'0812345004', show_phone:true },
-    { kenan_user_id:'K-1035', name_th:'อารยา พงษ์ไพบูลย์', name_en:'', nickname:'', position:'HR Officer', department:'IT', email:'staff05@kenan-asia.org', phone:'0812345005', show_phone:true },
+    { kenan_user_id:'K-1028', name_th:'ชุนหลี แซ่ลิ้ม', name_en:'', nickname:'', roles:'staff,officer', position:'IT Manager', department:'Finance and Accounting', email:'staff04@kenan-asia.org', phone:'0812345004', show_phone:true },
+    { kenan_user_id:'K-1035', name_th:'อารยา พงษ์ไพบูลย์', name_en:'', nickname:'', roles:'staff,officer', position:'HR Officer', department:'IT', email:'staff05@kenan-asia.org', phone:'0812345005', show_phone:true },
     { kenan_user_id:'K-1042', name_th:'กิตติ ศรีสุข', name_en:'', nickname:'', position:'Finance Officer', department:'Partnership and Communications', email:'staff06@kenan-asia.org', phone:'0812345006', show_phone:false },
     { kenan_user_id:'K-1049', name_th:'มณฑา ใจดี', name_en:'', nickname:'', position:'Admin Officer', department:'General Administration', email:'staff07@kenan-asia.org', phone:'0812345007', show_phone:true },
     { kenan_user_id:'K-1056', name_th:'ธนกร วัฒนา', name_en:'', nickname:'', position:'Partnership Lead', department:'Education Program', email:'staff08@kenan-asia.org', phone:'0812345008', show_phone:true },
@@ -1448,8 +1500,21 @@ const MOCK = {
     { resource_id:'RM-2', kind:'room', name_th:'ห้อง Collaboration', capacity:8, category:'ประชุมย่อย', is_active:true },
     { resource_id:'EQ-1', kind:'equipment', name_th:'กล้อง Canon R6', category:'กล้อง',
       storage_location:'ตู้ AV ชั้น 2', is_active:true },
-    { resource_id:'VEH-1', kind:'vehicle', name_th:'Toyota Commuter (ฮค-1234)', capacity:12, is_active:true }] },
-  saveResource:{ ok:true }, saveProject:{ ok:true },
+    { resource_id:'VEH-1', kind:'vehicle', name_th:'Toyota Commuter', plate:'ฮค-1234 กรุงเทพมหานคร',
+      capacity:12, color:'ขาว', fuel_type:'ดีเซล', co2_per_km:'0.28',
+      default_driver:'DRV-A1', driver_name:'สมพงษ์ ขับดี', is_active:true },
+    { resource_id:'ZM-1', kind:'zoom', name_th:'Zoom 1', capacity:100, note:'zoom1@kenan-asia.org', is_active:true },
+    { resource_id:'ZM-2', kind:'zoom', name_th:'Zoom 2', capacity:300, note:'zoom2@kenan-asia.org', is_active:true },
+    { resource_id:'ZM-4', kind:'zoom', name_th:'Zoom 4', capacity:500, note:'zoom4@kenan-asia.org', is_active:true },
+    { resource_id:'ZM-8', kind:'zoom', name_th:'Zoom 8', capacity:1000, note:'zoom8@kenan-asia.org', is_active:true }] },
+  saveResource:{ ok:true }, saveProject:{ ok:true }, saveDriver:{ ok:true },
+  getDriversAdmin:{ ok:true, items:[
+    { driver_id:'DRV-A1', name:'สมพงษ์ ขับดี', phone:'0812345678', company:'Kenan',
+      vehicles:'Toyota Commuter', note:'ขับรถตู้ได้ · ใบขับขี่ ท.2', thumb:'', is_active:true },
+    { driver_id:'DRV-B2', name:'ประยูร ทางไกล', phone:'0898765432', company:'บริษัทรถเช่า ABC',
+      vehicles:'Toyota Altis', note:'', thumb:'', is_active:true },
+    { driver_id:'DRV-C3', name:'วิรัตน์ ใจเย็น', phone:'0865554444', company:'บริษัทรถเช่า ABC',
+      vehicles:'', note:'สำรอง', thumb:'', is_active:false }] },
   geoSuggest:{ ok:true, items:[
     { name:'โรงแรมเอเชีย ราชเทวี ถนนพญาไท กรุงเทพมหานคร 10400', saved:true, uses:6 },
     { name:'โรงแรมแมนดาริน สามย่าน ถนนพระราม 4 กรุงเทพมหานคร 10500', saved:true, uses:2 },
@@ -1464,7 +1529,15 @@ const MOCK = {
     lineUsed:64, lineQuota:300, sheetUrl:'https://docs.google.com/spreadsheets' },
   getRoomDay:(function(){
     const d = new Date(), k = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
-    return { ok:true, date:k,
+    const zoom = { ok:true, date:k, kind:'zoom',
+      rooms:[{ resource_id:'ZM-1', name_th:'Zoom 1', capacity:100, note:'zoom1@kenan-asia.org' },
+             { resource_id:'ZM-2', name_th:'Zoom 2', capacity:300, note:'zoom2@kenan-asia.org' },
+             { resource_id:'ZM-4', name_th:'Zoom 4', capacity:500, note:'zoom4@kenan-asia.org' },
+             { resource_id:'ZM-8', name_th:'Zoom 8', capacity:1000, note:'zoom8@kenan-asia.org' }],
+      bookings:[{ record_id:'ZB-1', resource_id:'ZM-2', title:'อบรมออนไลน์ MSME รุ่น 3',
+        start_at:k+'T09:00:00+07:00', end_at:k+'T12:00:00+07:00',
+        requester_id:'K-1180', who:'สมชาย กิตติวงศ์', who_dept:'Education Program' }] };
+    const rooms = { ok:true, date:k, kind:'room',
       rooms:[{ resource_id:'RM-1', name_th:'ห้อง Inspiration', capacity:14, category:'ประชุมใหญ่', note:'จอ + Polycom' },
              { resource_id:'RM-2', name_th:'ห้อง Collaboration', capacity:8, category:'ประชุมย่อย', note:'ทีวี 55"' },
              { resource_id:'RM-3', name_th:'ห้อง Focus', capacity:4, category:'ห้องเล็ก', note:'' }],
@@ -1475,6 +1548,7 @@ const MOCK = {
         { record_id:'RB-2', resource_id:'RM-2', title:'สัมภาษณ์ผู้สมัคร',
           start_at:k+'T13:30:00+07:00', end_at:k+'T15:00:00+07:00',
           requester_id:'K-4920', who:'พิพัฒน์ ส.', who_dept:'Social Impact and Innovation' }] };
+    return q => (q && q.kind === 'zoom') ? zoom : rooms;
   })(),
   createRoomBooking:{ ok:true }, cancelRoomBooking:{ ok:true },
   getEquipment:{ ok:true, items:[
@@ -1548,7 +1622,8 @@ const MOCK = {
 async function api(action, payload = {}, method = 'GET'){
   if(DEMO){
     await new Promise(r => setTimeout(r, 260));       // จำลองดีเลย์จริง จะได้เห็น skeleton
-    return MOCK[action] ?? { ok:true };
+    const v = MOCK[action];
+    return (typeof v === 'function' ? v(payload) : v) ?? { ok:true };
   }
   if(!CFG.GAS_URL || CFG.GAS_URL.startsWith('PASTE_')) throw new Error('NO_CONFIG');
   const t0 = performance.now();
@@ -1689,11 +1764,19 @@ window.addEventListener('popstate', () => {
   }
 });
 $('#backBtn').onclick = back;
+document.querySelectorAll('#langTop button').forEach(b => b.onclick = () => {
+  if(S.lang === b.dataset.l) return;
+  S.lang = b.dataset.l;
+  const cur = S.stack[S.stack.length - 1];
+  render(cur?.name || 'home', cur?.params || {});
+});
 if($('#sHome')) $('#sHome').onclick = () => { S.stack = []; go('home'); };
 if($('#sMe'))   $('#sMe').onclick   = () => go('profile');
 
 function paintNav(){
   document.querySelectorAll('[data-nav]').forEach(el => el.textContent = t(el.dataset.nav));
+  document.querySelectorAll('#langTop button').forEach(b =>
+    b.classList.toggle('on', b.dataset.l === S.lang));
 }
 
 /** เมนูข้างของจอคอม — ทุกโมดูลเข้าถึงได้ในคลิกเดียว
@@ -1709,7 +1792,8 @@ const SIDE_GROUPS = () => [
   { g:t('sgBook'), items:[
     { go:'rooms',     ic:IC.cal,    label:t('resvRoom') },
     { go:'equipment', ic:IC.laptop, label:t('resvEq') },
-    { go:'cars',      ic:IC.car,    label:t('resvCar') }
+    { go:'cars',      ic:IC.car,    label:t('resvCar') },
+    { go:'zoom',      ic:IC.chat,   label:t('resvZoom') }
   ]},
   { g:t('sgInfo'), items:[
     { go:'news',      ic:IC.news,  label:t('news') },
@@ -1724,6 +1808,7 @@ function paintSide(active){
     const admin = [{ go:'admin', ic:IC.user, label:t('adminTitle') }];
     if(S.isAdmin){
       admin.push({ go:'admin-res',  ic:IC.laptop, label:t('admRes') });
+      admin.push({ go:'admin-drv',  ic:IC.user,   label:t('admDrv') });
       admin.push({ go:'admin-proj', ic:IC.info,   label:t('admProj') });
     }
     if(isDriverNow()) admin.unshift({ go:'driver', ic:IC.car, label:t('drvTitle') });
@@ -1760,6 +1845,7 @@ function chrome(name){
   $('#title').hidden   = isHome && window.innerWidth < 900;
   $('#nav').hidden     = isFull;
   $x('#side').style.display = isFull ? 'none' : '';
+  $x('#langTop').hidden = isFull;
   // ปุ่มลอยโผล่เฉพาะหน้าที่เกี่ยวกับพัสดุและเมนูผู้ดูแลเท่านั้น
   // หน้าอื่น (โดยเฉพาะหน้าฉุกเฉิน) ห้ามมีอะไรมาบัง
   $('#fab').hidden = !S.isOfficer ||
@@ -2344,7 +2430,12 @@ ROUTES.profile = async () => {
 
 ROUTES.news = async () => {
   setTitle(t('news'));
-  $x('#main').innerHTML = `<div class="view"><div id="list">${skeleton(3)}</div></div>`;
+  // แอดมินไม่ควรต้องออกไปเมนูผู้ดูแลเพื่อลงประกาศ ทั้งที่ยืนอยู่หน้าข่าวอยู่แล้ว
+  $x('#main').innerHTML = `<div class="view">
+    ${S.isAdmin ? `<button class="btn primary" id="nAdd">${esc(t('newsAdd'))}</button>
+      <div class="note info" style="margin:12px 0 4px">${IC.info}<div>${esc(t('newsGuide'))}</div></div>` : ''}
+    <div id="list">${skeleton(3)}</div></div>`;
+  if($('#nAdd')) $('#nAdd').onclick = () => go('admin-news');
   let items = [];
   try{ const r = await apiRetry('getAnnouncements', {}, 'GET'); items = r?.items || []; }catch(e){}
   if(!items.length){
@@ -2366,7 +2457,8 @@ ROUTES.reservation = async () => {
   const rows = [
     { ic:IC.cal,    th:t('resvRoom'), en:'Meeting rooms', go:'rooms' },
     { ic:IC.laptop, th:t('resvEq'),   en:'Equipment',     go:'equipment' },
-    { ic:IC.car,    th:t('resvCar'),  en:'Vehicles',      go:'cars' }
+    { ic:IC.car,    th:t('resvCar'),  en:'Vehicles',      go:'cars' },
+    { ic:IC.chat,   th:t('resvZoom'), en:'Zoom accounts', go:'zoom' }
   ];
   $x('#main').innerHTML = `<div class="view"><div class="rows">${rows.map(r => `
       <button class="row" ${r.soon ? '' : `data-go="${r.go}"`} ${r.soon ? 'style="opacity:.55"' : ''}>
@@ -2405,6 +2497,8 @@ ROUTES.admin = async () => {
       <button class="btn ghost" id="toRes">${esc(t('admRes'))}</button>
       <div style="height:9px"></div>
       <button class="btn ghost" id="toProj">${esc(t('admProj'))}</button>
+      <div style="height:9px"></div>
+      <button class="btn ghost" id="toDrv">${esc(t('admDrv'))}</button>
       ${S.isSuper ? `<div style="height:9px"></div>
         <button class="btn ghost" id="toRoles">${esc(t('admRoles'))}</button>` : ''}` : ''}
   </div>`;
@@ -2414,6 +2508,7 @@ ROUTES.admin = async () => {
   if($('#toNews'))  $('#toNews').onclick  = () => go('admin-news');
   if($('#toRes'))   $('#toRes').onclick   = () => go('admin-res');
   if($('#toProj'))  $('#toProj').onclick  = () => go('admin-proj');
+  if($('#toDrv'))   $('#toDrv').onclick   = () => go('admin-drv');
   if($('#toRoles')) $('#toRoles').onclick = () => go('admin-roles');
 
   let s = null;
@@ -2599,7 +2694,20 @@ ROUTES.directory = async () => {
           </div><span class="go">${IC.chev}</span>
         </button>`).join('')}</div></div>`).join('');
     // ปุ่มวงกลมเล็กๆ สองอันชิดกันกดพลาดง่ายบนมือถือ → เปิดการ์ดที่มีปุ่มเต็มความกว้างแทน
-    document.querySelectorAll('#dl .row[data-id]').forEach(b => b.onclick = () => {
+    // ให้พนักงานรู้ว่าต้องติดต่อใครเวลามีปัญหา แทนที่จะเดินถามกันไปทั้งออฟฟิศ
+  const staff = people.filter(p => /(^|,)\s*(admin|officer)\s*(,|$)/.test(String(p.roles || '')));
+  if(staff.length){
+    $x('#dl').insertAdjacentHTML('afterbegin', `<div class="dgrp">
+      <div class="section-title">${esc(t('dirAdmins'))}</div>
+      <div class="rows">${staff.map(p => `
+        <button class="row" data-id="${esc(p.kenan_user_id)}">
+          <span class="av" style="background:var(--navy);color:#fff">${
+            esc(String(p.name_th || '?').trim().charAt(0))}</span>
+          <div class="body"><div class="t">${esc(p.name_th || p.name_en)}</div>
+            <div class="s">${esc([p.position, p.department].filter(Boolean).join(' · '))}</div></div>
+          <span class="go">${IC.chev}</span></button>`).join('')}</div></div>`);
+  }
+  document.querySelectorAll('#dl .row[data-id]').forEach(b => b.onclick = () => {
       const p = people.find(x => x.kenan_user_id === b.dataset.id); if(!p) return;
       sheet(`<h3>${esc(p.name_th || p.name_en)}${p.nickname ? ' · ' + esc(p.nickname) : ''}</h3>
         <p class="sub">${esc([p.position, p.department, p.office].filter(Boolean).join(' · '))}</p>
@@ -2940,7 +3048,8 @@ const durLabel = (s, e) => {
 const firstName = n => String(n || '').trim().split(/\s+/)[0] || '';
 
 ROUTES.rooms = async (params = {}) => {
-  setTitle(t('rmTitle'));
+  const kind = params.kind === 'zoom' ? 'zoom' : 'room';
+  setTitle(kind === 'zoom' ? t('zoomTitle') : t('rmTitle'));
   const base = new Date(); const days = [];
   for(let i = 0; i < 14; i++){ const d = new Date(base); d.setDate(base.getDate()+i); days.push(d); }
   const sel  = params.date || dayKey(base);
@@ -2952,18 +3061,22 @@ ROUTES.rooms = async (params = {}) => {
       <button class="${mode==='week'?'on':''}" data-m="week">${esc(t('rmWeek'))}</button>
     </div>
     <div id="ctl"></div>
-    <div id="rl">${skeleton(3)}</div>
-    <div class="section-title">${esc(t('rmPick'))}</div>
-    <div id="rooms"></div>
+    <div class="bkwrap">
+      <div><div id="rl">${skeleton(3)}</div></div>
+      <div class="bkside">
+        <div class="section-title">${esc(kind === 'zoom' ? t('zoomPick') : t('rmPick'))}</div>
+        <div id="rooms"></div>
+      </div>
+    </div>
     <div class="sticky-cta"><button class="btn primary" id="bk">＋ ${esc(t('rmBook'))}</button></div>
   </div>`;
-  $('#bk').onclick = () => go('room-new', { date:sel });
+  $('#bk').onclick = () => go('room-new', { date:sel, kind });
   document.querySelectorAll('#sg button').forEach(b =>
-    b.onclick = () => go('rooms', { date:sel, mode:b.dataset.m }, true));
+    b.onclick = () => go('rooms', { date:sel, mode:b.dataset.m, kind }, true));
 
-  let r = (mode === 'day' && sel === dayKey(base)) ? takePre('room') : null;
+  let r = (kind === 'room' && mode === 'day' && sel === dayKey(base)) ? takePre('room') : null;
   if(!r){ try{ r = await apiRetry('getRoomDay',
-        { date: sel, days: mode==='week' ? 7 : 1 }, 'GET'); }catch(e){} }
+        { date: sel, days: mode==='week' ? 7 : 1, kind }, 'GET'); }catch(e){} }
   if(!r?.ok){ $x('#rl').innerHTML = emptyState(IC.info, t('netErr'), ''); return; }
 
   let room0 = params.room || r.rooms[0]?.resource_id;
@@ -2978,9 +3091,9 @@ ROUTES.rooms = async (params = {}) => {
         <button class="chip ${rm.resource_id===room0?'on':''}" data-r="${esc(rm.resource_id)}">
           ${esc(rm.name_th.replace('ห้อง ',''))}</button>`).join('')}</div>`;
   if($('#dch')) document.querySelectorAll('#dch .chip').forEach(c =>
-    c.onclick = () => go('rooms', { date:c.dataset.d, mode }, true));
+    c.onclick = () => go('rooms', { date:c.dataset.d, mode, kind }, true));
   if($('#rch')) document.querySelectorAll('#rch .chip').forEach(c =>
-    c.onclick = () => go('rooms', { date:sel, mode, room:c.dataset.r }, true));
+    c.onclick = () => go('rooms', { date:sel, mode, room:c.dataset.r, kind }, true));
 
   // ── ตาราง
   const cols = mode === 'day'
@@ -3025,8 +3138,8 @@ ROUTES.rooms = async (params = {}) => {
   // แตะช่องว่าง = จองเลย · แตะรายการที่มีอยู่ = ดูว่าใครจอง (ขอสลับได้)
   document.querySelectorAll('#rl .hr').forEach(cell => cell.onclick = () => {
     const key = cell.closest('.gcol').dataset.k, hr = cell.dataset.h;
-    go('room-new', mode==='day' ? { date:sel, room:key, hour:hr }
-                                : { date:key, room:room0, hour:hr });
+    go('room-new', mode==='day' ? { date:sel, room:key, hour:hr, kind }
+                                : { date:key, room:room0, hour:hr, kind });
   });
   document.querySelectorAll('#rl .gev').forEach(el => el.onclick = ev => {
     ev.stopPropagation();
@@ -3048,7 +3161,7 @@ ROUTES.rooms = async (params = {}) => {
     if($('#cx2')) $('#cx2').onclick = async () => {
       closeSheet();
       try{ await apiRetry('cancelRoomBooking', { record_id:b.record_id }, 'POST');
-           toast(t('rmCancelled'),'ok'); go('rooms', { date:sel, mode }, true); }
+           toast(t('rmCancelled'),'ok'); go('rooms', { date:sel, mode, kind }, true); }
       catch(e){ toast(t('netErr'),'bad'); }
     };
   });
@@ -3065,20 +3178,21 @@ ROUTES.rooms = async (params = {}) => {
     </button>`).join('');
   paintPhotos($('#rooms'));
   document.querySelectorAll('#rooms .rcard').forEach(b =>
-    b.onclick = () => go('room-new', { date:sel, room:b.dataset.r }));
+    b.onclick = () => go('room-new', { date:sel, room:b.dataset.r, kind }));
 };
 
-ROUTES['room-new'] = async ({ date, room:preRoom, hour } = {}) => {
-  setTitle(t('rmBook'));
+ROUTES['room-new'] = async ({ date, room:preRoom, hour, kind:k0 } = {}) => {
+  const kind = k0 === 'zoom' ? 'zoom' : 'room';
+  setTitle(kind === 'zoom' ? t('zoomTitle') : t('rmBook'));
   const day = date || dayKey(new Date());
   const h1  = hour ? String(hour).padStart(2,'0') + ':00' : '09:00';
   const h2  = hour ? String(Math.min(Number(hour)+1,18)).padStart(2,'0') + ':00' : '10:00';
   let rooms = [];
-  try{ const r = await apiRetry('getRoomDay', { date:day }, 'GET'); rooms = r?.rooms || []; }catch(e){}
+  try{ const r = await apiRetry('getRoomDay', { date:day, kind }, 'GET'); rooms = r?.rooms || []; }catch(e){}
 
   $x('#main').innerHTML = `<div class="view">
     <div class="card">
-      <div style="font-size:13px;font-weight:600;margin-bottom:9px">${esc(t('rmPick'))}</div>
+      <div style="font-size:13px;font-weight:600;margin-bottom:9px">${esc(kind === 'zoom' ? t('zoomPick') : t('rmPick'))}</div>
       <div id="rp">${rooms.map((rm, i) => `
         <button class="row" data-v="${esc(rm.resource_id)}" style="border:1.5px solid ${
           (preRoom?rm.resource_id===preRoom:i===0)?'var(--primary)':'var(--line)'};border-radius:12px;
@@ -3140,7 +3254,7 @@ ROUTES['room-new'] = async ({ date, room:preRoom, hour } = {}) => {
       }
       if(r?.ok === false) throw 0;
       toast(t('rmOk'), 'ok');
-      S.stack = [{ name:'home', params:{} }]; go('rooms', { date:d });
+      S.stack = [{ name:'home', params:{} }]; go('rooms', { date:d, kind });
     }catch(e){ toast(t('netErr'), 'bad'); b.disabled = false; }
   };
 };
@@ -3150,7 +3264,7 @@ ROUTES.equipment = async () => {
   setTitle(t('eqTitle'));
   $x('#main').innerHTML = `<div class="view">
     <div class="note info">${IC.info}<div>${esc(t('eqWhy'))}</div></div>
-    <div id="el" style="margin-top:12px">${S.cache.eq ? '' : skeleton(3)}</div></div>`;
+    <div id="el" style="margin-top:12px" class="eqcols">${S.cache.eq ? '' : skeleton(3)}</div></div>`;
   const pre = takePre('eq');
   if(pre) S.cache.eq = { at:Date.now(), v:pre };
   await swr('eq', () => apiRetry('getEquipment', {}, 'GET'),
@@ -3400,6 +3514,82 @@ function declareSheet(){
 
 
 
+/* ── จัดการคนขับ ─────────────────────────────────────────────────
+   แยกจากทำเนียบพนักงาน เพราะคนขับจำนวนมากเป็น outsource
+   ไม่มีอีเมลองค์กร ไม่มี LINE ในระบบ และเปลี่ยนตัวบ่อย
+   ถ้าบังคับให้เป็นพนักงานก่อน ผู้ดูแลจะเพิ่มคนขับใหม่ไม่ได้เลย */
+ROUTES['admin-drv'] = async () => {
+  setTitle(t('admDrv'));
+  $x('#main').innerHTML = `<div class="view">
+    <div class="note info">${IC.info}<div>${esc(t('admDrvWhy'))}</div></div>
+    <button class="btn primary" id="add" style="margin-top:12px">＋ ${esc(t('admDrvAdd'))}</button>
+    <div id="dv" style="margin-top:14px">${skeleton(3)}</div></div>`;
+  $('#add').onclick = () => drvEdit(null);
+
+  let items = [];
+  try{
+    const r = await apiRetry('getDriversAdmin', {}, 'GET');
+    if(!r?.ok){ $x('#dv').innerHTML = emptyState(IC.info, t('adminNo'), t('adminNoBody')); return; }
+    items = r.items || [];
+  }catch(e){ $x('#dv').innerHTML = emptyState(IC.info, t('netErr'), ''); return; }
+
+  $x('#dv').innerHTML = items.length ? items.map(d => `
+    <button class="rcard" data-id="${esc(d.driver_id)}" ${d.is_active ? '' : 'style="opacity:.5"'}>
+      ${d.thumb ? `<img class="rphoto" style="width:56px;height:56px;border-radius:50%" src="${d.thumb}" alt="">`
+                : `<div class="rphoto" style="width:56px;height:56px;border-radius:50%">${IC.user}</div>`}
+      <div style="flex:1;min-width:0">
+        <div style="font-size:14.5px;font-weight:700">${esc(d.name)}</div>
+        <div style="font-size:11.5px;color:var(--ink-3)">${esc([d.company, d.phone].filter(Boolean).join(' · '))}</div>
+        ${d.vehicles ? `<div style="font-size:10.5px;color:var(--ok);font-weight:700;margin-top:2px">
+          ${esc(t('carDriver'))}: ${esc(d.vehicles)}</div>` : ''}
+      </div>
+      ${d.is_active ? `<span class="go">${IC.chev}</span>`
+        : `<span class="pill" style="background:var(--neutral);color:var(--ink-3)">${esc(t('admResInactive'))}</span>`}
+    </button>`).join('')
+    : emptyState(IC.user, t('admDrvEmpty'), t('admDrvEmptyBody'));
+
+  document.querySelectorAll('#dv .rcard').forEach(b =>
+    b.onclick = () => drvEdit(items.find(x => x.driver_id === b.dataset.id)));
+
+  function drvEdit(it){
+    sheet(`<h3>${esc(it ? it.name : t('admDrvAdd'))}</h3>
+      <div class="field"><label>${esc(t('admDrvName'))}<span class="req">*</span></label>
+        <input id="dn" value="${esc(it?.name || '')}" placeholder="สมพงษ์ ขับดี"></div>
+      <div class="field"><label>${esc(t('admDrvPhone'))}</label>
+        <input id="dp" inputmode="tel" value="${esc(it?.phone || '')}" placeholder="0812345678"></div>
+      <div class="field"><label>${esc(t('admDrvCompany'))}</label>
+        <input id="dc" value="${esc(it?.company || '')}" placeholder="${esc(t('admDrvCompanyPh'))}"></div>
+      <div class="field"><label>${esc(t('admDrvNote'))}</label>
+        <input id="dnt" value="${esc(it?.note || '')}" placeholder="${esc(t('admDrvNotePh'))}"></div>
+      ${photoField('dph', t('admDrvPhoto'))}
+      <div style="font-size:11px;color:var(--ink-3);margin:-6px 0 12px">${esc(t('admDrvPhotoWhy'))}</div>
+      <button class="btn primary" id="dsv">${esc(t('admResSave'))}</button>
+      ${it ? `<button class="btn ghost" id="dtog">${esc(it.is_active ? t('admResOff') : t('admResOn'))}</button>` : ''}
+      <button class="btn ghost" id="dcx">${esc(t('cancel'))}</button>`);
+    const img = { v:null }; wirePhoto('dph', img);
+    $('#dcx').onclick = closeSheet;
+    const save = extra => async () => {
+      const name = $('#dn').value.trim();
+      if(!name){ toast(t('admNeedTitle'),'bad'); return; }
+      const b = $('#dsv'); b.disabled = true;
+      try{
+        await apiRetry('saveDriver', Object.assign({
+          driver_id: it?.driver_id || '', name,
+          phone:$('#dp').value.trim(), company:$('#dc').value.trim(),
+          note:$('#dnt').value.trim(),
+          photo:img.v?.full || '', card:img.v?.card || ''
+        }, extra || {}), 'POST');
+        closeSheet(); clearCache(); toast(t('admResSaved'),'ok'); go('admin-drv', {}, true);
+      }catch(e){ toast(t('netErr'),'bad'); b.disabled = false; }
+    };
+    $('#dsv').onclick = save(null);
+    if($('#dtog')) $('#dtog').onclick = save({ is_active: it.is_active ? 'false' : 'true' });
+  }
+};
+
+/* ── จอง Zoom ── ใช้หน้าเดียวกับจองห้อง เพราะเป็นการจองช่วงเวลาเหมือนกัน */
+ROUTES.zoom = async (params = {}) => { await ROUTES.rooms(Object.assign({}, params, { kind:'zoom' })); };
+
 /* ── รหัสโครงการ ────────────────────────────────────────────────
    ช่องโครงการตอนจองรถเป็นช่องบังคับ ถ้ารายชื่อนี้ว่าง = จองรถไม่ได้เลย
    จึงต้องแก้ได้ในแอป ไม่ใช่ต้องรอคนเปิดชีทให้ทุกครั้งที่มีโครงการใหม่ */
@@ -3488,7 +3678,7 @@ ROUTES['admin-res'] = async () => {
     ${grp[k].map(i => `
       <button class="rcard" data-id="${esc(i.resource_id)}" ${i.is_active?'':'style="opacity:.5"'}>
         ${phImg(i,'rphoto') || `<div class="rphoto">${
-          k==='room'?IC.cal:(k==='vehicle'?IC.car:IC.laptop)}</div>`}
+          k==='room'?IC.cal:k==='vehicle'?IC.car:k==='zoom'?IC.chat:IC.laptop}</div>`}
         <div style="flex:1;min-width:0">
           <div style="font-size:14.5px;font-weight:700">${esc(i.name_th)}</div>
           <div style="font-size:11.5px;color:var(--ink-3)">${esc([
@@ -3501,7 +3691,8 @@ ROUTES['admin-res'] = async () => {
         ${i.is_active ? `<span class="go">${IC.chev}</span>`
                       : `<span class="pill" style="background:var(--neutral);color:var(--ink-3)">${esc(t('admResInactive'))}</span>`}
       </button>`).join('')}` : '';
-  $x('#rs').innerHTML = sec('room', t('admResRoom')) + sec('equipment', t('admResEq')) + sec('vehicle', t('admResCar'));
+  $x('#rs').innerHTML = sec('room', t('admResRoom')) + sec('zoom', t('admResZoom')) +
+                        sec('equipment', t('admResEq')) + sec('vehicle', t('admResCar'));
   paintPhotos($('#rs'));
   document.querySelectorAll('#rs .rcard').forEach(b =>
     b.onclick = () => resEdit(items.find(x => x.resource_id === b.dataset.id)));
@@ -3514,13 +3705,14 @@ ROUTES['admin-res'] = async () => {
       ${it ? '' : `<div class="field"><label>${esc(t('admResKind'))}</label>
         <select id="rk"><option value="equipment">${esc(t('admResEq'))}</option>
           <option value="room">${esc(t('admResRoom'))}</option>
-          <option value="vehicle">${esc(t('admResCar'))}</option></select></div>`}
+          <option value="vehicle">${esc(t('admResCar'))}</option>
+          <option value="zoom">${esc(t('admResZoom'))}</option></select></div>`}
       <div class="field"><label>${esc(t('admResName'))}<span class="req">*</span></label>
         <input id="rn2" value="${esc(it?.name_th || '')}"></div>
       <div class="field"><label>${esc(t('admResCat'))}</label>
         <input id="rc" value="${esc(it?.category || '')}" placeholder="กล้อง · ไมค์ · จอภาพ"></div>
       <div class="field" id="capF" ${(isRoom || isCar) ? '' : 'hidden'}>
-        <label>${esc(isCar ? t('admResSeatsCar') : t('admResCap'))}</label>
+        <label>${esc(isCar ? t('admResSeatsCar') : kind0 === 'zoom' ? t('admResZoomCap') : t('admResCap'))}</label>
         <input id="rcap" inputmode="numeric" value="${esc(it?.capacity || '')}"></div>
       <div class="field" id="locF" ${(isRoom || isCar) ? 'hidden' : ''}>
         <label>${esc(t('admResLoc'))}</label>
@@ -3555,12 +3747,12 @@ ROUTES['admin-res'] = async () => {
     if($('#rk')) $('#rk').onchange = () => {
       const k = $('#rk').value;
       $('#capF').hidden = (k === 'equipment');
+      $x('#capF').querySelector('label').textContent =
+        k === 'vehicle' ? t('admResSeatsCar') : k === 'zoom' ? t('admResZoomCap') : t('admResCap');
       $('#locF').hidden = (k !== 'equipment');
       ['drvF','plateF','colorF','fuelF','co2F'].forEach(id => {
         const el = $(id === 'drvF' ? '#drvF' : '#' + id); if(el) el.hidden = (k !== 'vehicle');
       });
-      $x('#capF').querySelector('label').textContent =
-        k === 'vehicle' ? t('admResSeatsCar') : t('admResCap');
     };
     $('#rx3').onclick = closeSheet;
     const save = extra => async () => {
@@ -3612,9 +3804,13 @@ ROUTES.cars = async (params = {}) => {
       <button class="${mode==='week'?'on':''}" data-m="week">${esc(t('rmWeek'))}</button>
     </div>
     <div id="ctl"></div>
-    <div id="gr">${skeleton(3)}</div>
-    <div class="section-title">${esc(t('carPickVeh'))}</div>
-    <div id="vl"></div>
+    <div class="bkwrap">
+      <div><div id="gr">${skeleton(3)}</div></div>
+      <div class="bkside">
+        <div class="section-title">${esc(t('carPickVeh'))}</div>
+        <div id="vl"></div>
+      </div>
+    </div>
     <div class="sticky-cta"><button class="btn primary" id="bk">＋ ${esc(t('carBook'))}</button></div>
   </div>`;
   $('#bk').onclick = () => go('car-new', { date:sel });
@@ -3842,6 +4038,27 @@ function pickFromList({ title, items, label, sub, current, search }){
 /** ช่องค้นหาสถานที่ — พิมพ์ไปเรื่อยๆ รายการขึ้นเอง ไม่ต้องกดค้นหา
     หน่วงไว้ 450 ms หลังหยุดพิมพ์ ไม่ยิงทุกตัวอักษร (โควตาวันละ 1,000 ครั้ง)
     ที่ที่เคยไปแล้วขึ้นก่อนเสมอและไม่กินโควตา ยิ่งใช้ยิ่งเจอเร็ว */
+/* Maps ที่มากับ Apps Script คืนแค่ formatted_address ไม่มีชื่อสถานที่
+   ("โรงแรมเอเชีย" → "296 ถนนพญาไท…") ชื่อที่คนจำได้จึงหายไปหมด
+   แก้โดยเก็บคำที่ผู้ใช้พิมพ์ไว้เป็นชื่อ แล้ววางที่อยู่เป็นบรรทัดรอง */
+/* ผลจาก Maps ในไทยมักมีชื่อสถานที่อยู่ต้นที่อยู่แล้ว
+   ("โรงแรมเอเชีย ราชเทวี ถนนพญาไท…") จึงไม่ต้องเติมชื่อซ้ำ
+   เติมคำที่ผู้ใช้พิมพ์เป็นชื่อ เฉพาะตอนที่คำนั้นไม่ปรากฏในที่อยู่เลย
+   (เช่นพิมพ์ชื่อเล่นที่ออฟฟิศเรียกกันเอง ซึ่ง Maps ไม่รู้จัก) */
+const labelFor = (r, typed) => {
+  const t0 = String(typed || '').trim();
+  const addr = String(r.addr || r.name || '');
+  if(r.place) return r.place;
+  if(t0.length >= 3 && addr && addr.toLowerCase().indexOf(t0.toLowerCase()) < 0) return t0;
+  return '';
+};
+const joinPlace = (place, addr) => {
+  const p0 = String(place || '').trim(), a0 = String(addr || '').trim();
+  if(!p0) return a0;
+  if(!a0 || a0.indexOf(p0) === 0) return a0 || p0;
+  return p0 + ' — ' + a0;
+};
+
 async function pickPlace(initial){
   return new Promise(resolve => {
     sheet(`<h3>${esc(t('carPlace'))}</h3>
@@ -3858,17 +4075,24 @@ async function pickPlace(initial){
       if(state === 'busy'){ $x('#ppr').innerHTML = skeleton(2); return; }
       if(state === 'short'){ $x('#ppr').innerHTML =
         `<div class="pk-empty">${esc(t('carPlaceShort'))}</div>`; return; }
-      $x('#ppr').innerHTML = items.length ? items.map((r, i) => `
-        <button class="pk-row place" data-i="${i}">
+      const typed = inp.value.trim();
+      $x('#ppr').innerHTML = items.length ? items.map((r, i) => {
+        const nm = labelFor(r, typed), addr = r.addr || r.name;
+        return `<button class="pk-row place" data-i="${i}">
           <span class="b">
-            <span class="t">${esc(r.name)}</span>
+            <span class="t">${esc(nm || addr)}</span>
+            ${nm ? `<span class="s">${esc(addr)}</span>` : ''}
             ${r.saved ? `<span class="s" style="color:var(--ok);font-weight:700">★ ${esc(t('carPlaceUsed'))}</span>` : ''}
           </span>
           <span class="pill new" style="flex:0 0 auto">${esc(t('carPick'))}</span>
-        </button>`).join('')
+        </button>`; }).join('')
         : `<div class="pk-empty">${esc(t('carPlaceNone'))}</div>`;
       document.querySelectorAll('#ppr .pk-row').forEach(b => b.onclick = () => {
-        closeSheet(); resolve(items[Number(b.dataset.i)]);
+        const r = items[Number(b.dataset.i)];
+        closeSheet();
+        const nm = labelFor(r, typed), addr = r.addr || r.name;
+        // เก็บทั้งชื่อที่คนจำได้ และที่อยู่ที่ Maps ใช้คำนวณเส้นทาง
+        resolve({ name: joinPlace(nm, addr), place: nm || addr, addr });
       });
     };
 
@@ -3890,7 +4114,7 @@ async function pickPlace(initial){
     $('#ppuse').onclick = () => {
       const v = inp.value.trim();
       if(!v){ toast(t('carPlaceShort'), 'bad'); return; }
-      clearTimeout(timer); closeSheet(); resolve({ name:v, typed:true });
+      clearTimeout(timer); closeSheet(); resolve({ name:v, place:v, addr:'', typed:true });
     };
     paint('short');
     if(initial) search();
