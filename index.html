@@ -4,13 +4,13 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#0033CC">
-<title>Kenan Connect</title>
+<title>Kenan ONE</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&family=Noto+Sans+Thai:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
 /* ─────────────────────────────────────────────────────────────
-   DESIGN TOKENS — ตรงกับ Kenan Connect Vision ใน Stitch
+   DESIGN TOKENS — ตรงกับ Kenan ONE Vision ใน Stitch
    ───────────────────────────────────────────────────────────── */
 :root{
   --primary:#0033CC;
@@ -739,7 +739,7 @@ body.drvmode .nav{display:flex!important}
     <button class="icon-btn" id="backBtn" hidden aria-label="ย้อนกลับ">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
     </button>
-    <div class="brand" id="brand"><div class="mark">K</div><div class="txt">Kenan Connect</div></div>
+    <div class="brand" id="brand"><div class="mark">K</div><div class="txt">Kenan ONE</div></div>
     <h1 id="title" hidden></h1>
     <div class="langtop" id="langTop">
       <button data-l="th">TH</button><button data-l="en">EN</button>
@@ -750,7 +750,7 @@ body.drvmode .nav{display:flex!important}
     <button class="sbrand" id="sHome">
       <div class="mark">K</div>
       <div style="min-width:0">
-        <div class="txt">Kenan Connect</div>
+        <div class="txt">Kenan ONE</div>
         <div class="sub">Staff Hub</div>
       </div>
     </button>
@@ -816,17 +816,17 @@ body.drvmode .nav{display:flex!important}
 <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
 <script>
 /* ═══════════════════════════════════════════════════════════════
-   KENAN CONNECT — Single Page App
+   KENAN ONE — Single Page App
    ทุกโมดูลอยู่ในไฟล์เดียว URL เดียว LIFF init ครั้งเดียว
    ═══════════════════════════════════════════════════════════════ */
 
 /* ── 1. CONFIG — แก้แค่ตรงนี้ ─────────────────────────────────── */
 const CFG = {
-  LIFF_ID : '2010937586-Ko0ID2zY',                   // LIFF "Kenan Connect" (Full)
+  LIFF_ID : '2010937586-Ko0ID2zY',                   // LIFF "Kenan ONE" (Full)
   GAS_URL : 'https://script.google.com/macros/s/AKfycbyOjh4BAAbzY5QfZNG_oGuxbmvZwHjEAKazRMuMxrDeoNknE_rqEoAFdkuJldOPP_q_eg/exec',
   LIFF_TIMEOUT_MS : 3500,
   CONSENT_VERSION : '2026-09-01',
-  BUILD : '2026-09-05a'      // ต้องตรงกับ BUILD ใน Code.gs ที่ Deploy ไว้
+  BUILD : '2026-09-05b'      // ต้องตรงกับ BUILD ใน Code.gs ที่ Deploy ไว้
 };
 
 /* เก็บ ?go=... ไว้ตั้งแต่ต้น เพราะเดี๋ยวจะล้าง query string ทิ้งหลัง LIFF ล็อกอิน
@@ -840,7 +840,7 @@ const START_AT = (function(){
             'rooms','room-new','equipment','admin-res',
             'cars','car-new','driver','admin-proj','admin-drv','admin-staff','zoom',
             'item','labels','driver-portal','driver-me','driver-report','driver-pair',
-            'admin-drvrep'].includes(g) ? g : null;
+            'admin-drvrep','my-data','admin-dsr'].includes(g) ? g : null;
   }catch(e){ return null; }
 })();
 /* ?rec=PCL-xxx → เปิดพัสดุชิ้นนั้นให้เลย (ลิงก์ที่ส่งไปในข้อความ LINE) */
@@ -907,7 +907,7 @@ async function swr(key, fetchFn, paint, maxAge = 0){
 /* ── 3. COPY DECK — ข้อความจริงทุกบรรทัด ไทย/อังกฤษ ───────────── */
 const T = {
   th:{
-    appName:'Kenan Connect',
+    appName:'Kenan ONE',
     navHome:'หน้าแรก', navParcel:'พัสดุ', navSos:'ฉุกเฉิน', navMe:'ฉัน', navLog:'บันทึกพัสดุ',
     navNotif:'แจ้งเตือน',
     sgWork:'งานของฉัน', sgBook:'จอง ยืม คืน', sgInfo:'ข้อมูลองค์กร', sgAdmin:'สำหรับผู้ดูแล',
@@ -1208,11 +1208,56 @@ const T = {
     dpOff:'บัญชีคนขับนี้ถูกปิดการใช้งาน', dpOffBody:'ติดต่อทีม GA เพื่อเปิดใช้งานอีกครั้ง',
     dpNavJobs:'งาน', dpNavRep:'แจ้งเรื่อง', dpNavMe:'ฉัน',
 
+    /* ── ข้อมูลของฉัน / สิทธิตาม PDPA ── */
+    mdTitle:'ข้อมูลของฉัน',
+    mdLead:'หน้านี้แสดงทุกอย่างที่ระบบเก็บเกี่ยวกับคุณ ตามสิทธิที่ พ.ร.บ.คุ้มครองข้อมูลส่วนบุคคล พ.ศ. 2562 ให้ไว้',
+    mdProfile:'ข้อมูลโปรไฟล์', mdActivity:'ร่องรอยการใช้งาน',
+    mdPosition:'ตำแหน่ง', mdPhoto:'มีรูปโปรไฟล์ในระบบ', mdRoles:'สิทธิการใช้งาน',
+    mdLineLinked:'ผูกกับบัญชี LINE แล้ว', mdRegistered:'ลงทะเบียนเมื่อ',
+    mdConsent:'ให้ความยินยอมเมื่อ',
+    mdShown:'แสดงในทำเนียบ', mdHidden:'ไม่แสดงในทำเนียบ',
+    mdYes:'มี', mdNo:'ไม่มี', mdItems:'รายการ', mdTimes:'ครั้ง',
+    mdRecords:'รายการที่คุณสร้างไว้', mdNotifs:'การแจ้งเตือนที่ส่งถึงคุณ',
+    mdAlerts:'การตอบรับประกาศฉุกเฉิน',
+    mdType:{ parcel:'พัสดุ', borrow:'ยืมอุปกรณ์', room:'จองห้อง', car:'จองรถ', issue:'แจ้งซ่อม/แจ้งเรื่อง' },
+    mdGetCopy:'ขอสำเนาข้อมูล',
+    mdGetCopyWhy:'ระบบจะส่งข้อมูลทั้งหมดของคุณเป็นไฟล์ไปที่อีเมลองค์กรของคุณ',
+    mdEmailMe:'ส่งสำเนาไปอีเมลของฉัน',
+    mdEmailed:e=>`ส่งไปที่ ${e} แล้ว`,
+    mdRights:'ใช้สิทธิอื่น',
+    mdRightsWhy:'ขอแก้ไขข้อมูลให้ถูกต้อง ขอลบ ขอคัดค้านการใช้ข้อมูล หรือขอถอนความยินยอม',
+    mdRequest:'ยื่นคำขอใช้สิทธิ',
+    mdRequestSub:'คำขอจะถูกบันทึกไว้และส่งถึงผู้ดูแลข้อมูลส่วนบุคคลทันที',
+    mdWhich:'ต้องการใช้สิทธิเรื่องอะไร', mdDetail:'รายละเอียดเพิ่มเติม',
+    mdDetailPh:'เช่น ขอลบเบอร์โทรออกจากทำเนียบ · ขอแก้ชื่อภาษาอังกฤษให้ตรงกับพาสปอร์ต',
+    mdSla:'มูลนิธิต้องตอบกลับภายใน 30 วันนับจากวันที่ได้รับคำขอ ตามมาตรา 30',
+    mdSend:'ส่งคำขอ',
+    mdSent:(id,due)=>`รับคำขอแล้ว (${id}) · จะตอบกลับภายใน ${due}`,
+    dsrAccess:'ขอเข้าถึง / ขอสำเนาข้อมูล', dsrRectify:'ขอแก้ไขข้อมูลให้ถูกต้อง',
+    dsrErase:'ขอลบข้อมูล', dsrObject:'ขอคัดค้านการประมวลผล',
+    dsrWithdraw:'ขอถอนความยินยอม',
+
+    /* ── ผู้ดูแล: คำขอใช้สิทธิ + สำรองข้อมูล ── */
+    admDsr:'คำขอใช้สิทธิ PDPA',
+    admDsrWhy:'ทุกคำขอต้องตอบกลับภายใน 30 วันตามกฎหมาย · กดปิดเรื่องพร้อมบันทึกผลทุกครั้ง เพราะบันทึกนี้คือหลักฐานว่าเราทำตามกฎหมายแล้ว',
+    admDsrNone:'ยังไม่มีคำขอใช้สิทธิ',
+    admDsrOpen:'รอดำเนินการ', admDsrDone:'ตอบกลับแล้ว',
+    admDsrDue:d=>`ครบกำหนดตอบ ${d}`,
+    admDsrOverdue:d=>`⚠ เลยกำหนดตอบแล้ว (${d})`,
+    admDsrClose:'บันทึกผลและปิดเรื่อง', admDsrClosed:'ปิดเรื่องแล้ว',
+    admDsrOutcome:'ผลการดำเนินการ',
+    admDsrOutcomePh:'เช่น ลบเบอร์โทรออกจากทำเนียบแล้ว แจ้งผู้ยื่นทางอีเมลวันที่ 12 ก.ย.',
+    admDsrOutcomeWhy:'เขียนให้ชัดว่าทำอะไรไปบ้าง และแจ้งผู้ยื่นเมื่อไหร่ · ถ้าปฏิเสธคำขอ ต้องระบุเหตุผลตามกฎหมายด้วย',
+    admBackup:'การสำรองข้อมูล',
+    admBackupOk:(d,n)=>`สำรองล่าสุด ${d} · เก็บไว้ ${n} ชุด`,
+    admBackupStale:'⚠ ไม่ได้สำรองข้อมูลมาเกิน 2 วัน — ตรวจสอบที่ Apps Script → Executions',
+    admBackupNever:'⚠ ยังไม่เคยสำรองข้อมูล — รันฟังก์ชัน installTriggers ใน Apps Script',
+
     /* ── ผู้ดูแล: จับคู่คนขับกับ LINE ── */
     admDrvPaired:'เชื่อมต่อ LINE แล้ว', admDrvUnpaired:'ยังไม่ได้เชื่อมต่อ LINE',
     admDrvPair:'สร้างรหัสเข้าใช้งาน', admDrvUnpair:'ถอดการเชื่อมต่อ',
     admDrvPairTitle:'รหัสเข้าใช้งานสำหรับคนขับ',
-    admDrvPairHow:'ให้คนขับแอด LINE OA ของ Kenan → เปิด Kenan Connect → กด "ฉันเป็นคนขับรถ" → กรอกรหัสนี้',
+    admDrvPairHow:'ให้คนขับแอด LINE OA ของ Kenan → เปิด Kenan ONE → กด "ฉันเป็นคนขับรถ" → กรอกรหัสนี้',
     admDrvPairExp:d=>`รหัสหมดอายุ ${d} · ใช้ได้ครั้งเดียว`,
     admDrvPairCopy:'คัดลอกรหัส', admDrvPairCopied:'คัดลอกแล้ว',
     admDrvUnpairAsk:'ถอดการเชื่อมต่อ LINE ของคนขับคนนี้?',
@@ -1289,7 +1334,7 @@ const T = {
     admPostNews:'ลงประกาศ / ข่าวสาร',
     admRoles:'ตั้งสิทธิ์ผู้ใช้',
     admImport:'ดึงประกาศจากอีเมล',
-    admImportHint:'HR ส่งประกาศทางอีเมลอยู่แล้ว — แค่ forward มาที่บัญชีระบบแล้วติด label "kc-news" จากนั้นกดปุ่มนี้ ระบบจะเก็บเข้า Kenan Connect ให้เอง (ทำอัตโนมัติทุกเช้าด้วย)',
+    admImportHint:'HR ส่งประกาศทางอีเมลอยู่แล้ว — แค่ forward มาที่บัญชีระบบแล้วติด label "kc-news" จากนั้นกดปุ่มนี้ ระบบจะเก็บเข้า Kenan ONE ให้เอง (ทำอัตโนมัติทุกเช้าด้วย)',
     admImported:n=>`นำเข้าประกาศ ${n} รายการแล้ว`,
     admWriteOwn:'หรือพิมพ์เอง',
     admTitleTh:'หัวข้อ (ไทย)', admTitleEn:'หัวข้อ (อังกฤษ)', admBodyTh:'รายละเอียด',
@@ -1384,7 +1429,7 @@ const T = {
     noConfigBody:'ใส่ URL ของ Apps Script (ลงท้าย /exec) ในตัวแปร CFG.GAS_URL ที่ต้นไฟล์ก่อนใช้งาน'
   },
   en:{
-    appName:'Kenan Connect',
+    appName:'Kenan ONE',
     navHome:'Home', navParcel:'Parcels', navSos:'Emergency', navMe:'Me', navLog:'Log parcel',
     navNotif:'Alerts',
     sgWork:'My work', sgBook:'Book & borrow', sgInfo:'Directory & info', sgAdmin:'Admin',
@@ -1683,11 +1728,56 @@ const T = {
     dpOff:'This driver account is switched off', dpOffBody:'Contact the GA team to switch it back on.',
     dpNavJobs:'Jobs', dpNavRep:'Report', dpNavMe:'Me',
 
+    /* ── My data / PDPA rights ── */
+    mdTitle:'My data',
+    mdLead:'This page shows everything the system holds about you, under the rights given by Thailand’s Personal Data Protection Act B.E. 2562.',
+    mdProfile:'Profile data', mdActivity:'Activity trail',
+    mdPosition:'Job title', mdPhoto:'Profile photo on file', mdRoles:'Access level',
+    mdLineLinked:'Linked to a LINE account', mdRegistered:'Registered on',
+    mdConsent:'Consent given on',
+    mdShown:'shown in the directory', mdHidden:'hidden from the directory',
+    mdYes:'Yes', mdNo:'No', mdItems:'items', mdTimes:'times',
+    mdRecords:'Records you created', mdNotifs:'Notifications sent to you',
+    mdAlerts:'Emergency roll-call responses',
+    mdType:{ parcel:'Parcels', borrow:'Equipment loans', room:'Room bookings', car:'Vehicle bookings', issue:'Reports' },
+    mdGetCopy:'Get a copy of your data',
+    mdGetCopyWhy:'We will email all of your data as a file to your work address.',
+    mdEmailMe:'Email a copy to me',
+    mdEmailed:e=>`Sent to ${e}`,
+    mdRights:'Exercise your other rights',
+    mdRightsWhy:'Ask us to correct, erase, or stop using your data, or withdraw your consent.',
+    mdRequest:'Submit a request',
+    mdRequestSub:'Your request is logged and sent to the data protection contact straight away.',
+    mdWhich:'Which right do you want to exercise', mdDetail:'Further detail',
+    mdDetailPh:'e.g. remove my phone number from the directory · correct my English name to match my passport',
+    mdSla:'The Foundation must respond within 30 days of receiving your request, under Section 30.',
+    mdSend:'Send request',
+    mdSent:(id,due)=>`Request received (${id}) · we will respond by ${due}`,
+    dsrAccess:'Access / get a copy', dsrRectify:'Correct my data',
+    dsrErase:'Erase my data', dsrObject:'Object to processing',
+    dsrWithdraw:'Withdraw consent',
+
+    /* ── Admin: rights requests + backups ── */
+    admDsr:'PDPA requests',
+    admDsrWhy:'Every request must be answered within 30 days by law. Always close it with a written outcome — that record is the proof the Foundation complied.',
+    admDsrNone:'No requests yet',
+    admDsrOpen:'Open', admDsrDone:'Answered',
+    admDsrDue:d=>`Due ${d}`,
+    admDsrOverdue:d=>`⚠ Overdue (was due ${d})`,
+    admDsrClose:'Record outcome and close', admDsrClosed:'Closed',
+    admDsrOutcome:'What was done',
+    admDsrOutcomePh:'e.g. phone number removed from the directory, requester notified by email on 12 Sept',
+    admDsrOutcomeWhy:'Say exactly what was done and when the person was told. If the request was refused, state the legal ground for refusing.',
+    admBackup:'Backups',
+    admBackupOk:(d,n)=>`Last backup ${d} · ${n} copies kept`,
+    admBackupStale:'⚠ No backup for more than 2 days — check Apps Script → Executions',
+    admBackupNever:'⚠ Never backed up — run installTriggers in Apps Script',
+
     /* ── Admin: linking a driver to LINE ── */
     admDrvPaired:'Linked to LINE', admDrvUnpaired:'Not linked to LINE',
     admDrvPair:'Create a sign-in code', admDrvUnpair:'Unlink from LINE',
     admDrvPairTitle:'Driver sign-in code',
-    admDrvPairHow:'Ask the driver to add the Kenan LINE OA → open Kenan Connect → tap "I am a driver" → enter this code.',
+    admDrvPairHow:'Ask the driver to add the Kenan LINE OA → open Kenan ONE → tap "I am a driver" → enter this code.',
     admDrvPairExp:d=>`Expires ${d} · single use`,
     admDrvPairCopy:'Copy code', admDrvPairCopied:'Copied',
     admDrvUnpairAsk:'Unlink this driver from LINE?',
@@ -2063,6 +2153,31 @@ const MOCK = {
     { resource_id:'EQ-3', asset_tag:'', name_th:'โปรเจกเตอร์ Epson', category:'ภาพ',
       brand:'Epson', model:'EB-992F', storage_location:'ห้องเก็บของ ชั้น 1', is_active:true }] },
   backfillAssetTags:{ ok:true, filled:1 },
+  backupStatus:{ ok:true, last:'2026-09-05T02:00:12+07:00', days:0, count:30, stale:false,
+    items:[{ name:'kenan-one-2026-09-05', at:'2026-09-05 02:00' }] },
+  myData:{ ok:true,
+    profile:{ kenan_user_id:'K-4920', email:'pipats@kenan-asia.org',
+      name_th:'พิพัฒน์ สุริยสมบูรณ์', name_en:'Pipat S.', nickname:'พิ',
+      department:'Social Impact and Innovation', position:'Senior Program Manager', office:'BKK',
+      phone:'081-234-5678', show_phone:true, birthday:'11-24', birth_year:'1988',
+      has_photo:true, roles:'staff,admin,driver', status:'active',
+      registered_at:'2026-08-20T03:00:00Z', consent_at:'2026-08-20T03:00:00Z',
+      consent_version:'2026-09-01', line_linked:true },
+    counts:{ records:37, byType:{ parcel:12, borrow:5, room:14, car:4, issue:2 },
+             notifications:58, alert_responses:2 },
+    records:[], notifications:[], generated_at:'2026-09-05T12:00:00+07:00' },
+  myDataEmail:{ ok:true, email:'pipats@kenan-asia.org' },
+  dsrCreate:{ ok:true, request_id:'DSR-260905-A1B2', due:'5 ต.ค. 2026' },
+  dsrList:{ ok:true, items:[
+    { request_id:'DSR-260903-77C1', at:'2026-09-03T10:12:00+07:00', kind:'rectify',
+      note:'ขอแก้ชื่อภาษาอังกฤษให้ตรงกับพาสปอร์ต', who:'วราภรณ์ ทองดี',
+      email:'waraphornt@kenan-asia.org', status:'open', due_at:'2026-10-03',
+      outcome:'', overdue:false },
+    { request_id:'DSR-260812-2F9D', at:'2026-08-12T14:30:00+07:00', kind:'erase',
+      note:'ขอลบเบอร์โทรออกจากทำเนียบ', who:'ธนพล ศรีสุข',
+      email:'thanapols@kenan-asia.org', status:'done', due_at:'2026-09-11',
+      outcome:'ลบเบอร์ออกจากทำเนียบแล้ว แจ้งผู้ยื่นทางอีเมล 14 ส.ค.', overdue:false }] },
+  dsrClose:{ ok:true },
   aiSpec:{ ok:true, spec:{ brand:'Canon', model:'EOS R6', serial:'042021000123',
     category:'กล้อง', name_th:'กล้อง Canon R6', spec:'20MP · 4K60 · เมาท์ RF', confidence:0.88 } },
   getCarDay:(function(){
@@ -2336,6 +2451,7 @@ function paintSide(active){
       admin.push({ go:'admin-proj', ic:IC.info,   label:t('admProj') });
     }
     admin.push({ go:'admin-drvrep', ic:IC.tool, label:t('admDrvRep') });
+    if(S.isAdmin) admin.push({ go:'admin-dsr', ic:IC.info, label:t('admDsr') });
     if(isDriverNow()) admin.unshift({ go:'driver', ic:IC.car, label:t('drvTitle') });
     groups.push({ g:t('sgAdmin'), items:admin });
   }else if(isDriverNow()){
@@ -3047,6 +3163,8 @@ ROUTES.profile = async () => {
       <pre id="spdOut" hidden style="margin:8px 0 12px;padding:11px;background:var(--surface);
         border:1px solid var(--line);border-radius:12px;font-size:11px;
         white-space:pre-wrap;color:var(--ink-2)"></pre>
+      <button class="btn ghost" id="mydata">${esc(t('mdTitle'))}</button>
+      <div style="height:9px"></div>
       <button class="btn ghost" id="pol">${esc(t('prPrivacy'))}</button></div>
   </div>`;
   if($('#toAdm')) $('#toAdm').onclick = () => go('admin');
@@ -3072,6 +3190,7 @@ ROUTES.profile = async () => {
     b.disabled = false;
   };
   $('#pol').onclick = () => go('privacy');
+  $('#mydata').onclick = () => go('my-data');
 
   /* ปุ่มวัดความเร็ว — เอาไว้ส่งตัวเลขจริงให้คนแก้ดู
      net = รอทั้งหมด · srv = Apps Script ใช้จริง · db = อ่าน Google Sheet
@@ -3208,7 +3327,11 @@ ROUTES.admin = async () => {
       ${S.isSuper ? `<div style="height:9px"></div>
         <button class="btn ghost" id="toStaff">${esc(t('admStaff'))}</button>` : ''}
       ${S.isSuper ? `<div style="height:9px"></div>
-        <button class="btn ghost" id="toRoles">${esc(t('admRoles'))}</button>` : ''}` : ''}
+        <button class="btn ghost" id="toRoles">${esc(t('admRoles'))}</button>` : ''}
+      <div style="height:9px"></div>
+      <button class="btn ghost" id="toDsr">${esc(t('admDsr'))}</button>
+      <div class="section-title">${esc(t('admBackup'))}</div>
+      <div id="bk">${skeleton(1)}</div>` : ''}
   </div>`;
   $('#toCam').onclick = () => go('parcel-in');
   $('#toUn').onclick  = () => go('unidentified');
@@ -3219,6 +3342,20 @@ ROUTES.admin = async () => {
   if($('#toDrv'))   $('#toDrv').onclick   = () => go('admin-drv');
   if($('#toStaff')) $('#toStaff').onclick = () => go('admin-staff');
   if($('#toRoles')) $('#toRoles').onclick = () => go('admin-roles');
+  if($('#toDsr'))   $('#toDsr').onclick   = () => go('admin-dsr');
+
+  /* สถานะการสำรองข้อมูล — ระบบสำรองที่พังเงียบๆ แย่กว่าไม่มีระบบสำรองเลย
+     เพราะทุกคนเชื่อว่ามีอยู่จนถึงวันที่ต้องใช้จริง จึงต้องเห็นได้ทุกครั้งที่เข้าหน้านี้ */
+  if($('#bk')) (async () => {
+    let b = null;
+    try{ b = await apiRetry('backupStatus', {}, 'GET'); }catch(e){}
+    if(!b?.ok){ $x('#bk').innerHTML = ''; return; }
+    const bad = b.stale;
+    $x('#bk').innerHTML = `<div class="note ${bad ? 'warn' : 'info'}">${bad ? '⚠️' : '✅'}<div>${
+      esc(!b.last ? t('admBackupNever')
+                  : bad ? t('admBackupStale')
+                        : t('admBackupOk')(fmtDate(b.last), b.count))}</div></div>`;
+  })();
 
   let s = null;
   try{ s = await apiRetry('getAdminSummary', {}, 'GET'); }catch(e){}
@@ -5939,10 +6076,20 @@ const QR = (function(){
   return { matrix, svg };
 })();
 
-/** ที่อยู่ที่ QR จะพาไป — หน้าเดิมของแอปพร้อม ?go=item&tag=...
-    ใช้ที่อยู่จริงของหน้าที่กำลังเปิดอยู่ จะได้ไม่ต้องมาแก้โค้ดตอนย้ายโดเมน */
-const itemUrl = tag =>
-  location.origin + location.pathname + '?go=item&tag=' + encodeURIComponent(tag);
+/* ── ที่อยู่ที่ QR จะพาไป ─────────────────────────────────────────
+   ชี้ไปที่ LIFF ไม่ใช่ที่อยู่เว็บโดยตรง — เหตุผลสำคัญกว่าที่คิด
+
+   QR ที่พิมพ์แล้วแปะบนตัวของ คือข้อมูลที่ "แก้ทีหลังไม่ได้"
+   ถ้าฝังที่อยู่เว็บไว้ตรงๆ วันที่ย้ายโดเมน เปลี่ยนชื่อ repo หรือย้ายโฮสต์
+   ป้ายทุกใบที่แปะไปแล้วจะสแกนไม่ได้พร้อมกันทั้งออฟฟิศ ต้องลอกออกแล้วพิมพ์ใหม่หมด
+
+   LIFF ID ไม่ผูกกับโดเมน ย้ายเว็บทีหลังแก้ที่ LINE Developers ที่เดียวจบ
+   ป้ายเดิมยังใช้ได้ และสแกนแล้วเปิดใน LINE เลย ไม่ต้องล็อกอินซ้ำ
+
+   ถ้ายังไม่ได้ตั้ง LIFF_ID ให้ถอยไปใช้ที่อยู่ปัจจุบัน เพื่อให้โหมดพรีวิวยังทำงานได้ */
+const itemUrl = tag => (CFG.LIFF_ID && !CFG.LIFF_ID.startsWith('PASTE_'))
+  ? 'https://liff.line.me/' + CFG.LIFF_ID + '?go=item&tag=' + encodeURIComponent(tag)
+  : location.origin + location.pathname + '?go=item&tag=' + encodeURIComponent(tag);
 
 /* ══════════════════ พอร์ทัลคนขับ ══════════════════
    คนขับส่วนใหญ่เป็น outsource ไม่มีอีเมลองค์กร ลงทะเบียนแบบพนักงานไม่ได้
@@ -6383,11 +6530,170 @@ ROUTES.labels = async () => {
         <div class="tx">
           <div class="nm">${esc(x.name_th)}</div>
           <div class="tg">${esc(x.asset_tag)}</div>
-          ${x.storage_location ? `<div class="lo">${esc(x.storage_location)}</div>` : ''}
+          <div class="lo">${esc(t('appName'))}${x.storage_location ? ' · ' + esc(x.storage_location) : ''}</div>
         </div>
       </div>`).join('')}</div>`;
     setTimeout(() => { window.print(); }, 120);
   }
+};
+
+
+/* ══════════════════ สิทธิของเจ้าของข้อมูล (PDPA) ══════════════════
+   พ.ร.บ.คุ้มครองข้อมูลส่วนบุคคลให้สิทธิพนักงานขอดู ขอแก้ ขอลบ และขอคัดค้าน
+   การเขียนไว้ในนโยบายอย่างเดียวไม่พอ ต้องมีปุ่มกดได้จริงในระบบ
+   ไม่งั้นวันที่มีคนมาขอใช้สิทธิ จะไม่มีใครรู้ว่าต้องทำยังไงและใครรับผิดชอบ  */
+
+const DSR_KIND = () => [
+  ['access',   t('dsrAccess')],
+  ['rectify',  t('dsrRectify')],
+  ['erase',    t('dsrErase')],
+  ['object',   t('dsrObject')],
+  ['withdraw', t('dsrWithdraw')]
+];
+
+ROUTES['my-data'] = async () => {
+  setTitle(t('mdTitle'));
+  $x('#main').innerHTML = `<div class="view">${skeleton(2)}</div>`;
+  let d = null;
+  try{ d = await apiRetry('myData', {}, 'GET'); }catch(e){}
+  if(!d?.ok){ errorScreen(new Error('load'), () => render('my-data', {})); return; }
+
+  const p = d.profile, c = d.counts;
+  const row = (k, v) => `<div class="row"><div class="body">
+    <div class="s">${esc(k)}</div><div class="t">${esc(v === '' || v == null ? '—' : String(v))}</div>
+  </div></div>`;
+  const yn = b => b ? t('mdYes') : t('mdNo');
+
+  $x('#main').innerHTML = `<div class="view">
+    <div class="note info">${IC.info}<div>${esc(t('mdLead'))}</div></div>
+
+    <div class="section-title" style="margin-top:18px">${esc(t('mdProfile'))}</div>
+    <div class="rows">
+      ${row(t('prEmpId'), p.kenan_user_id)}
+      ${row(t('fEmail'), p.email)}
+      ${row(t('fName'), p.name_th)}
+      ${row(t('fNameE'), p.name_en)}
+      ${row(t('fNick'), p.nickname)}
+      ${row(t('prDept'), p.department)}
+      ${row(t('mdPosition'), p.position)}
+      ${row(t('admDrvPhone'), p.phone + (p.phone ? ' · ' + (p.show_phone ? t('mdShown') : t('mdHidden')) : ''))}
+      ${row(t('prBirthday'), p.birthday)}
+      ${row(t('mdPhoto'), yn(p.has_photo))}
+      ${row(t('mdRoles'), p.roles)}
+      ${row(t('mdLineLinked'), yn(p.line_linked))}
+      ${row(t('mdRegistered'), fmtDate(p.registered_at))}
+      ${row(t('mdConsent'), p.consent_at ? fmtDate(p.consent_at) + ' (v' + p.consent_version + ')' : '—')}
+    </div>
+
+    <div class="section-title" style="margin-top:18px">${esc(t('mdActivity'))}</div>
+    <div class="rows">
+      ${row(t('mdRecords'), c.records + ' ' + t('mdItems'))}
+      ${Object.keys(c.byType || {}).map(k =>
+        row('· ' + (t('mdType')[k] || k), c.byType[k] + ' ' + t('mdItems'))).join('')}
+      ${row(t('mdNotifs'), c.notifications + ' ' + t('mdTimes'))}
+      ${row(t('mdAlerts'), c.alert_responses + ' ' + t('mdTimes'))}
+    </div>
+
+    <div class="section-title" style="margin-top:18px">${esc(t('mdGetCopy'))}</div>
+    <div class="fhint">${esc(t('mdGetCopyWhy'))}</div>
+    <button class="btn primary" id="mdMail">${esc(t('mdEmailMe'))}</button>
+
+    <div class="section-title" style="margin-top:22px">${esc(t('mdRights'))}</div>
+    <div class="fhint">${esc(t('mdRightsWhy'))}</div>
+    <button class="btn soft" id="mdReq">${esc(t('mdRequest'))}</button>
+    <div style="height:10px"></div>
+    <button class="btn ghost" id="mdPol">${esc(t('prPrivacy'))}</button>
+  </div>`;
+
+  $('#mdPol').onclick = () => go('privacy');
+
+  $('#mdMail').onclick = async () => {
+    const b = $('#mdMail'); b.disabled = true; b.textContent = t('loading');
+    try{
+      const r = await apiRetry('myDataEmail', {}, 'POST');
+      toast(r?.ok ? t('mdEmailed')(r.email) : t('netErr'), r?.ok ? 'ok' : 'bad');
+    }catch(e){ toast(t('netErr'),'bad'); }
+    b.disabled = false; b.textContent = t('mdEmailMe');
+  };
+
+  $('#mdReq').onclick = () => {
+    sheet(`<h3>${esc(t('mdRequest'))}</h3>
+      <p class="sub">${esc(t('mdRequestSub'))}</p>
+      <div class="field"><label>${esc(t('mdWhich'))}</label>
+        <select id="dk">${DSR_KIND().map(k =>
+          `<option value="${k[0]}">${esc(k[1])}</option>`).join('')}</select></div>
+      <div class="field"><label>${esc(t('mdDetail'))}</label>
+        <textarea id="dn" rows="3" placeholder="${esc(t('mdDetailPh'))}"></textarea></div>
+      <div class="note info">${IC.info}<div>${esc(t('mdSla'))}</div></div>
+      <button class="btn primary" id="dgo">${esc(t('mdSend'))}</button>
+      <button class="btn ghost" id="dcx2">${esc(t('cancel'))}</button>`);
+    $('#dcx2').onclick = closeSheet;
+    $('#dgo').onclick = async () => {
+      const b = $('#dgo'); b.disabled = true;
+      try{
+        const r = await apiRetry('dsrCreate', { kind:$('#dk').value, note:$('#dn').value.trim() }, 'POST');
+        if(!r?.ok) throw 0;
+        closeSheet();
+        toast(t('mdSent')(r.request_id, r.due), 'ok');
+      }catch(e){ toast(t('netErr'),'bad'); b.disabled = false; }
+    };
+  };
+};
+
+/** คำขอใช้สิทธิที่ค้างอยู่ — สำหรับผู้ดูแล/ผู้รับผิดชอบข้อมูลส่วนบุคคล */
+ROUTES['admin-dsr'] = async () => {
+  setTitle(t('admDsr'));
+  $x('#main').innerHTML = `<div class="view">
+    <div class="note info">${IC.info}<div>${esc(t('admDsrWhy'))}</div></div>
+    <div id="ds" style="margin-top:12px">${skeleton(3)}</div></div>`;
+  let items = [];
+  try{
+    const r = await apiRetry('dsrList', {}, 'GET');
+    if(!r?.ok){ $x('#ds').innerHTML = emptyState(IC.info, t('adminNo'), t('adminNoBody')); return; }
+    items = r.items || [];
+  }catch(e){ $x('#ds').innerHTML = emptyState(IC.info, t('netErr'), ''); return; }
+
+  const KL = Object.fromEntries(DSR_KIND());
+  $x('#ds').innerHTML = items.length ? items.map(x => `
+    <div class="card" style="margin-bottom:10px;${x.overdue ? 'border-color:var(--bad);border-width:2px' : ''}">
+      <div style="display:flex;justify-content:space-between;gap:8px;align-items:flex-start">
+        <div style="min-width:0">
+          <div style="font-size:14.5px;font-weight:800">${esc(KL[x.kind] || x.kind)}</div>
+          <div style="font-size:12.5px;color:var(--ink-2);margin-top:3px">${esc(x.who)} · ${esc(x.email)}</div>
+          ${x.note ? `<div style="font-size:12px;color:var(--ink-2);margin-top:5px;white-space:pre-wrap">${esc(x.note)}</div>` : ''}
+          <div style="font-size:11px;color:var(--ink-3);margin-top:5px">
+            ${esc(x.request_id)} · ${esc(fmtDate(x.at))}</div>
+          ${x.status !== 'done' ? `<div style="font-size:11.5px;font-weight:800;margin-top:3px;color:${
+            x.overdue ? 'var(--bad)' : 'var(--warn)'}">${
+            esc(x.overdue ? t('admDsrOverdue')(x.due_at) : t('admDsrDue')(x.due_at))}</div>` : ''}
+          ${x.outcome ? `<div style="font-size:12px;color:var(--ok);margin-top:5px">✓ ${esc(x.outcome)}</div>` : ''}
+        </div>
+        <span class="pill ${x.status === 'done' ? 'done' : 'wait'}" style="flex:0 0 auto">${
+          esc(x.status === 'done' ? t('admDsrDone') : t('admDsrOpen'))}</span>
+      </div>
+      ${x.status === 'done' ? '' : `<button class="btn ghost" data-dsr="${esc(x.request_id)}"
+        style="margin-top:9px">${esc(t('admDsrClose'))}</button>`}
+    </div>`).join('') : emptyState(IC.info, t('admDsrNone'), '');
+
+  document.querySelectorAll('#ds [data-dsr]').forEach(b => b.onclick = () => {
+    sheet(`<h3>${esc(t('admDsrClose'))}</h3>
+      <p class="sub">${esc(b.dataset.dsr)}</p>
+      <div class="field"><label>${esc(t('admDsrOutcome'))}<span class="req">*</span></label>
+        <textarea id="oc" rows="3" placeholder="${esc(t('admDsrOutcomePh'))}"></textarea></div>
+      <div class="fhint">${esc(t('admDsrOutcomeWhy'))}</div>
+      <button class="btn primary" id="ocgo">${esc(t('confirm'))}</button>
+      <button class="btn ghost" id="occx">${esc(t('cancel'))}</button>`);
+    $('#occx').onclick = closeSheet;
+    $('#ocgo').onclick = async () => {
+      const v = $('#oc').value.trim();
+      if(!v){ toast(t('admNeedTitle'),'bad'); return; }
+      $('#ocgo').disabled = true;
+      try{
+        await apiRetry('dsrClose', { request_id:b.dataset.dsr, outcome:v }, 'POST');
+        closeSheet(); toast(t('admDsrClosed'),'ok'); go('admin-dsr', {}, true);
+      }catch(e){ toast(t('netErr'),'bad'); $('#ocgo').disabled = false; }
+    };
+  });
 };
 
 /** หน้าเดียวกับ consent แต่เปิดจากโปรไฟล์ — อ่านอย่างเดียว มีปุ่มย้อนกลับ */
